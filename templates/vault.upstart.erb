@@ -1,0 +1,20 @@
+# vault Agent (Upstart unit)
+description "vault server"
+start on (local-filesystems and net-device-up IFACE!=lo)
+stop on runlevel [06]
+
+env VAULT=<%= scope.lookupvar('vault::bin_dir') %>/vault
+env CONFIG=<%= scope.lookupvar('vault::config_dir') %>/config.json
+env USER=<%= scope.lookupvar('vault::user') %>
+env GROUP=<%= scope.lookupvar('vault::group') %>
+env PID_FILE=/var/run/vault.pid
+
+script
+    export GOMAXPROCS=${GOMAXPROCS:-2}
+    [ -e /etc/default/$UPSTART_JOB ] && . /etc/default/$UPSTART_JOB
+    exec start-stop-daemon -u $USER -g $GROUP -p $PID_FILE -x $VAULT -S -- server -config=$CONFIG <%= scope.lookupvar('vault::service_options') %>
+end script
+
+respawn
+respawn limit 10 10
+kill timeout 10
