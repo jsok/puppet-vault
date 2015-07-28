@@ -6,9 +6,35 @@
 # Parameters
 # ----------
 #
-# * `sample parameter`
-#   Explanation of what this parameter affects and what it defaults to.
-#   e.g. "Specify one or more upstream ntp servers as an array."
+# * `user`
+#   Customise the user vault runs as, will also create the user.
+#
+# * `group`
+#   Customise the group vault runs as, will also create the user.
+#
+# * `bin_dir`
+#   Directory the vault executable will be installed in.
+#
+# * `config_dir`
+#   Directory the vault configuration will be kept in.
+#
+# * `purge_config_dir`
+#   Whether the `config_dir` should be purged before installing the
+#   generated config.
+#
+# * `download_url`
+#   URL to download the vault zip distribution from.
+#
+# * `service_name`
+#   Customise the name of the system service
+#
+# * `config_hash`
+#   A hash representing vault's config (in JSON) as per:
+#   https://vaultproject.io/docs/config/index.html
+#
+# * `service_options`
+#   Extra argument to pass to `vault server`, as per:
+#   `vault server --help`
 #
 class vault (
   $user             = $::vault::params::user,
