@@ -1,7 +1,9 @@
 require 'spec_helper'
 
 describe 'vault' do
-  let(:manifest) { 'spec/defaults.pp' }
+  let(:facts) {{
+    :path => '/usr/local/bin:/usr/bin:/bin'
+  }}
 
   context "vault class without any parameters" do
     let(:params) {{
