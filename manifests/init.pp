@@ -49,8 +49,10 @@ class vault (
 ) inherits ::vault::params {
   validate_hash($config_hash)
 
+  anchor { '::vault::begin': }  ->
   class { '::vault::install': } ->
-  class { '::vault::config': } ~>
+  class { '::vault::config': }  ~>
   class { '::vault::service': } ->
-  Class['::vault']
+  Class['::vault']              ->
+  anchor { '::vault::end': }
 }
