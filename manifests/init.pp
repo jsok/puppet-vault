@@ -53,4 +53,7 @@ class vault (
   contain vault::config
   contain vault::service
 
+  Class['vault::install'] -> Class['vault::config']
+  Class['vault::config'] ~> Class['vault::service']
+
 }

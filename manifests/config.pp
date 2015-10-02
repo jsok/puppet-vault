@@ -26,5 +26,4 @@ class vault::config {
     mode    => '0755',
   }
 
-  Class['vault::config'] ~> Class['vault::service']
 }
