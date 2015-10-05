@@ -25,4 +25,5 @@ class vault::config {
     group   => 'root',
     mode    => '0755',
   }
+
 }
