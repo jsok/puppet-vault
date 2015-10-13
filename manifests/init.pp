@@ -28,6 +28,9 @@
 # * `service_name`
 #   Customise the name of the system service
 #
+# * `service_provider`
+#   Customise the name of the system service provider
+#
 # * `config_hash`
 #   A hash representing vault's config (in JSON) as per:
 #   https://vaultproject.io/docs/config/index.html
@@ -44,6 +47,7 @@ class vault (
   $purge_config_dir = true,
   $download_url     = $::vault::params::download_url,
   $service_name     = $::vault::params::service_name,
+  $service_provider = $::vault::params::service_provider,
   $config_hash      = {},
   $service_options  = '',
 ) inherits ::vault::params {

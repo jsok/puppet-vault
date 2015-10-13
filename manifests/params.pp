@@ -10,4 +10,5 @@ class vault::params {
   $config_dir   = '/etc/vault'
   $download_url = 'https://dl.bintray.com/mitchellh/vault/vault_0.3.1_linux_amd64.zip'
   $service_name = 'vault'
+  $service_provider = 'upstart'
 }
