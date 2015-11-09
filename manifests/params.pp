@@ -8,7 +8,7 @@ class vault::params {
   $group        = 'vault'
   $bin_dir      = '/usr/local/bin'
   $config_dir   = '/etc/vault'
-  $download_url = 'https://releases.hashicorp.com/vault/0.3.1/vault_0.3.1_linux_amd64.zip',
+  $download_url = 'https://releases.hashicorp.com/vault/0.3.1/vault_0.3.1_linux_amd64.zip'
   $service_name = 'vault'
   $service_provider = 'upstart'
 }
