@@ -37,6 +37,9 @@ case $::osfamily {
        content => template('vault/vault.initd.erb'),
      }
   }
+  default: {
+    fail("Module ${module_name} is not supported on ${::osfamily}")
+  }
 }
 
 }
