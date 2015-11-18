@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# Basic startup script for the Vault Project Server
+#
+# chkconfig: 3 85 15
+# description: Init.d script for Vault Project Server
+# processname: vault
+# pidfile: /var/run/vault.pid
+# config: <%= scope.lookupvar('vault::config_dir') %>/config.json
+
+prog='Vault Server'
+RETVAL=0
+
+start() {
+  echo -n $"Starting $prog: "
+  su <%= scope.lookupvar('vault::user') %> -c '<%= scope.lookupvar('vault::bin_dir') %>/vault server -config=<%= scope.lookupvar('vault::config_dir') %>/config.json <%= scope.lookupvar('vault::service_options') %> >/dev/null 2>&1 &'
+  RETVAL=$?
+  echo
+  [ $RETVAL = 0 ] && touch /var/lock/subsys/vault
+  return $RETVAL
+}
+
+stop() {
+  echo -n $"Stopping $prog: "
+  killall vault
+  RETVAL=$?
+  echo
+  [ $RETVAL = 0 ] && rm -f /var/lock/subsys/vault /var/run/vault.pid
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  *)
+    echo $"Usage: $prog {start|restart|stop}"
+    exit 1
+esac
+
+exit $RETVAL
