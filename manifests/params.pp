@@ -13,5 +13,6 @@ class vault::params {
   $service_provider = $osfamily ? {
     'Debian'  => 'upstart',
     'RedHat'  => 'init',
+    default   => 'upstart',
   }
 }
