@@ -1,11 +1,11 @@
-Pending Release 0.1.6
+2016-01-05 Release 0.1.6
 - Update to vault 0.4.0
 
-2016-02-05 Release 0.1.5
+2016-01-05 Release 0.1.5
 - Add CentOS support
 
 2015-10-14 Release 0.1.4
-- Fixes syntax error in bad releae v0.1.3
+- Fixes syntax error in bad release v0.1.3
 
 2015-10-14 Release 0.1.3
 - Use new Fastly CDN for default `download_url` parameter
