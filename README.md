@@ -56,7 +56,7 @@ vault::config_hash:
 
 By default vault will use the `mlock` system call, therefore the executable will need the corresponding capability.
 
-In production, you should only consider setting the disable_mlock option on Linux systems that only use encrypted swap or do not use swap at all. Vault does not currently support memory locking on Mac OS X and Windows and so the feature is automatically disabled on those platforms. To give the Vault executable access to the mlock syscall on Linux systems
+In production, you should only consider setting the disable_mlock option on Linux systems that only use encrypted swap or do not use swap at all.
 
 The module will use `setcap` on the vault binary to enable this.
 If you do not wish to use `mlock`, modify your `config_hash` like:
