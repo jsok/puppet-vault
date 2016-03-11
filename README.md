@@ -71,3 +71,13 @@ class { '::vault':
     }
 }
 ```
+
+## Testing
+
+First, ``bundle install``
+
+To run RSpec unit tests: ``bundle exec rake spec``
+
+To run RSpec unit tests, puppet-lint, syntax checks and metadata lint: ``bundle exec rake test``
+
+To run Beaker acceptance tests for an Ubuntu Docker container: ``BEAKER_set=ubuntu-14.04-x86_64-docker bundle exec rake acceptance``
