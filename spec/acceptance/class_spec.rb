@@ -28,13 +28,19 @@ describe 'vault class' do
       apply_manifest(pp, :catch_changes  => true)
     end
 
-    describe file('/usr/local/bin/vault') do
-      it { is_expected.to exist }
+    if (fact('osfamily') == 'Debian')
+      describe file('/usr/local/bin/vault') do
+        it { is_expected.to exist }
+      end
     end
 
     describe service('vault') do
       it { is_expected.to be_enabled }
       it { is_expected.to be_running }
+    end
+
+    describe port(8200) do
+      it { is_expected.to be_listening.on('127.0.0.1').with('tcp') }
     end
   end
 end
