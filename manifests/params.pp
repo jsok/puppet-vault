@@ -5,9 +5,9 @@
 #
 class vault::params {
   $user             = 'vault'
-  $manage_user      = true,
+  $manage_user      = true
   $group            = 'vault'
-  $manage_group     = true,
+  $manage_group     = true
   $bin_dir          = '/usr/local/bin'
   $config_dir       = '/etc/vault'
   $download_url     = 'https://releases.hashicorp.com/vault/0.5.0/vault_0.5.0_linux_amd64.zip'
