@@ -103,7 +103,14 @@ describe 'vault' do
       :osfamily => "RedHat",
     }}
     context 'includes SysV init script' do
-      it { is_expected.to contain_file('/etc/init.d/vault').with_mode('0755') }
+      it {
+        is_expected.to contain_file('/etc/init.d/vault')
+          .with_mode('0755')
+          .with_ensure('file')
+          .with_owner('root')
+          .with_group('root')
+          .with_content(/^#!\/bin\/bash/)
+      }
     end
   end
   context 'Debian-specific' do
