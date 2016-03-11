@@ -127,7 +127,14 @@ describe 'vault' do
       }
     end
     context 'contains /etc/init/vault.conf' do
-      it { is_expected.to contain_file('/etc/init/vault.conf').with_mode('0444') }
+      it {
+        is_expected.to contain_file('/etc/init/vault.conf')
+        .with_mode('0444')
+        .with_ensure('file')
+        .with_owner('root')
+        .with_group('root')
+        .with_content(/^# vault Agent \(Upstart unit\)/)
+      }
     end
     context "service with modified options" do
       let(:params) {{
