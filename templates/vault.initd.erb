@@ -7,6 +7,11 @@
 # processname: vault
 # pidfile: /var/run/vault.pid
 # config: <%= scope.lookupvar('vault::config_dir') %>/config.json
+#
+###########################################################################################################
+# this file has been put in place by the jsok/vault Puppet module (https://forge.puppetlabs.com/jsok/vault)
+# any changes will be overwritten if Puppet is run again
+###########################################################################################################
 
 prog='Vault Server'
 RETVAL=0
