@@ -15,6 +15,7 @@ class vault::config {
 case $::osfamily {
   'Debian': {
     file { '/etc/init/vault.conf':
+      ensure  => file,
       mode    => '0444',
       owner   => 'root',
       group   => 'root',
