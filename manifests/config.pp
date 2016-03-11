@@ -38,7 +38,7 @@ case $::osfamily {
      }
   }
   default: {
-    fail("Module ${module_name} is not supported on ${::osfamily}")
+    fail("Module ${module_name} is not supported on osfamily '${::osfamily}'")
   }
 }
 
