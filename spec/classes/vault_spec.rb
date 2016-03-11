@@ -97,11 +97,11 @@ describe 'vault' do
       end
     end
   end
-  context 'RedHat 6 specific' do
+  context 'RedHat <=6 specific' do
     let(:facts) {{
       :path                      => '/usr/local/bin:/usr/bin:/bin',
       :osfamily                  => 'RedHat',
-      :operatingsystemmajrelease => 6,
+      :operatingsystemmajrelease => '6',
     }}
     context 'includes SysV init script' do
       it {
@@ -110,7 +110,82 @@ describe 'vault' do
           .with_ensure('file')
           .with_owner('root')
           .with_group('root')
-          .with_content(/^#!\/bin\/bash/)
+          .with_content(%r{^#!/bin/bash})
+          .with_content(%r{su vault -c '/usr/local/bin/vault server -config=/etc/vault/config.json  >/dev/null 2>&1 &'})
+      }
+    end
+    context 'service with non-default options' do
+      let(:params) {{
+        :bin_dir => '/opt/bin',
+        :config_dir => '/opt/etc/vault',
+        :service_options => '-log-level=info',
+        :user => 'root',
+        :group => 'admin',
+      }}
+      it {
+        is_expected.to contain_file('/etc/init.d/vault')
+          .with_mode('0755')
+          .with_ensure('file')
+          .with_owner('root')
+          .with_group('root')
+          .with_content(%r{^#!/bin/bash})
+          .with_content(%r{su root -c '/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info >/dev/null 2>&1 &'})
+      }
+    end
+    context 'does not include systemd reload' do
+      it {
+        is_expected.to_not contain_exec('systemd-reload')
+      }
+    end
+  end
+  context 'RedHat >=7 specific' do
+    let(:facts) {{
+      :path                      => '/usr/local/bin:/usr/bin:/bin',
+      :osfamily                  => 'RedHat',
+      :operatingsystemmajrelease => '7',
+    }}
+    context 'includes systemd init script' do
+      it {
+        is_expected.to contain_file('/etc/systemd/system/vault.service')
+          .with_mode('0644')
+          .with_ensure('file')
+          .with_owner('root')
+          .with_group('root')
+          .with_notify('Exec[systemd-reload]')
+          .with_content(/^# vault systemd unit file/)
+          .with_content(/^User=vault$/)
+          .with_content(/^Group=vault$/)
+          .with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $})
+      }
+    end
+    context 'service with non-default options' do
+      let(:params) {{
+        :bin_dir => '/opt/bin',
+        :config_dir => '/opt/etc/vault',
+        :service_options => '-log-level=info',
+        :user => 'root',
+        :group => 'admin',
+      }}
+      it {
+        is_expected.to contain_file('/etc/systemd/system/vault.service')
+          .with_mode('0644')
+          .with_ensure('file')
+          .with_owner('root')
+          .with_group('root')
+          .with_notify('Exec[systemd-reload]')
+          .with_content(/^# vault systemd unit file/)
+          .with_content(/^User=root$/)
+          .with_content(/^Group=admin$/)
+          .with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info$})
+      }
+    end
+    context 'includes systemd reload' do
+      it {
+        is_expected.to contain_exec('systemd-reload')
+          .with_command('systemctl daemon-reload')
+          .with_path('/bin:/usr/bin:/sbin:/usr/sbin')
+          .with_user('root')
+          .with_refreshonly(true)
       }
     end
   end
@@ -135,6 +210,11 @@ describe 'vault' do
         .with_owner('root')
         .with_group('root')
         .with_content(/^# vault Agent \(Upstart unit\)/)
+        .with_content(/env USER=vault/)
+        .with_content(/env GROUP=vault/)
+        .with_content(/env CONFIG=\/etc\/vault\/config.json/)
+        .with_content(/env VAULT=\/usr\/local\/bin\/vault/)
+        .with_content(/exec start-stop-daemon -u \$USER -g \$GROUP -p \$PID_FILE -x \$VAULT -S -- server -config=\$CONFIG $/)
       }
     end
     context "service with modified options" do

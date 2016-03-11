@@ -1,0 +1,32 @@
+# vault systemd unit file
+###########################################################################################################
+# this file has been put in place by the jsok/vault Puppet module (https://forge.puppetlabs.com/jsok/vault)
+# any changes will be overwritten if Puppet is run again
+# This script is originally from: https://github.com/mterron/init-scripts/blob/master/vault.service
+###########################################################################################################
+
+[Unit]
+Description=Vault server
+Requires=basic.target network.target
+After=basic.target network.target
+
+[Service]
+User=<%= scope.lookupvar('vault::user') %>
+Group=<%= scope.lookupvar('vault::group') %>
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=read-only
+SecureBits=keep-caps
+Capabilities=CAP_IPC_LOCK+ep
+CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
+NoNewPrivileges=yes
+ExecStart=<%= scope.lookupvar('vault::bin_dir') %>/vault server -config=<%= scope.lookupvar('vault::config_dir') %>/config.json <%= scope.lookupvar('vault::service_options') %>
+KillSignal=SIGINT
+TimeoutStopSec=30s
+Restart=on-failure
+StartLimitInterval=60s
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target

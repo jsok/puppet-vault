@@ -38,6 +38,24 @@ class vault::config {
          content => template('vault/vault.initd.erb'),
        }
     }
+    'systemd': {
+      file { '/etc/systemd/system/vault.service':
+        ensure  => file,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => template('vault/vault.systemd.erb'),
+        notify  => Exec['systemd-reload'],
+      }
+      if ! defined(Exec['systemd-reload']) {
+        exec {'systemd-reload':
+          command     => 'systemctl daemon-reload',
+          path        => '/bin:/usr/bin:/sbin:/usr/sbin',
+          user        => 'root',
+          refreshonly => true,
+        }
+      }
+    }
     default: {
       fail("vault::service_provider '${::vault::service_provider}' is not valid")
     }

@@ -18,7 +18,11 @@ class vault::params {
       $service_provider = 'upstart'
     }
     'RedHat': {
-      $service_provider = 'init'
+      if ($::operatingsystemmajrelease == '5' or $::operatingsystemmajrelease == '6') {
+        $service_provider = 'init'
+      } else {
+        $service_provider = 'systemd'
+      }
     }
     default: {
       fail("Module ${module_name} is not supported on osfamily '${::osfamily}'")
