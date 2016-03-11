@@ -97,10 +97,11 @@ describe 'vault' do
       end
     end
   end
-  context 'RedHat-specific' do
+  context 'RedHat 6 specific' do
     let(:facts) {{
-      :path     => '/usr/local/bin:/usr/bin:/bin',
-      :osfamily => "RedHat",
+      :path                      => '/usr/local/bin:/usr/bin:/bin',
+      :osfamily                  => 'RedHat',
+      :operatingsystemmajrelease => 6,
     }}
     context 'includes SysV init script' do
       it {
@@ -116,7 +117,7 @@ describe 'vault' do
   context 'Debian-specific' do
     let(:facts) {{
       :path     => '/usr/local/bin:/usr/bin:/bin',
-      :osfamily => "Debian",
+      :osfamily => 'Debian',
     }}
     context 'includes init link to upstart-job' do
       it {
@@ -168,6 +169,22 @@ describe 'vault' do
       }
       it { is_expected.to contain_user('root') }
       it { is_expected.to contain_group('admin') }
+    end
+  end
+  context 'Invalid service_provider' do
+    let(:facts) {{
+      :path                      => '/usr/local/bin:/usr/bin:/bin',
+      :osfamily                  => 'RedHat',
+      :operatingsystemmajrelease => 6,
+    }}
+    let(:params) {{
+      :service_provider => 'foo',
+    }}
+    context 'fails with a helpful message' do
+      it {
+        expect { should contain_class('vault::config') }
+          .to raise_error(Puppet::Error, /vault::service_provider 'foo' is not valid/)
+      }
     end
   end
   context 'on unsupported osfamily' do

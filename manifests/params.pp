@@ -12,9 +12,16 @@ class vault::params {
   $config_dir       = '/etc/vault'
   $download_url     = 'https://releases.hashicorp.com/vault/0.5.1/vault_0.5.1_linux_amd64.zip'
   $service_name     = 'vault'
-  $service_provider = $osfamily ? {
-    'Debian'  => 'upstart',
-    'RedHat'  => 'init',
-    default   => 'upstart',
+
+  case $::osfamily {
+    'Debian': {
+      $service_provider = 'upstart'
+    }
+    'RedHat': {
+      $service_provider = 'init'
+    }
+    default: {
+      fail("Module ${module_name} is not supported on osfamily '${::osfamily}'")
+    }
   }
 }
