@@ -47,6 +47,15 @@ describe 'vault' do
         it { is_expected.to contain_user('vault') }
         it { is_expected.to contain_group('vault') }
 
+        context "do not manage user and group" do
+          let(:params) {{
+            :manage_user => false,
+            :manage_group => false
+          }}
+          it { is_expected.not_to contain_user('vault') }
+          it { is_expected.not_to contain_group('vault') }
+        end
+
         it {
           is_expected.to contain_file('/etc/vault')
             .with_ensure('directory')
