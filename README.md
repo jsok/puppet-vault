@@ -80,4 +80,9 @@ To run RSpec unit tests: ``bundle exec rake spec``
 
 To run RSpec unit tests, puppet-lint, syntax checks and metadata lint: ``bundle exec rake test``
 
-To run Beaker acceptance tests for an Ubuntu Docker container: ``BEAKER_set=ubuntu-14.04-x86_64-docker bundle exec rake acceptance``
+To run Beaker acceptance tests: ``BEAKER_set=<nodeset name> bundle exec rake acceptance``
+where ``<nodeset name>`` is one of the filenames in ``spec/acceptance/nodesets`` without the trailing ``.yml``, specifically one of:
+
+* ``ubuntu-14.04-x86_64-docker``
+* ``centos-6-x86_64-docker``
+* ``centos-7-x86_64-docker``
