@@ -46,6 +46,13 @@
 #   Extra argument to pass to `vault server`, as per:
 #   `vault server --help`
 #
+# * `num_procs`
+#   Sets the GOMAXPROCS environment variable, to determine how many CPUs Vault
+#   can use. The official Vault Terraform install.sh script sets this to the
+#   output of ``nprocs``, with the comment, "Make sure to use all our CPUs,
+#   because Vault can block a scheduler thread". Default: number of CPUs
+#   on the system, retrieved from the ``processorcount`` Fact.
+#
 class vault (
   $user             = $::vault::params::user,
   $manage_user      = $::vault::params::manage_user,
@@ -59,6 +66,7 @@ class vault (
   $service_provider = $::vault::params::service_provider,
   $config_hash      = {},
   $service_options  = '',
+  $num_procs        = $::vault::params::num_procs,
 ) inherits ::vault::params {
   validate_hash($config_hash)
 

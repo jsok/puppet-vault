@@ -58,6 +58,7 @@ describe 'vault class' do
         its(:content) { is_expected.to include 'env USER=vault' }
         its(:content) { is_expected.to include 'env GROUP=vault' }
         its(:content) { is_expected.to include 'exec start-stop-daemon -u $USER -g $GROUP -p $PID_FILE -x $VAULT -S -- server -config=$CONFIG ' }
+        its(:content) { is_expected.to match /export GOMAXPROCS=\${GOMAXPROCS:-\d+}/ }
       end
       describe file('/etc/init.d/vault') do
         it { is_expected.to be_symlink }
@@ -73,6 +74,7 @@ describe 'vault class' do
           its(:content) { is_expected.to include 'daemon --user vault "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"' }
           its(:content) { is_expected.to include 'conffile="/etc/vault/config.json"' }
           its(:content) { is_expected.to include 'exec="/usr/local/bin/vault"' }
+          its(:content) { is_expected.to match /export GOMAXPROCS=\${GOMAXPROCS:-\d+}/ }
         end
       else
         describe file('/etc/systemd/system/vault.service') do
@@ -83,6 +85,7 @@ describe 'vault class' do
           its(:content) { is_expected.to include 'User=vault' }
           its(:content) { is_expected.to include 'Group=vault' }
           its(:content) { is_expected.to include 'ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json ' }
+          its(:content) { is_expected.to match /Environment=GOMAXPROCS=\d+/ }
         end
         describe command('systemctl list-units') do
           its(:stdout) { is_expected.to include 'vault.service' }

@@ -4,8 +4,9 @@ describe 'vault' do
   ['RedHat','Debian'].each do |osfamily|
     context "on #{osfamily}" do
       let(:facts) {{
-        :path     => '/usr/local/bin:/usr/bin:/bin',
-        :osfamily => "#{osfamily}",
+        :path           => '/usr/local/bin:/usr/bin:/bin',
+        :osfamily       => "#{osfamily}",
+        :processorcount => '3',
       }}
 
       context "vault class with simple config_hash only" do
@@ -105,6 +106,7 @@ describe 'vault' do
       :path                      => '/usr/local/bin:/usr/bin:/bin',
       :osfamily                  => 'RedHat',
       :operatingsystemmajrelease => '6',
+      :processorcount            => '3',
     }}
     context 'includes SysV init script' do
       it {
@@ -114,7 +116,7 @@ describe 'vault' do
           .with_owner('root')
           .with_group('root')
           .with_content(%r{^#!/bin/sh})
-          .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-2}/)
+          .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-3}/)
           .with_content(%r{daemon --user vault "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
           .with_content(%r{OPTIONS=\$OPTIONS:-""})
           .with_content(%r{exec="/usr/local/bin/vault"})
@@ -129,6 +131,7 @@ describe 'vault' do
         :service_options => '-log-level=info',
         :user => 'root',
         :group => 'admin',
+        :num_procs => '5',
       }}
       it {
         is_expected.to contain_file('/etc/init.d/vault')
@@ -137,7 +140,7 @@ describe 'vault' do
           .with_owner('root')
           .with_group('root')
           .with_content(%r{^#!/bin/sh})
-          .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-2}/)
+          .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-5}/)
           .with_content(%r{daemon --user root "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
           .with_content(%r{OPTIONS=\$OPTIONS:-"-log-level=info"})
           .with_content(%r{exec="/opt/bin/vault"})
@@ -156,6 +159,7 @@ describe 'vault' do
       :path                      => '/usr/local/bin:/usr/bin:/bin',
       :osfamily                  => 'RedHat',
       :operatingsystemmajrelease => '7',
+      :processorcount            => '3',
     }}
     context 'includes systemd init script' do
       it {
@@ -168,7 +172,7 @@ describe 'vault' do
           .with_content(/^# vault systemd unit file/)
           .with_content(/^User=vault$/)
           .with_content(/^Group=vault$/)
-          .with_content(/Environment=GOMAXPROCS=2/)
+          .with_content(/Environment=GOMAXPROCS=3/)
           .with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $})
           .with_content(/SecureBits=keep-caps/)
           .with_content(/Capabilities=CAP_IPC_LOCK\+ep/)
@@ -183,6 +187,7 @@ describe 'vault' do
         :service_options => '-log-level=info',
         :user => 'root',
         :group => 'admin',
+        :num_procs => 8,
       }}
       it {
         is_expected.to contain_file('/etc/systemd/system/vault.service')
@@ -194,7 +199,7 @@ describe 'vault' do
           .with_content(/^# vault systemd unit file/)
           .with_content(/^User=root$/)
           .with_content(/^Group=admin$/)
-          .with_content(/Environment=GOMAXPROCS=2/)
+          .with_content(/Environment=GOMAXPROCS=8/)
           .with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info$})
       }
     end
@@ -245,8 +250,9 @@ describe 'vault' do
   end
   context 'Debian-specific' do
     let(:facts) {{
-      :path     => '/usr/local/bin:/usr/bin:/bin',
-      :osfamily => 'Debian',
+      :path           => '/usr/local/bin:/usr/bin:/bin',
+      :osfamily       => 'Debian',
+      :processorcount => '3',
     }}
     context 'includes init link to upstart-job' do
       it {
@@ -269,7 +275,7 @@ describe 'vault' do
         .with_content(/env CONFIG=\/etc\/vault\/config.json/)
         .with_content(/env VAULT=\/usr\/local\/bin\/vault/)
         .with_content(/exec start-stop-daemon -u \$USER -g \$GROUP -p \$PID_FILE -x \$VAULT -S -- server -config=\$CONFIG $/)
-        .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-2}/)
+        .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-3}/)
       }
     end
     context "service with modified options" do
@@ -311,6 +317,7 @@ describe 'vault' do
       :path                      => '/usr/local/bin:/usr/bin:/bin',
       :osfamily                  => 'RedHat',
       :operatingsystemmajrelease => 6,
+      :processorcount            => '3',
     }}
     let(:params) {{
       :service_provider => 'foo',
@@ -324,8 +331,9 @@ describe 'vault' do
   end
   context 'on unsupported osfamily' do
     let(:facts) {{
-      :path     => '/usr/local/bin:/usr/bin:/bin',
-      :osfamily => 'nexenta',
+      :path           => '/usr/local/bin:/usr/bin:/bin',
+      :osfamily       => 'nexenta',
+      :processorcount => '3',
     }}
     it {
       expect { should contain_class('vault') }.to raise_error(Puppet::Error, /Module vault is not supported on osfamily 'nexenta'/)

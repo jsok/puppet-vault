@@ -12,6 +12,7 @@ class vault::params {
   $config_dir       = '/etc/vault'
   $download_url     = 'https://releases.hashicorp.com/vault/0.5.1/vault_0.5.1_linux_amd64.zip'
   $service_name     = 'vault'
+  $num_procs        = $::processorcount
 
   case $::osfamily {
     'Debian': {
