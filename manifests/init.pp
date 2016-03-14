@@ -7,10 +7,16 @@
 # ----------
 #
 # * `user`
-#   Customise the user vault runs as, will also create the user.
+#   Customise the user vault runs as, will also create the user unless `manage_user` is false.
+#
+# * `manage_user`
+#   Whether or not the module should create the user.
 #
 # * `group`
-#   Customise the group vault runs as, will also create the user.
+#   Customise the group vault runs as, will also create the user unless `manage_group` is false.
+#
+# * `manage_group`
+#   Whether or not the module should create the group.
 #
 # * `bin_dir`
 #   Directory the vault executable will be installed in.
@@ -41,7 +47,9 @@
 #
 class vault (
   $user             = $::vault::params::user,
+  $manage_user      = $::vault::params::manage_user,
   $group            = $::vault::params::group,
+  $manage_group     = $::vault::params::manage_group,
   $bin_dir          = $::vault::params::bin_dir,
   $config_dir       = $::vault::params::config_dir,
   $purge_config_dir = true,

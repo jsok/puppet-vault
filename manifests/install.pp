@@ -22,11 +22,18 @@ class vault::install {
     }
   }
 
-  user { $::vault::user:
-    ensure => present,
+  if $vault::manage_user {
+    user { $::vault::user:
+      ensure => present,
+    }
+    if $vault::manage_group {
+      Group[$vault::group] -> User[$vault::user]
+    }
   }
-  group { $::vault::group:
-    ensure => present,
+  if $vault::manage_group {
+    group { $::vault::group:
+      ensure => present,
+    }
   }
 
 }
