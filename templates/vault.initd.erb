@@ -50,6 +50,7 @@ start() {
     echo -n $"Starting $prog: "
     touch $logfile $pidfile
     chown <%= scope.lookupvar('vault::user') %> $logfile $pidfile
+    export GOMAXPROCS=${GOMAXPROCS:-2}
     daemon --user <%= scope.lookupvar('vault::user') %> "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"
 
     RETVAL=$?

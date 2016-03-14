@@ -114,6 +114,7 @@ describe 'vault' do
           .with_owner('root')
           .with_group('root')
           .with_content(%r{^#!/bin/sh})
+          .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-2}/)
           .with_content(%r{daemon --user vault "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
           .with_content(%r{OPTIONS=\$OPTIONS:-""})
           .with_content(%r{exec="/usr/local/bin/vault"})
@@ -136,6 +137,7 @@ describe 'vault' do
           .with_owner('root')
           .with_group('root')
           .with_content(%r{^#!/bin/sh})
+          .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-2}/)
           .with_content(%r{daemon --user root "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
           .with_content(%r{OPTIONS=\$OPTIONS:-"-log-level=info"})
           .with_content(%r{exec="/opt/bin/vault"})
@@ -166,6 +168,7 @@ describe 'vault' do
           .with_content(/^# vault systemd unit file/)
           .with_content(/^User=vault$/)
           .with_content(/^Group=vault$/)
+          .with_content(/Environment=GOMAXPROCS=2/)
           .with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $})
           .with_content(/SecureBits=keep-caps/)
           .with_content(/Capabilities=CAP_IPC_LOCK\+ep/)
@@ -191,6 +194,7 @@ describe 'vault' do
           .with_content(/^# vault systemd unit file/)
           .with_content(/^User=root$/)
           .with_content(/^Group=admin$/)
+          .with_content(/Environment=GOMAXPROCS=2/)
           .with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info$})
       }
     end
@@ -265,6 +269,7 @@ describe 'vault' do
         .with_content(/env CONFIG=\/etc\/vault\/config.json/)
         .with_content(/env VAULT=\/usr\/local\/bin\/vault/)
         .with_content(/exec start-stop-daemon -u \$USER -g \$GROUP -p \$PID_FILE -x \$VAULT -S -- server -config=\$CONFIG $/)
+        .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-2}/)
       }
     end
     context "service with modified options" do
