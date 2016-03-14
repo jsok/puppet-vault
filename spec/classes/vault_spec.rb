@@ -167,6 +167,10 @@ describe 'vault' do
           .with_content(/^User=vault$/)
           .with_content(/^Group=vault$/)
           .with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $})
+          .with_content(/SecureBits=keep-caps/)
+          .with_content(/Capabilities=CAP_IPC_LOCK\+ep/)
+          .with_content(/CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK/)
+          .with_content(/NoNewPrivileges=yes/)
       }
     end
     context 'service with non-default options' do
@@ -188,6 +192,41 @@ describe 'vault' do
           .with_content(/^User=root$/)
           .with_content(/^Group=admin$/)
           .with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info$})
+      }
+    end
+    context 'with mlock disabled' do
+      let(:params) {{
+        :config_hash => {
+          'disable_mlock'  => true,
+          'advertise_addr' => '0.0.0.0',
+          'backend' => {
+            'file' => {
+              'path' => '/data/vault'
+            }
+          },
+          'listener' => {
+            'tcp' => {
+              'address'     => '127.0.0.1:8200',
+              'tls_disable' => 1,
+            }
+          }
+        }
+      }}
+      it {
+        is_expected.to contain_file('/etc/systemd/system/vault.service')
+          .with_mode('0644')
+          .with_ensure('file')
+          .with_owner('root')
+          .with_group('root')
+          .with_notify('Exec[systemd-reload]')
+          .with_content(/^# vault systemd unit file/)
+          .with_content(/^User=vault$/)
+          .with_content(/^Group=vault$/)
+          .with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $})
+          .without_content(/SecureBits=keep-caps/)
+          .without_content(/Capabilities=CAP_IPC_LOCK\+ep/)
+          .with_content(/CapabilityBoundingSet=CAP_SYSLOG/)
+          .with_content(/NoNewPrivileges=yes/)
       }
     end
     context 'includes systemd reload' do

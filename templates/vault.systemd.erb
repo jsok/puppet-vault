@@ -17,10 +17,15 @@ PrivateDevices=yes
 PrivateTmp=yes
 ProtectSystem=full
 ProtectHome=read-only
+<% if scope.lookupvar('vault::config_hash')['disable_mlock'] -%>
+CapabilityBoundingSet=CAP_SYSLOG
+NoNewPrivileges=yes
+<% else -%>
 SecureBits=keep-caps
 Capabilities=CAP_IPC_LOCK+ep
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
+<% end -%>
 ExecStart=<%= scope.lookupvar('vault::bin_dir') %>/vault server -config=<%= scope.lookupvar('vault::config_dir') %>/config.json <%= scope.lookupvar('vault::service_options') %>
 KillSignal=SIGINT
 TimeoutStopSec=30s
