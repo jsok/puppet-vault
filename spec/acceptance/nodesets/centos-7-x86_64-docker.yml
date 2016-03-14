@@ -10,6 +10,7 @@ HOSTS:
     # This stops the image from being deleted on completion, speeding up the process.
     docker_preserve_image: true
     docker_cmd: '["/sbin/init"]'
+    # we need iproute because ServerSpec on CentOS 7 uses the ``ss`` command
     docker_image_commands:
       - 'yum install -y unzip iproute'
 CONFIG:

@@ -18,8 +18,8 @@ class vault::params {
       $service_provider = 'upstart'
     }
     'RedHat': {
-      if ($::operatingsystemmajrelease == '5' or $::operatingsystemmajrelease == '6') {
-        $service_provider = 'init'
+      if ($::operatingsystemmajrelease == '6') {
+        $service_provider = 'redhat'
       } else {
         $service_provider = 'systemd'
       }

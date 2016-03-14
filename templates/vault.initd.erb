@@ -1,52 +1,119 @@
-#!/bin/bash
+#!/bin/sh
 #
-# Basic startup script for the Vault Project Server
+# vault - this script manages the vault server
 #
 # chkconfig: 3 85 15
-# description: Init.d script for Vault Project Server
 # processname: vault
+# description: Init.d script for Vault Project Server
 # pidfile: /var/run/vault.pid
 # config: <%= scope.lookupvar('vault::config_dir') %>/config.json
-#
 ###########################################################################################################
 # this file has been put in place by the jsok/vault Puppet module (https://forge.puppetlabs.com/jsok/vault)
 # any changes will be overwritten if Puppet is run again
 ###########################################################################################################
 
-prog='Vault Server'
-RETVAL=0
+### BEGIN INIT INFO
+# Provides:       vault
+# Required-Start: $local_fs $network
+# Required-Stop:  $local_fs $network
+# Default-Start: 3 4 5
+# Default-Stop:  0 1 2 6
+# Short-Description: Manage the vault server
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "$NETWORKING" = "no" ] && exit 0
+
+exec="<%= scope.lookupvar('vault::bin_dir') %>/vault"
+prog=${exec##*/}
+
+lockfile="/var/lock/subsys/$prog"
+pidfile="/var/run/${prog}.pid"
+logfile="/var/log/${prog}.log"
+sysconfig="/etc/sysconfig/$prog"
+conffile="<%= scope.lookupvar('vault::config_dir') %>/config.json"
+
+[ -f $sysconfig ] && . $sysconfig
+
+OPTIONS=$OPTIONS:-"<%= scope.lookupvar('vault::service_options') %>"
 
 start() {
-  echo -n $"Starting $prog: "
-  su <%= scope.lookupvar('vault::user') %> -c '<%= scope.lookupvar('vault::bin_dir') %>/vault server -config=<%= scope.lookupvar('vault::config_dir') %>/config.json <%= scope.lookupvar('vault::service_options') %> >/dev/null 2>&1 &'
-  RETVAL=$?
-  echo
-  [ $RETVAL = 0 ] && touch /var/lock/subsys/vault
-  return $RETVAL
+    [ -x $exec ] || exit 5
+    [ -f $conffile ] || exit 6
+
+    echo -n $"Starting $prog: "
+    touch $logfile $pidfile
+    chown <%= scope.lookupvar('vault::user') %> $logfile $pidfile
+    daemon --user <%= scope.lookupvar('vault::user') %> "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"
+
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ]; then
+        touch $lockfile
+    fi
+    echo
+    return $RETVAL
 }
 
 stop() {
-  echo -n $"Stopping $prog: "
-  killall vault
-  RETVAL=$?
-  echo
-  [ $RETVAL = 0 ] && rm -f /var/lock/subsys/vault /var/run/vault.pid
+    echo -n $"Stopping $prog: "
+    killproc -p $pidfile $exec 2>> $logfile
+    RETVAL=$?
+    [ $RETVAL -eq 0 ] && rm -f $lockfile
+    echo
+    return $RETVAL
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    echo -n $"Reloading $prog: "
+    killproc -p $pidfile $exec -HUP
+    echo
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
 }
 
 case "$1" in
-  start)
-    start
-    ;;
-  stop)
-    stop
-    ;;
-  restart)
-    stop
-    start
-    ;;
-  *)
-    echo $"Usage: $prog {start|restart|stop}"
-    exit 1
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 7
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart}"
+        exit 2
 esac
 
-exit $RETVAL
+exit $?

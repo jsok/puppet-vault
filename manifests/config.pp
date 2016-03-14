@@ -29,15 +29,6 @@ class vault::config {
         mode    => '0755',
       }
     }
-    'init': {
-       file { '/etc/init.d/vault':
-         ensure  => file,
-         owner   => 'root',
-         group   => 'root',
-         mode    => '0755',
-         content => template('vault/vault.initd.erb'),
-       }
-    }
     'systemd': {
       file { '/etc/systemd/system/vault.service':
         ensure  => file,
@@ -54,6 +45,15 @@ class vault::config {
           user        => 'root',
           refreshonly => true,
         }
+      }
+    }
+    'redhat': {
+      file { '/etc/init.d/vault':
+        ensure  => file,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0755',
+        content => template('vault/vault.initd.erb'),
       }
     }
     default: {

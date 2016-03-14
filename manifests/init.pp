@@ -35,7 +35,8 @@
 #   Customise the name of the system service
 #
 # * `service_provider`
-#   Customise the name of the system service provider
+#   Customise the name of the system service provider; this
+#   also controls the init configuration files that are installed.
 #
 # * `config_hash`
 #   A hash representing vault's config (in JSON) as per:

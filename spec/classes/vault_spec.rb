@@ -34,7 +34,10 @@ describe 'vault' do
         it { is_expected.to contain_class('vault::config') }
         it { is_expected.to contain_class('vault::service').that_subscribes_to('vault::config') }
 
-        it { is_expected.to contain_service('vault') }
+        it { is_expected.to contain_service('vault')
+          .with_ensure('running')
+          .with_enable(true)
+        }
         it { is_expected.to contain_user('vault') }
         it { is_expected.to contain_group('vault') }
 
@@ -97,7 +100,7 @@ describe 'vault' do
       end
     end
   end
-  context 'RedHat <=6 specific' do
+  context 'RedHat 6 specific' do
     let(:facts) {{
       :path                      => '/usr/local/bin:/usr/bin:/bin',
       :osfamily                  => 'RedHat',
@@ -110,8 +113,12 @@ describe 'vault' do
           .with_ensure('file')
           .with_owner('root')
           .with_group('root')
-          .with_content(%r{^#!/bin/bash})
-          .with_content(%r{su vault -c '/usr/local/bin/vault server -config=/etc/vault/config.json  >/dev/null 2>&1 &'})
+          .with_content(%r{^#!/bin/sh})
+          .with_content(%r{daemon --user vault "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
+          .with_content(%r{OPTIONS=\$OPTIONS:-""})
+          .with_content(%r{exec="/usr/local/bin/vault"})
+          .with_content(%r{conffile="/etc/vault/config.json"})
+          .with_content(%r{chown vault \$logfile \$pidfile})
       }
     end
     context 'service with non-default options' do
@@ -128,8 +135,12 @@ describe 'vault' do
           .with_ensure('file')
           .with_owner('root')
           .with_group('root')
-          .with_content(%r{^#!/bin/bash})
-          .with_content(%r{su root -c '/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info >/dev/null 2>&1 &'})
+          .with_content(%r{^#!/bin/sh})
+          .with_content(%r{daemon --user root "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
+          .with_content(%r{OPTIONS=\$OPTIONS:-"-log-level=info"})
+          .with_content(%r{exec="/opt/bin/vault"})
+          .with_content(%r{conffile="/opt/etc/vault/config.json"})
+          .with_content(%r{chown root \$logfile \$pidfile})
       }
     end
     context 'does not include systemd reload' do
