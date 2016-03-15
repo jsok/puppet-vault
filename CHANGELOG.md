@@ -1,4 +1,4 @@
-## 2016-03-12 v0.1.9-dev
+## 2016-03-15 v0.1.9
 - Update to vault 0.5.1
 - Add `manage_user` and `manage_group` params
 
