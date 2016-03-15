@@ -9,7 +9,10 @@ Currently installs `v0.5.1` Linux AMD64 binary.
 
 ## Support
 
-This module is currently only tested on Ubuntu 14.04.
+This module is currently only tested on:
+
+ * Ubuntu 14.04.
+ * CentOS/RedHat 6
 
 ## Usage
 
