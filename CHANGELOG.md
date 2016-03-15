@@ -1,30 +1,31 @@
-2016-03-12 Release 0.1.9-dev
+## 2016-03-12 v0.1.9-dev
 - Update to vault 0.5.1
+- Add `manage_user` and `manage_group` params
 
-2016-02-11 Release 0.1.8
+## 2016-02-11 v0.1.8
 - Update to vault 0.5.0
 
-2016-01-14 Release 0.1.7
+## 2016-01-14 v0.1.7
 - Update to vault 0.4.1
 
-2016-01-05 Release 0.1.6
+## 2016-01-05 v0.1.6
 - Update to vault 0.4.0
 
-2016-01-05 Release 0.1.5
-- Add CentOS support
+## 2016-01-05 v0.1.5
+- Add CentOS 6 support
 
-2015-10-14 Release 0.1.4
+## 2015-10-14 v0.1.4
 - Fixes syntax error in bad release v0.1.3
 
-2015-10-14 Release 0.1.3
+## 2015-10-14 v0.1.3
 - Use new Fastly CDN for default `download_url` parameter
 
-2015-10-14 Release 0.1.2
+## 2015-10-14 v0.1.2
 - Support specifying `service_provider`
 
-2015-10-06 Release 0.1.1
+## 2015-10-06 v0.1.1
 - Fixed issue #1, containment bug
 
-2015-07-28 Release 0.1.0
+## 2015-07-28 v0.1.0
 - Initial relase
 - Add support exclusively for Ubuntu 14.04
