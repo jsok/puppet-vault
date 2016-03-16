@@ -13,6 +13,7 @@ This module is currently only tested on:
 
  * Ubuntu 14.04.
  * CentOS/RedHat 6
+ * CentOS/RedHat 7
 
 ## Usage
 
