@@ -1,0 +1,20 @@
+HOSTS:
+  centos-7-x64:
+    default_apply_opts:
+      order: random
+      strict_variables:
+    platform: el-7-x86_64
+    hypervisor : docker
+    # Need upstart to tests services
+    image: centos:7
+    # This stops the image from being deleted on completion, speeding up the process.
+    docker_preserve_image: true
+    docker_cmd: '["/sbin/init"]'
+    # we need iproute because ServerSpec on CentOS 7 uses the ``ss`` command
+    docker_image_commands:
+      - 'yum install -y unzip iproute'
+CONFIG:
+  type: foss
+  log_level: debug
+  docker_options:
+    ssl_verify_peer: false
