@@ -1,3 +1,9 @@
+## 2016-03-17 v0.2.0
+- Add RedHat7/CentOS7 support (including `systemd` support)
+- Add `num_procs` option to control `GOMAXPROCS` in init scripts
+- RedHat6 SysV init script improvements
+- Improved beaker acceptance tests
+
 ## 2016-03-15 v0.1.9
 - Update to vault 0.5.1
 - Add `manage_user` and `manage_group` params
