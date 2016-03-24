@@ -16,10 +16,12 @@ class vault::params {
 
   case $::osfamily {
     'Debian': {
-      if ($::operatingsystemmajrelease == '8') {
-        $service_provider = 'systemd'
-      } else {
-        $service_provider = 'upstart'
+      if ($::operatingsystem == 'Debian') {
+        if ($::operatingsystemmajrelease == '8') {
+          $service_provider = 'systemd'
+        } else {
+          $service_provider = 'upstart'
+        }
       }
     }
     'RedHat': {
