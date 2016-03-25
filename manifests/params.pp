@@ -22,6 +22,8 @@ class vault::params {
         } else {
           $service_provider = 'upstart'
         }
+      } else {
+        $service_provider = 'upstart'
       }
     }
     'RedHat': {
