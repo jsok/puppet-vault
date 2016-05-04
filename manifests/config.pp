@@ -22,11 +22,11 @@ class vault::config {
         content => template('vault/vault.upstart.erb'),
       }
       file { '/etc/init.d/vault':
-        ensure  => link,
-        target  => '/lib/init/upstart-job',
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0755',
+        ensure => link,
+        target => '/lib/init/upstart-job',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755',
       }
     }
     'systemd': {
