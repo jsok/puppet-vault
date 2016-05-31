@@ -1,3 +1,6 @@
+## 2016-06-01 v0.2.2
+- Update to vault 0.5.3
+
 ## 2016-03-17 v0.2.1
 - Update to vault 0.5.2
 
