@@ -5,7 +5,7 @@
 
 Puppet module to install and run [Hashicorp Vault](https://vaultproject.io).
 
-Currently installs `v0.5.2` Linux AMD64 binary.
+Currently installs `v0.5.3` Linux AMD64 binary.
 
 ## Support
 
