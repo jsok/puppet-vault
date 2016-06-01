@@ -25,6 +25,13 @@
       ]
     },
     {
+      "operatingsystem": "Amazon Linux (RHEL based non systemd)",
+      "operatingsystemrelease": [
+          "6.0",
+          "7.0"
+      ]
+    },
+    {
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
           "6.0",
