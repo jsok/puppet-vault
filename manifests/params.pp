@@ -19,7 +19,7 @@ class vault::params {
       $service_provider = 'upstart'
     }
     'RedHat': {
-      if ($::operatingsystemmajrelease == '6' or $::operatingsystem =~ /^[Aa]mazon$/) {
+      if ($::operatingsystemmajrelease == '6' or $::operatingsystem = 'Amazon') {
         $service_provider = 'redhat'
       } else {
         $service_provider = 'systemd'
