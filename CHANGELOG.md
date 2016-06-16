@@ -1,5 +1,7 @@
 ## 2016-06-01 v0.2.3-dev
+- Configure log file for upstart
 - Update to vault 0.6.0
+- Deploy to PuppetForge via TravisCI
 
 ## 2016-06-01 v0.2.2
 - Update to vault 0.5.3
