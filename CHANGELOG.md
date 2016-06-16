@@ -1,3 +1,6 @@
+## 2016-06-01 v0.2.3-dev
+- Update to vault 0.6.0
+
 ## 2016-06-01 v0.2.2
 - Update to vault 0.5.3
 
