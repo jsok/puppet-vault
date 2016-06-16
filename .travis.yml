@@ -14,9 +14,11 @@ env:
   - PUPPET_GEM_VERSION="~> 3.7.0"
   - PUPPET_GEM_VERSION="~> 3.8.0"
   - PUPPET_GEM_VERSION="~> 4.0.0"
-  - PUPPET_GEM_VERSION="~> 4.1.0"
+  - PUPPET_GEM_VERSION="~> 4.4.0" DEPLOY_CANDIDATE="yes"
 matrix:
   exclude:
+    - rvm: 1.9.3
+      env: PUPPET_GEM_VERSION="~> 4.4.0"
     - rvm: 2.2
       env: PUPPET_GEM_VERSION="~> 3.6.0"
     - rvm: 2.2
@@ -31,3 +33,4 @@ deploy:
   on:
     tags: true
     rvm: 2.2
+    condition: "$DEPLOY_CANDIDATE = yes"
