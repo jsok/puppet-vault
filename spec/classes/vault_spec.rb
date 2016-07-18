@@ -59,6 +59,8 @@ describe 'vault' do
         }
         it {
           is_expected.to contain_file('/etc/vault/config.json') \
+            .with_owner('vault')
+            .with_group('vault')
             .with_content(/"advertise_addr":\s*"0.0.0.0"/)
             .with_content(/"backend":\s*{\s*"file":\s*{\s*"path":\s*"\/data\/vault"/)
             .with_content(/"listener":\s*{\s*"tcp":/)
