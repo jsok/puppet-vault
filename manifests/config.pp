@@ -10,6 +10,8 @@ class vault::config {
   } ->
   file { "${::vault::config_dir}/config.json":
     content => vault_sorted_json($::vault::config_hash),
+    owner   => $::vault::user,
+    group   => $::vault::group,
   }
 
   case $::vault::service_provider {
