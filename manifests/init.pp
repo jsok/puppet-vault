@@ -24,6 +24,9 @@
 # * `config_dir`
 #   Directory the vault configuration will be kept in.
 #
+# * `log_dir`
+#   Directory the vault logs will be written in.
+#
 # * `purge_config_dir`
 #   Whether the `config_dir` should be purged before installing the
 #   generated config.
@@ -60,6 +63,7 @@ class vault (
   $manage_group     = $::vault::params::manage_group,
   $bin_dir          = $::vault::params::bin_dir,
   $config_dir       = $::vault::params::config_dir,
+  $log_dir          = $::vault::params::log_dir,
   $purge_config_dir = true,
   $download_url     = $::vault::params::download_url,
   $service_name     = $::vault::params::service_name,
