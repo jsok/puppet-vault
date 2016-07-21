@@ -13,7 +13,14 @@ class vault::config {
     owner   => $::vault::user,
     group   => $::vault::group,
   }
-
+  
+  file { $::vault::log_dir:
+    ensure => directory,
+    owner  => $::vault::user,
+    group  => $::vault::group,
+  }
+  
+  
   case $::vault::service_provider {
     'upstart': {
       file { '/etc/init/vault.conf':
