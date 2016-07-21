@@ -10,6 +10,7 @@ class vault::params {
   $manage_group     = true
   $bin_dir          = '/usr/local/bin'
   $config_dir       = '/etc/vault'
+  $log_dir          = '/log/vault'
   $download_url     = 'https://releases.hashicorp.com/vault/0.6.0/vault_0.6.0_linux_amd64.zip'
   $service_name     = 'vault'
   $num_procs        = $::processorcount
