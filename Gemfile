@@ -8,6 +8,7 @@ group :test do
   gem "puppetlabs_spec_helper"
   gem "metadata-json-lint"
   gem "rspec-puppet-facts"
+  gem "json_pure", '<= 2.0.1', :require => false if RUBY_VERSION < '2.0.0'
 end
 
 group :development do
