@@ -4,7 +4,7 @@ class vault::install {
   $vault_bin = "${::vault::bin_dir}/vault"
 
   staging::deploy { 'vault.zip':
-    source  => $::vault::download_url,
+    source  => $::vault::real_download_url,
     target  => $::vault::bin_dir,
     creates => $vault_bin,
   } ~>

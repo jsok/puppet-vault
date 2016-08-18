@@ -4,15 +4,18 @@
 # It sets variables according to platform.
 #
 class vault::params {
-  $user             = 'vault'
-  $manage_user      = true
-  $group            = 'vault'
-  $manage_group     = true
-  $bin_dir          = '/usr/local/bin'
-  $config_dir       = '/etc/vault'
-  $download_url     = 'https://releases.hashicorp.com/vault/0.6.0/vault_0.6.0_linux_amd64.zip'
-  $service_name     = 'vault'
-  $num_procs        = $::processorcount
+  $user               = 'vault'
+  $manage_user        = true
+  $group              = 'vault'
+  $manage_group       = true
+  $bin_dir            = '/usr/local/bin'
+  $config_dir         = '/etc/vault'
+  $package_name       = 'vault'
+  $download_url_base  = 'https://releases.hashicorp.com/vault/'
+  $download_extension = 'zip'
+  $version            = '0.6.0'
+  $service_name       = 'vault'
+  $num_procs          = $::processorcount
 
   case $::osfamily {
     'Debian': {
@@ -29,4 +32,16 @@ class vault::params {
       fail("Module ${module_name} is not supported on osfamily '${::osfamily}'")
     }
   }
+
+  case $::architecture {
+    'x86_64', 'amd64': { $arch = 'amd64' }
+    'i386':            { $arch = '386'   }
+    /^arm.*/:          { $arch = 'arm'   }
+    default:           {
+      fail("Unsupported kernel architecture: ${::architecture}")
+    }
+  }
+
+  $os = downcase($::kernel)
+
 }
