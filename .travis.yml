@@ -10,12 +10,13 @@ rvm:
 script: bundle exec rake test
 env:
   - PUPPET_GEM_VERSION="~> 3.8.0"
-  - PUPPET_GEM_VERSION="~> 4.0.0"
-  - PUPPET_GEM_VERSION="~> 4.4.0" DEPLOY_CANDIDATE="yes"
+  - PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="no"
+  - PUPPET_GEM_VERSION="~> 4.4" STRICT_VARIABLES="no"
+  - PUPPET_GEM_VERSION="~> 4.6" STRICT_VARIABLES="no" DEPLOY_CANDIDATE="yes"
 matrix:
   exclude:
     - rvm: 1.9.3
-      env: PUPPET_GEM_VERSION="~> 4.4.0"
+      env: PUPPET_GEM_VERSION="~> 4.4"
     - rvm: 2.2
       env: PUPPET_GEM_VERSION="~> 3.8.0"
 deploy:
