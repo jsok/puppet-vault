@@ -31,9 +31,9 @@ describe 'vault' do
         it { is_expected.to contain_class('vault') }
 
         it { is_expected.to contain_class('vault::params') }
-        it { is_expected.to contain_class('vault::install').that_comes_before('vault::config') }
+        it { is_expected.to contain_class('vault::install').that_comes_before('Class[vault::config]') }
         it { is_expected.to contain_class('vault::config') }
-        it { is_expected.to contain_class('vault::service').that_subscribes_to('vault::config') }
+        it { is_expected.to contain_class('vault::service').that_subscribes_to('Class[vault::config]') }
 
         it { is_expected.to contain_service('vault')
           .with_ensure('running')
