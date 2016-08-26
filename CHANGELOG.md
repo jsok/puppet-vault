@@ -1,5 +1,6 @@
 ## 2016-07-19 v0.3.1-dev
 - Update to vault 0.6.1
+- Add Amazon OS support
 
 ## 2016-07-19 v0.3.0
 - Ensure config.json has correct user/group
