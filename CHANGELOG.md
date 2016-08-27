@@ -1,4 +1,4 @@
-## 2016-07-19 v0.3.1-dev
+## 2016-07-19 v0.4.0
 - Update to vault 0.6.1
 - Add Amazon OS support
 
