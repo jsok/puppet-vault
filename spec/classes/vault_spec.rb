@@ -31,9 +31,9 @@ describe 'vault' do
         it { is_expected.to contain_class('vault') }
 
         it { is_expected.to contain_class('vault::params') }
-        it { is_expected.to contain_class('vault::install').that_comes_before('vault::config') }
+        it { is_expected.to contain_class('vault::install').that_comes_before('Class[vault::config]') }
         it { is_expected.to contain_class('vault::config') }
-        it { is_expected.to contain_class('vault::service').that_subscribes_to('vault::config') }
+        it { is_expected.to contain_class('vault::service').that_subscribes_to('Class[vault::config]') }
 
         it { is_expected.to contain_service('vault')
           .with_ensure('running')
@@ -101,6 +101,60 @@ describe 'vault' do
           }
         end
       end
+    end
+  end
+  context 'RedHat 7 Amazon Linux specific' do
+   let(:facts) {{
+      :path                      => '/usr/local/bin:/usr/bin:/bin',
+      :osfamily                  => 'RedHat',
+      :operatingsystem           => 'Amazon',
+      :operatingsystemmajrelease => '7',
+      :processorcount            => '3',
+   }}
+   context 'includes SysV init script' do
+      it {
+        is_expected.to contain_file('/etc/init.d/vault')
+          .with_mode('0755')
+          .with_ensure('file')
+          .with_owner('root')
+          .with_group('root')
+          .with_content(%r{^#!/bin/sh})
+          .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-3}/)
+          .with_content(%r{daemon --user vault "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
+          .with_content(%r{OPTIONS=\$OPTIONS:-""})
+          .with_content(%r{exec="/usr/local/bin/vault"})
+          .with_content(%r{conffile="/etc/vault/config.json"})
+          .with_content(%r{chown vault \$logfile \$pidfile})
+      }
+    end
+    context 'service with non-default options' do
+      let(:params) {{
+        :bin_dir => '/opt/bin',
+        :config_dir => '/opt/etc/vault',
+        :service_options => '-log-level=info',
+        :user => 'root',
+        :group => 'admin',
+        :num_procs => '5',
+      }}
+      it {
+        is_expected.to contain_file('/etc/init.d/vault')
+          .with_mode('0755')
+          .with_ensure('file')
+          .with_owner('root')
+          .with_group('root')
+          .with_content(%r{^#!/bin/sh})
+          .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-5}/)
+          .with_content(%r{daemon --user root "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
+          .with_content(%r{OPTIONS=\$OPTIONS:-"-log-level=info"})
+          .with_content(%r{exec="/opt/bin/vault"})
+          .with_content(%r{conffile="/opt/etc/vault/config.json"})
+          .with_content(%r{chown root \$logfile \$pidfile})
+      }
+    end
+    context 'does not include systemd reload' do
+      it {
+        is_expected.to_not contain_exec('systemd-reload')
+      }
     end
   end
   context 'RedHat 6 specific' do
@@ -318,7 +372,7 @@ describe 'vault' do
     let(:facts) {{
       :path                      => '/usr/local/bin:/usr/bin:/bin',
       :osfamily                  => 'RedHat',
-      :operatingsystemmajrelease => 6,
+      :operatingsystemmajrelease => '6',
       :processorcount            => '3',
     }}
     let(:params) {{

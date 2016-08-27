@@ -25,10 +25,23 @@
       ]
     },
     {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+          "6.0",
+          "7.0"
+      ]
+    },
+    {
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
           "6.0",
           "7.0"
+      ]
+    },
+    {
+      "operatingsystem": "Amazon",
+      "operatingsystemrelease": [
+        "2016.03"
       ]
     }
   ]
