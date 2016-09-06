@@ -9,6 +9,7 @@ class vault::install {
         source  => $::vault::download_url,
         target  => $::vault::bin_dir,
         creates => $vault_bin,
+        notify  => File[$vault_bin]
       }
     }
 
@@ -21,7 +22,8 @@ class vault::install {
     default: {
       fail("Installation method ${::vault::install_method} not supported")
     }
-  }->
+  }
+
   file { $vault_bin:
     owner => 'root',
     group => 'root',
