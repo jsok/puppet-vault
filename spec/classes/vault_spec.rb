@@ -329,7 +329,7 @@ describe 'vault' do
     let(:facts) {{
       :path                      => '/usr/local/bin:/usr/bin:/bin',
       :osfamily                  => 'RedHat',
-      :operatingsystemmajrelease => 6,
+      :operatingsystemmajrelease => '6',
       :processorcount            => '3',
     }}
     let(:params) {{
