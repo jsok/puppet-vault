@@ -3,11 +3,27 @@
 class vault::install {
   $vault_bin = "${::vault::bin_dir}/vault"
 
-  staging::deploy { 'vault.zip':
-    source  => $::vault::download_url,
-    target  => $::vault::bin_dir,
-    creates => $vault_bin,
-  } ~>
+  case $::vault::install_method {
+    'archive': {
+      staging::deploy { 'vault.zip':
+        source  => $::vault::download_url,
+        target  => $::vault::bin_dir,
+        creates => $vault_bin,
+        notify  => File[$vault_bin]
+      }
+    }
+
+    'repo': {
+      package { $::vault::package_name:
+        ensure  => $::vault::package_ensure
+      }
+    }
+
+    default: {
+      fail("Installation method ${::vault::install_method} not supported")
+    }
+  }
+
   file { $vault_bin:
     owner => 'root',
     group => 'root',

@@ -91,7 +91,8 @@ describe 'vault' do
 
         context "installs from download url" do
           let(:params) {{
-            :download_url => 'http://example.com/vault.zip',
+            :download_url   => 'http://example.com/vault.zip',
+            :install_method => 'archive',
           }}
 
           it {
@@ -99,6 +100,16 @@ describe 'vault' do
               .with_source('http://example.com/vault.zip')
               .that_notifies('File[/usr/local/bin/vault]')
           }
+        end
+
+        context "installs from repository" do
+          let(:params) {{
+            :install_method => 'repo',
+            :package_name   => 'vault',
+            :package_ensure => 'installed',
+          }}
+
+          it { should contain_package('vault') }
         end
       end
     end

@@ -67,6 +67,9 @@ class vault (
   $config_hash      = {},
   $service_options  = '',
   $num_procs        = $::vault::params::num_procs,
+  $install_method   = $::vault::params::install_method,
+  $package_name     = $::vault::params::package_name,
+  $package_ensure   = $::vault::params::package_ensure
 ) inherits ::vault::params {
   validate_hash($config_hash)
 
