@@ -3,13 +3,28 @@
 # This class is called from vault for service config.
 #
 class vault::config {
+
+
+  $config_hash = delete_undef_values({
+    'backend'           => $::vault::backend,
+    'ha_backend'        => $::vault::ha_backend,
+    'listener'          => $::vault::listener,
+    'telemetry'         => $::vault::telemetry,
+    'disable_cache'     => $::vault::disable_cache,
+    'default_lease_ttl' => $::vault::default_lease_ttl,
+    'max_lease_ttl'     => $::vault::max_lease_ttl,
+    'disable_mlock'     => $::vault::disable_mlock,
+  })
+
+
   file { $::vault::config_dir:
     ensure  => directory,
     purge   => $::vault::purge_config_dir,
     recurse => $::vault::purge_config_dir,
-  } ->
+  } 
+
   file { "${::vault::config_dir}/config.json":
-    content => vault_sorted_json($::vault::config_hash),
+    content => vault_sorted_json($config_hash),
     owner   => $::vault::user,
     group   => $::vault::group,
   }

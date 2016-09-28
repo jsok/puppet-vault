@@ -7,18 +7,18 @@ description "vault server"
 start on (local-filesystems and net-device-up IFACE!=lo)
 stop on runlevel [06]
 
-env VAULT=<%= scope.lookupvar('vault::bin_dir') %>/vault
-env CONFIG=<%= scope.lookupvar('vault::config_dir') %>/config.json
-env USER=<%= scope.lookupvar('vault::user') %>
-env GROUP=<%= scope.lookupvar('vault::group') %>
+env VAULT=<%= scope['vault::bin_dir'] %>/vault
+env CONFIG=<%= scope['vault::config_dir'] %>/config.json
+env USER=<%= scope['vault::user'] %>
+env GROUP=<%= scope['vault::group'] %>
 env PID_FILE=/var/run/vault.pid
 env LOG_FILE=/var/log/vault.log
 
 script
-    export GOMAXPROCS=${GOMAXPROCS:-<%= scope.lookupvar('vault::num_procs') %>}
+    export GOMAXPROCS=${GOMAXPROCS:-<%= scope['vault::num_procs'] %>}
     [ -e /etc/default/$UPSTART_JOB ] && . /etc/default/$UPSTART_JOB
     exec >> $LOG_FILE 2>&1
-    exec start-stop-daemon -u $USER -g $GROUP -p $PID_FILE -x $VAULT -S -- server -config=$CONFIG <%= scope.lookupvar('vault::service_options') %>
+    exec start-stop-daemon -u $USER -g $GROUP -p $PID_FILE -x $VAULT -S -- server -config=$CONFIG <%= scope['vault::service_options'] %>
 end script
 
 respawn

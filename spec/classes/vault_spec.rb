@@ -9,20 +9,17 @@ describe 'vault' do
         :processorcount => '3',
       }}
 
-      context "vault class with simple config_hash only" do
+      context "vault class with simple configuration" do
         let(:params) {{
-          :config_hash => {
-            'advertise_addr' => '0.0.0.0',
-            'backend' => {
-              'file' => {
-                'path' => '/data/vault'
-              }
+          :backend => {
+            'file' => {
+              'path' => '/data/vault'
+            }
             },
-            'listener' => {
-              'tcp' => {
-                'address'     => '127.0.0.1:8200',
-                'tls_disable' => 1,
-              }
+          :listener => {
+            'tcp' => {
+              'address'     => '127.0.0.1:8200',
+              'tls_disable' => 1,
             }
           }
         }}
@@ -61,7 +58,6 @@ describe 'vault' do
           is_expected.to contain_file('/etc/vault/config.json') \
             .with_owner('vault')
             .with_group('vault')
-            .with_content(/"advertise_addr":\s*"0.0.0.0"/)
             .with_content(/"backend":\s*{\s*"file":\s*{\s*"path":\s*"\/data\/vault"/)
             .with_content(/"listener":\s*{\s*"tcp":/)
             .with_content(/"address":\s*"127.0.0.1:8200"/)
@@ -77,9 +73,7 @@ describe 'vault' do
 
         context "disable mlock" do
           let(:params) {{
-            'config_hash' => {
-              'disable_mlock' => true
-            }
+              :disable_mlock => true
           }}
           it { is_expected.not_to contain_exec('setcap cap_ipc_lock=+ep /usr/local/bin/vault') }
 
@@ -96,9 +90,9 @@ describe 'vault' do
           }}
 
           it {
-            is_expected.to contain_staging__deploy('vault.zip')
+            is_expected.to contain_archive('/tmp/vault.zip')
               .with_source('http://example.com/vault.zip')
-              .that_notifies('File[/usr/local/bin/vault]')
+              .that_comes_before('File[/usr/local/bin/vault]')
           }
         end
 
@@ -272,19 +266,16 @@ describe 'vault' do
     end
     context 'with mlock disabled' do
       let(:params) {{
-        :config_hash => {
-          'disable_mlock'  => true,
-          'advertise_addr' => '0.0.0.0',
-          'backend' => {
-            'file' => {
-              'path' => '/data/vault'
-            }
-          },
-          'listener' => {
-            'tcp' => {
-              'address'     => '127.0.0.1:8200',
-              'tls_disable' => 1,
-            }
+        :disable_mlock   => true,
+        :backend => {
+          'file' => {
+            'path' => '/data/vault'
+          }
+        },
+        :listener => {
+          'tcp' => {
+            'address'     => '127.0.0.1:8200',
+            'tls_disable' => 1,
           }
         }
       }}

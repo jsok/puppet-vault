@@ -7,17 +7,15 @@ describe 'vault class' do
     it 'should work idempotently with no errors' do
       pp = <<-EOS
       class { '::vault':
-        config_hash => {
-          'backend' => {
-            'file' => {
-              'path' => '/tmp',
-            }
-          },
-          'listener' => {
-            'tcp' => {
-              'address' => '127.0.0.1:8200',
-              'tls_disable' => 1,
-            }
+        backend => {
+          'file' => {
+            'path' => '/tmp',
+          }
+        },
+       listener' => {
+         'tcp' => {
+           'address' => '127.0.0.1:8200',
+           'tls_disable' => 1,
           }
         }
       }
