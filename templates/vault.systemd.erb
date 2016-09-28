@@ -11,13 +11,14 @@ Requires=basic.target network.target
 After=basic.target network.target
 
 [Service]
-User=<%= scope.lookupvar('vault::user') %>
-Group=<%= scope.lookupvar('vault::group') %>
+User=<%= scope['vault::user'] %>
+Group=<%= scope['vault::group'] %>
 PrivateDevices=yes
 PrivateTmp=yes
 ProtectSystem=full
 ProtectHome=read-only
-<% if scope.lookupvar('vault::config_hash')['disable_mlock'] -%>
+<% # Still require check for :undef for Puppet 3.x -%>
+<% if scope['vault::disable_mlock'] && scope['vault::disable_mlock'] != :undef -%>
 CapabilityBoundingSet=CAP_SYSLOG
 NoNewPrivileges=yes
 <% else -%>
@@ -26,8 +27,8 @@ Capabilities=CAP_IPC_LOCK+ep
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
 <% end -%>
-Environment=GOMAXPROCS=<%= scope.lookupvar('vault::num_procs') %>
-ExecStart=<%= scope.lookupvar('vault::bin_dir') %>/vault server -config=<%= scope.lookupvar('vault::config_dir') %>/config.json <%= scope.lookupvar('vault::service_options') %>
+Environment=GOMAXPROCS=<%= scope['vault::num_procs'] %>
+ExecStart=<%= scope['vault::bin_dir'] %>/vault server -config=<%= scope['vault::config_dir'] %>/config.json <%= scope['vault::service_options'] %>
 KillSignal=SIGINT
 TimeoutStopSec=30s
 Restart=on-failure

@@ -4,14 +4,22 @@ class vault::install {
   $vault_bin = "${::vault::bin_dir}/vault"
 
   case $::vault::install_method {
-    'archive': {
-      staging::deploy { 'vault.zip':
-        source  => $::vault::download_url,
-        target  => $::vault::bin_dir,
-        creates => $vault_bin,
-        notify  => File[$vault_bin]
+      'archive': {
+        if $::vault::manage_download_dir {
+          file { $::vault::download_dir:
+            ensure => directory,
+          }
+        }
+        archive { "${::vault::download_dir}/${::vault::download_filename}":
+          ensure       => present,
+          extract      => true,
+          extract_path => $::vault::bin_dir,
+          source       => $::vault::download_url,
+          cleanup      => true,
+          creates      => $vault_bin,
+          before       => File[$vault_bin],
+        }
       }
-    }
 
     'repo': {
       package { $::vault::package_name:
@@ -30,7 +38,7 @@ class vault::install {
     mode  => '0555',
   }
 
-  if !$::vault::config_hash['disable_mlock'] {
+  if !$::vault::disable_mlock {
     exec { "setcap cap_ipc_lock=+ep ${vault_bin}":
       path        => ['/sbin', '/usr/sbin'],
       subscribe   => File[$vault_bin],
@@ -51,5 +59,4 @@ class vault::install {
       ensure => present,
     }
   }
-
 }
