@@ -13,6 +13,9 @@ class vault::params {
   $download_url     = 'https://releases.hashicorp.com/vault/0.6.1/vault_0.6.1_linux_amd64.zip'
   $service_name     = 'vault'
   $num_procs        = $::processorcount
+  $install_method   = 'archive'
+  $package_name     = 'vault'
+  $package_ensure   = 'installed'
 
   case $::osfamily {
     'Debian': {
