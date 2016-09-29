@@ -1,4 +1,10 @@
-## 2016-07-19 v0.4.0
+## 2016-09-29 v1.0.0
+- Replaced `config_hash` parameter for more fine grained controls
+- Replaced nanliu/staging for puppet/archive
+- Allow for package-based install method
+- Generate pretty JSON configs
+
+## 2016-08-27 v0.4.0
 - Update to vault 0.6.1
 - Add Amazon OS support
 
