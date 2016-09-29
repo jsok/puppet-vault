@@ -110,18 +110,18 @@ By default, with no parameters the module will configure vault with some sensibl
 
 ```puppet
 class { '::vault':
-      'backend' => {
-        'file' => {
-          'path' => '/tmp',
-        }
-      },
-      listener => {
-       'tcp' => {
-         'address' => '127.0.0.1:8200',
-         'tls_disable' => 0,
-        }
-      }
+  backend => {
+    'file' => {
+      'path' => '/tmp',
     }
+  },
+  listener => {
+    'tcp' => {
+      'address' => '127.0.0.1:8200',
+      'tls_disable' => 0,
+    }
+  }
+}
 ```
 
 or alternatively using Hiera:
