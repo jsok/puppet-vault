@@ -104,13 +104,7 @@ By default, with no parameters the module will configure vault with some sensibl
 
 * `max_lease_ttl`: A string containing the max lease TTL (default: undefined)
 
-* `service_options`
-  Extra argument to pass to `vault server`, as per:
-  `vault server --help`
-
-* `num_procs`
-  Sets the GOMAXPROCS environment variable, to determine how many CPUs Vault can use. The official Vault Terraform install.sh script sets this to the output of ``nprocs``, with the comment, "Make sure to use all our CPUs, because Vault can block a scheduler thread". Default: number of CPUs on the system, retrieved from the ``processorcount`` Fact.
-
+* `extra_config`: A hash containing extra configuration, intended for newly released configuration not yet supported by the module. This hash will get merged with other configuration attributes into the JSON config file.
 
 ## Examples
 
