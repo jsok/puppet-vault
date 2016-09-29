@@ -76,10 +76,12 @@ class vault (
   $download_dir        = $::vault::params::download_dir,
   $manage_download_dir = $::vault::params::manage_download_dir,
   $download_filename   = $::vault::params::download_filename,
+  $extra_config        = {},
 ) inherits ::vault::params {
 
   validate_hash($backend)
   validate_hash($listener)
+  validate_hash($extra_config)
 
   if $ha_backend {
     validate_hash($ha_backend)

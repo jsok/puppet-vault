@@ -5,7 +5,7 @@
 class vault::config {
 
 
-  $config_hash = delete_undef_values({
+  $_config_hash = delete_undef_values({
     'backend'           => $::vault::backend,
     'ha_backend'        => $::vault::ha_backend,
     'listener'          => $::vault::listener,
@@ -15,6 +15,8 @@ class vault::config {
     'max_lease_ttl'     => $::vault::max_lease_ttl,
     'disable_mlock'     => $::vault::disable_mlock,
   })
+
+  $config_hash = merge($_config_hash, $::vault::extra_config)
 
 
   file { $::vault::config_dir:
