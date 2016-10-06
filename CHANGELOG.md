@@ -1,3 +1,7 @@
+## 2016-10-07 v1.1.0
+- Update to vault 0.6.2
+- Add `manage_backend_dir` option
+
 ## 2016-09-29 v1.0.0
 - Replaced `config_hash` parameter for more fine grained controls
 - Replaced nanliu/staging for puppet/archive
