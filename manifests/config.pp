@@ -18,7 +18,6 @@ class vault::config {
 
   $config_hash = merge($_config_hash, $::vault::extra_config)
 
-
   file { $::vault::config_dir:
     ensure  => directory,
     purge   => $::vault::purge_config_dir,
@@ -30,6 +29,23 @@ class vault::config {
     owner   => $::vault::user,
     group   => $::vault::group,
   }
+
+  # If using the file backend then the path must exist and be readable
+  # and writable by the vault user, if we have a file path and the
+  # manage_backend_dir attribute is true, then we create it here.
+  #
+  if $::vault::backend['file'] and $::vault::manage_backend_dir {
+    if ! $::vault::backend['file']['path'] {
+      fail('Must provide a path attribute to backend file')
+    }
+
+    file { $::vault::backend['file']['path']:
+      ensure => directory,
+      owner  => $::vault::user,
+      group  => $::vault::group,
+    }
+  }
+
 
   if $::vault::install_method == 'archive' {
     case $::vault::service_provider {

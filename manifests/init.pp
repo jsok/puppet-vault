@@ -61,6 +61,7 @@ class vault (
   $service_name        = $::vault::params::service_name,
   $service_provider    = $::vault::params::service_provider,
   $backend             = $::vault::params::backend,
+  $manage_backend_dir  = $::vault::params::manage_backend_dir,
   $listener            = $::vault::params::listener,
   $ha_backend          = $::vault::params::ha_backend,
   $disable_cache       = $::vault::params::disable_cache,

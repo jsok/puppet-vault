@@ -24,6 +24,7 @@ class vault::params {
   # backend and listener are mandatory, we provide some sensible
   # defaults here
   $backend             = { 'file' => { 'path' => '/var/lib/vault' }}
+  $manage_backend_dir  = false
   $listener            = {
     'tcp' => {
       'address' => '127.0.0.1:8200',
