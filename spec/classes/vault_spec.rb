@@ -38,6 +38,7 @@ describe 'vault' do
         }
         it { is_expected.to contain_user('vault') }
         it { is_expected.to contain_group('vault') }
+        it { is_expected.not_to contain_file('/data/vault') }
 
         context "do not manage user and group" do
           let(:params) {{
@@ -105,6 +106,24 @@ describe 'vault' do
 
           it { should contain_package('vault') }
         end
+      end
+
+      context "when specifying manage_backend_dir" do
+        let(:params) {{
+          :manage_backend_dir => true,
+          :backend => {
+            'file' => {
+              'path' => '/data/vault'
+            }
+            }
+        }}
+
+        it {
+          is_expected.to contain_file('/data/vault')
+            .with_ensure('directory')
+            .with_owner('vault')
+            .with_group('vault')
+        }
       end
     end
   end
