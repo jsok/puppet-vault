@@ -5,15 +5,15 @@
 
 Puppet module to install and run [Hashicorp Vault](https://vaultproject.io).
 
-Installs `v0.6.2` Linux AMD64 binary by default.
+Installs `v0.6.2` Linux AMD64 binary from the Hashicorp releases CDN by default.
 
 ## Support
 
 This module is currently only tested on:
 
- * Ubuntu 14.04.
- * CentOS/RedHat 6
- * CentOS/RedHat 7
+* Ubuntu 14.04.
+* CentOS/RedHat 6
+* CentOS/RedHat 7
 
 ## Usage
 
@@ -21,28 +21,10 @@ This module is currently only tested on:
 include vault
 ```
 
-By default, with no parameters the module will configure vault with some sensible defaults to get you running, the following parameters may be specified to configure Vault.  Please see [The official documentation](https://www.vaultproject.io/docs/config/) for further details of acceptable parameter values.
+By default, with no parameters the module will configure vault with some sensible defaults to get you running, the following parameters may be specified to configure Vault.
+Please see [The official documentation](https://www.vaultproject.io/docs/config/) for further details of acceptable parameter values.
 
 ## Parameters
-
-### Installation parameters
-
-These parameters control how Vault gets installed
-
-
-* `install_method`: Support the values `repo` or `archive`.  When `repo` is set the module will attempt to install a package corresponding with the value of `package_name`, when `archive` the module will attempt to download and extract a zip file from the `download_url`, the extracted file will be placed in the `bin_dir` folder
-
-#### When `install_method` is `package`
-
-* `package_name`:  Name of the package to install, default: vault
-* `package_ensure`: Desired state of the package, default: installed
-
-#### When `install_method` is `archive`
-
-* `download_url`: URL to download the vault zip distribution from.  You can specify a local file on the server with a fully qualified pathname, or use `http`, `https`, `ftp` or `s3` based URI's.
-* `download_dir`: Path to download the zip file to, default: `/tmp`
-* `manage_download_dir`: Boolean, whether or not to create the download directory, default: `false`
-* `download_filename`: Filename to (temporarily) save the downloaded zip file, default: `vault.zip`
 
 ### Setup parameters
 
@@ -58,10 +40,9 @@ These parameters control how Vault gets installed
 
 * `config_dir`: Directory the vault configuration will be kept in.
 
-* `purge_config_dir`: Whether the `config_dir` should be purged before installing the
-  generated config.
+* `purge_config_dir`: Whether the `config_dir` should be purged before installing the generated config.
 
-* `install method`: Support the values `repo` or `archive`.  When `repo` is set the module will attempt to install a package corresponding with the value of `package_name`, when `archive
+* `install method`: Supports the values `repo` or `archive`. See [Installation parameters](#installation-parameters).
 
 * `service_name`: Customise the name of the system service
 
@@ -72,6 +53,25 @@ These parameters control how Vault gets installed
 * `num_procs`: Sets the GOMAXPROCS environment variable, to determine how many CPUs Vault can use. The official Vault Terraform install.sh script sets this to the output of ``nprocs``, with the comment, "Make sure to use all our CPUs, because Vault can block a scheduler thread". Default: number of CPUs on the system, retrieved from the ``processorcount`` fact.
 
 * `manage_backend_dir`: When using the file backend, this boolean determines whether or not the path (as specified in the `['file']['path']` section of the backend config) is created, and the owner and group set to the vault user.  Default: false
+
+### Installation parameters
+
+#### When `install_method` is `repo`
+
+When `repo` is set the module will attempt to install a package corresponding with the value of `package_name`.
+
+* `package_name`:  Name of the package to install, default: vault
+* `package_ensure`: Desired state of the package, default: installed
+* `bin_dir`: Set to the path where the package will install the Vault binary, this is necessary to correctly manage the [`disable_mlock`](#mlock) option.
+
+#### When `install_method` is `archive`
+
+When `archive` the module will attempt to download and extract a zip file from the `download_url`, the extracted file will be placed in the `bin_dir` folder.
+
+* `download_url`: URL to download the vault zip distribution from.  You can specify a local file on the server with a fully qualified pathname, or use `http`, `https`, `ftp` or `s3` based URI's.
+* `download_dir`: Path to download the zip file to, default: `/tmp`
+* `manage_download_dir`: Boolean, whether or not to create the download directory, default: `false`
+* `download_filename`: Filename to (temporarily) save the downloaded zip file, default: `vault.zip`
 
 ### Configuration parameters
 
@@ -146,7 +146,7 @@ vault::default_lease_ttl: 720h
 
 By default vault will use the `mlock` system call, therefore the executable will need the corresponding capability.
 
-In production, you should only consider setting the disable_mlock option on Linux systems that only use encrypted swap or do not use swap at all.
+In production, you should only consider setting the `disable_mlock` option on Linux systems that only use encrypted swap or do not use swap at all.
 
 The module will use `setcap` on the vault binary to enable this.
 If you do not wish to use `mlock`, set the `disable_mlock` attribute to `true`
