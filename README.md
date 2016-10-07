@@ -153,7 +153,7 @@ If you do not wish to use `mlock`, set the `disable_mlock` attribute to `true`
 
 ```puppet
 class { '::vault':
-  'disable_mlock' => true
+  disable_mlock => true
 }
 ```
 
