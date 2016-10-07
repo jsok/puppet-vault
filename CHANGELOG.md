@@ -1,3 +1,6 @@
+## 2016-10-08 v1.1.1-dev
+- Documentation fixes
+
 ## 2016-10-07 v1.1.0
 - Update to vault 0.6.2
 - Add `manage_backend_dir` option
