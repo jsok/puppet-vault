@@ -171,3 +171,7 @@ where ``<nodeset name>`` is one of the filenames in ``spec/acceptance/nodesets``
 * ``ubuntu-14.04-x86_64-docker``
 * ``centos-6-x86_64-docker``
 * ``centos-7-x86_64-docker``
+
+## Related Projects
+
+ * [`hiera-vault`](https://github.com/jsok/hiera-vault): A Hiera backend to retrieve secrets from Hashicorp's Vault
