@@ -7,14 +7,24 @@
   "source": "https://github.com/jsok/puppet-vault.git",
   "project_page": "https://github.com/jsok/puppet-vault",
   "issues_url": "https://github.com/jsok/puppet-vault/issues",
+  "requirements": [
+    {
+      "name": "pe",
+      "version_requirement": ">= 3.2.0 < 3.4.0"
+    },
+    {
+      "name": "puppet",
+      "version_requirement": ">= 3.0.0 < 5.0.0"
+    }
+  ],
   "dependencies": [
     {
       "name": "puppetlabs-stdlib",
-      "version_requirement": ">= 4.2.0"
+      "version_requirement": ">= 4.2.0 < 5.0.0"
     },
     {
       "name": "puppet-archive",
-      "version_requirement": ">= 1.1.2"
+      "version_requirement": ">= 1.1.2 < 2.0.0"
     }
   ],
   "operatingsystem_support": [

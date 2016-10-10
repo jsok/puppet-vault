@@ -4,7 +4,6 @@
 #
 class vault::config {
 
-
   $_config_hash = delete_undef_values({
     'backend'           => $::vault::backend,
     'ha_backend'        => $::vault::ha_backend,
@@ -22,7 +21,7 @@ class vault::config {
     ensure  => directory,
     purge   => $::vault::purge_config_dir,
     recurse => $::vault::purge_config_dir,
-  } 
+  }
 
   file { "${::vault::config_dir}/config.json":
     content => vault_sorted_json($config_hash),
@@ -45,7 +44,6 @@ class vault::config {
       group  => $::vault::group,
     }
   }
-
 
   if $::vault::install_method == 'archive' {
     case $::vault::service_provider {
