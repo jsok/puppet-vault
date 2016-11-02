@@ -373,7 +373,7 @@ describe 'vault' do
       }
       it {
         is_expected.to contain_exec('setcap cap_ipc_lock=+ep /opt/bin/vault')
-          .with_unless('getcap /usr/local/bin/vault | grep cap_ipc_lock+ep')
+          .with_unless('getcap /opt/bin/vault | grep cap_ipc_lock+ep')
           .that_subscribes_to('File[/opt/bin/vault]')
       }
       it { is_expected.to contain_file('/opt/etc/vault/config.json') }
