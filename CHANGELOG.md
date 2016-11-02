@@ -1,3 +1,6 @@
+## 2016-11-03 v1.1.2
+- Better code to ensure `cap_ipc_lock` is set
+
 ## 2016-10-10 v1.1.1
 - Documentation fixes
 
