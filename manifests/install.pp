@@ -42,7 +42,7 @@ class vault::install {
     exec { "setcap cap_ipc_lock=+ep ${vault_bin}":
       path      => ['/sbin', '/usr/sbin', '/usr/bin', ],
       subscribe => File[$vault_bin],
-      unless    => 'getcap /usr/local/bin/vault | grep cap_ipc_lock+ep',
+      unless    => "getcap ${vault_bin} | grep cap_ipc_lock+ep",
     }
   }
 
