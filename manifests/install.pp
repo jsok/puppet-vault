@@ -40,7 +40,7 @@ class vault::install {
 
   if !$::vault::disable_mlock {
     exec { "setcap cap_ipc_lock=+ep ${vault_bin}":
-      path      => ['/sbin', '/usr/sbin', '/usr/bin', ],
+      path      => ['/sbin', '/usr/sbin', '/bin', '/usr/bin', ],
       subscribe => File[$vault_bin],
       unless    => "getcap ${vault_bin} | grep cap_ipc_lock+ep",
     }
