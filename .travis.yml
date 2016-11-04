@@ -5,19 +5,22 @@ before_install: rm Gemfile.lock || true
 sudo: false
 rvm:
   - 1.9.3
-  - 2.0.0
-  - 2.2
+  - 2.1.9
+  - 2.3.1
 script: bundle exec rake test
 env:
   - PUPPET_GEM_VERSION="~> 3.8.0"
-  - PUPPET_GEM_VERSION="~> 4.0"
-  - PUPPET_GEM_VERSION="~> 4.4"
-  - PUPPET_GEM_VERSION="~> 4.6" DEPLOY_CANDIDATE="yes"
+  - PUPPET_GEM_VERSION="~> 4.6"
+  - PUPPET_GEM_VERSION="~> 4.8" DEPLOY_CANDIDATE="yes"
 matrix:
   exclude:
     - rvm: 1.9.3
-      env: PUPPET_GEM_VERSION="~> 4.4"
-    - rvm: 2.2
+      env: PUPPET_GEM_VERSION="~> 4.6"
+    - rvm: 1.9.3
+      env: PUPPET_GEM_VERSION="~> 4.8"
+    - rvm: 2.1.9
+      env: PUPPET_GEM_VERSION="~> 3.8.0"
+    - rvm: 2.3.1
       env: PUPPET_GEM_VERSION="~> 3.8.0"
 deploy:
   provider: puppetforge
@@ -26,5 +29,5 @@ deploy:
     secure: Fpvb/pZBy+FBpcXkQua6eEWN/4/klJjgFvBzDocrEa8ud5MGs8YuERKENoZ16bFzCtnyytRGZbiXJtqo4+IkxY0EFuCWgw1BH0ekljXWsuTi0ZCrYgedjy0Tykj6cgPkLecBzqtPe5b1gXwmIamlYQkVdnyglZEkSKvo9GqYX/VYSs7cc5mJ5bP5zgAr7U1jBQCKxD95kSt28NwIliekX1KoUqEVhxsHW5fzQa+4eS8vz7HUBppkJoUpHJfjXuoZKWXR4lQka4VgIZXflHno6OH908B0JiFoZI6klOInrn6eZbpF10CmjbK7ZCMIKdiPiVqzDQJgsSqg2n+9fA6TGbEj5A3K8VZtqp7MGd3b5HBfeVNPTPEAFGi4SkWPGwb2l53fUxP7T/NQUQ130GGNKdJdFmVW6Y6i2q9zrWWYZB1zbHRac/lY3uDd6qRxmbDYJzzTqMUPpl5eyBtRbg0XWuxTR1R9yhSwNw+N1sz1CaqT27MvgHqNRrISPSAXRfA+KP5mV8n+gInZVKiXf1BkNtPZJ+t2WO7jhKkC05WRGy0HAi2jaZiSL39bBMQOuoTCGlgo3h146PE27dJ2E4Yd3OBPn3vV/FrU8zuRFt77kOlffCq7yL7zv4OORfIgUql2RvEJ0aLA3jIxrKve8uQZFQ6Y7NjuFMQnKpG+lntW5xw=
   on:
     tags: true
-    rvm: 2.2
+    rvm: 2.3.1
     condition: "$DEPLOY_CANDIDATE = yes"
