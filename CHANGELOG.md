@@ -1,3 +1,7 @@
+## 2016-11-04 v1.1.3
+- Fix `cap_ipc_lock` for Debian/Ubuntu
+- Bump Puppet and Ruby versions used in CI
+
 ## 2016-11-03 v1.1.2
 - Better code to ensure `cap_ipc_lock` is set
 
