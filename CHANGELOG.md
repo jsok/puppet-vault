@@ -1,3 +1,6 @@
+## 2016-12-07 v1.1.4
+- Update to vault 0.6.3
+
 ## 2016-11-04 v1.1.3
 - Fix `cap_ipc_lock` for Debian/Ubuntu
 - Bump Puppet and Ruby versions used in CI
