@@ -1,3 +1,6 @@
+## 2017-01-10 v1.1.5-dev
+- Update to vault 0.6.4
+
 ## 2016-12-07 v1.1.4
 - Update to vault 0.6.3
 

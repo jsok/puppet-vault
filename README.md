@@ -5,7 +5,7 @@
 
 Puppet module to install and run [Hashicorp Vault](https://vaultproject.io).
 
-Installs `v0.6.3` Linux AMD64 binary from the Hashicorp releases CDN by default.
+Installs `v0.6.4` Linux AMD64 binary from the Hashicorp releases CDN by default.
 
 ## Support
 
