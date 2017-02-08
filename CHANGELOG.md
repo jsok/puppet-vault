@@ -1,3 +1,6 @@
+## 2017-02-09 v1.1.7-dev
+- Update to vault 0.6.5
+
 ## 2017-01-21 v1.1.6
 - Fix regression in vault_sorted_json
 
