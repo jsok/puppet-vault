@@ -41,6 +41,8 @@ class vault::params {
   $max_lease_ttl      = undef
   $disable_mlock      = undef
 
+  $service_managed = true
+
   case $::osfamily {
     'Debian': {
       $service_provider = 'upstart'

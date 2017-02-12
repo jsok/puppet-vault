@@ -108,6 +108,22 @@ describe 'vault' do
         end
       end
 
+      context "when specifying service_managed" do
+        let(:params) {{
+          :service_managed => false,
+          :backend => {
+            'file' => {
+              'path' => '/data/vault'
+            }
+            }
+        }}
+
+        it { is_expected.to_not contain_service('vault')
+          .with_ensure('running')
+          .with_enable(true)
+        }
+      end
+
       context "when specifying manage_backend_dir" do
         let(:params) {{
           :manage_backend_dir => true,
@@ -388,6 +404,12 @@ describe 'vault' do
       it { is_expected.to contain_user('root') }
       it { is_expected.to contain_group('admin') }
     end
+  end
+  context 'service_managed' do
+    let(:params) {{
+      :service_provider => 'foo',
+    }}
+
   end
   context 'Invalid service_provider' do
     let(:facts) {{
