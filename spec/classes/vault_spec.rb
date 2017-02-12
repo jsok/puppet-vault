@@ -405,12 +405,6 @@ describe 'vault' do
       it { is_expected.to contain_group('admin') }
     end
   end
-  context 'service_managed' do
-    let(:params) {{
-      :service_provider => 'foo',
-    }}
-
-  end
   context 'Invalid service_provider' do
     let(:facts) {{
       :path                      => '/usr/local/bin:/usr/bin:/bin',
