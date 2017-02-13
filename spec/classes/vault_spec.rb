@@ -108,9 +108,9 @@ describe 'vault' do
         end
       end
 
-      context "when specifying service_managed" do
+      context "when specifying manage_service" do
         let(:params) {{
-          :service_managed => false,
+          :manage_service => false,
           :backend => {
             'file' => {
               'path' => '/data/vault'

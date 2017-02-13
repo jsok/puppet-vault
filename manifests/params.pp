@@ -41,7 +41,7 @@ class vault::params {
   $max_lease_ttl      = undef
   $disable_mlock      = undef
 
-  $service_managed = true
+  $manage_service = true
 
   case $::osfamily {
     'Debian': {

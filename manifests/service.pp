@@ -1,6 +1,6 @@
 # == Class vault::service
 class vault::service {
-  if $::vault::service_managed {
+  if $::vault::manage_service {
     service { $::vault::service_name:
       ensure   => running,
       enable   => true,
