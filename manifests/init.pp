@@ -41,6 +41,9 @@
 # * `service_options`
 #   Extra argument to pass to `vault server`, as per:
 #   `vault server --help`
+
+# * `manage_service`
+#   Instruct puppet to manage service or not
 #
 # * `num_procs`
 #   Sets the GOMAXPROCS environment variable, to determine how many CPUs Vault
@@ -60,6 +63,7 @@ class vault (
   $download_url        = $::vault::params::download_url,
   $service_name        = $::vault::params::service_name,
   $service_provider    = $::vault::params::service_provider,
+  $manage_service     = $::vault::params::manage_service,
   $backend             = $::vault::params::backend,
   $manage_backend_dir  = $::vault::params::manage_backend_dir,
   $listener            = $::vault::params::listener,

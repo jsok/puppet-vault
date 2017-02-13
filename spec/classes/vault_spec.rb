@@ -108,6 +108,22 @@ describe 'vault' do
         end
       end
 
+      context "when specifying manage_service" do
+        let(:params) {{
+          :manage_service => false,
+          :backend => {
+            'file' => {
+              'path' => '/data/vault'
+            }
+            }
+        }}
+
+        it { is_expected.to_not contain_service('vault')
+          .with_ensure('running')
+          .with_enable(true)
+        }
+      end
+
       context "when specifying manage_backend_dir" do
         let(:params) {{
           :manage_backend_dir => true,
