@@ -45,7 +45,7 @@ describe 'vault class' do
       it { is_expected.to be_grouped_into 'root' }
     end
 
-    if (fact('osfamily') == 'Debian')
+    if (fact('initsystem') == 'upstart')
       describe file('/etc/init/vault.conf') do
         it { is_expected.to be_file }
         it { is_expected.to be_mode 444 }
@@ -62,32 +62,30 @@ describe 'vault class' do
         it { is_expected.to be_symlink }
         it { is_expected.to be_linked_to '/lib/init/upstart-job' }
       end
-    elsif (fact('osfamily') == 'RedHat')
-      if (fact('operatingsystemmajrelease') == '6')
-        describe file('/etc/init.d/vault') do
-          it { is_expected.to be_file }
-          it { is_expected.to be_mode 755 }
-          it { is_expected.to be_owned_by 'root' }
-          it { is_expected.to be_grouped_into 'root' }
-          its(:content) { is_expected.to include 'daemon --user vault "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"' }
-          its(:content) { is_expected.to include 'conffile="/etc/vault/config.json"' }
-          its(:content) { is_expected.to include 'exec="/usr/local/bin/vault"' }
-          its(:content) { is_expected.to match /export GOMAXPROCS=\${GOMAXPROCS:-\d+}/ }
-        end
-      else
-        describe file('/etc/systemd/system/vault.service') do
-          it { is_expected.to be_file }
-          it { is_expected.to be_mode 644 }
-          it { is_expected.to be_owned_by 'root' }
-          it { is_expected.to be_grouped_into 'root' }
-          its(:content) { is_expected.to include 'User=vault' }
-          its(:content) { is_expected.to include 'Group=vault' }
-          its(:content) { is_expected.to include 'ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json ' }
-          its(:content) { is_expected.to match /Environment=GOMAXPROCS=\d+/ }
-        end
-        describe command('systemctl list-units') do
-          its(:stdout) { is_expected.to include 'vault.service' }
-        end
+    elsif (fact('initsystem') == 'redhat')
+      describe file('/etc/init.d/vault') do
+        it { is_expected.to be_file }
+        it { is_expected.to be_mode 755 }
+        it { is_expected.to be_owned_by 'root' }
+        it { is_expected.to be_grouped_into 'root' }
+        its(:content) { is_expected.to include 'daemon --user vault "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"' }
+        its(:content) { is_expected.to include 'conffile="/etc/vault/config.json"' }
+        its(:content) { is_expected.to include 'exec="/usr/local/bin/vault"' }
+        its(:content) { is_expected.to match /export GOMAXPROCS=\${GOMAXPROCS:-\d+}/ }
+      end
+    elsif (fact('initsystem') == 'systemd')
+      describe file('/etc/systemd/system/vault.service') do
+        it { is_expected.to be_file }
+        it { is_expected.to be_mode 644 }
+        it { is_expected.to be_owned_by 'root' }
+        it { is_expected.to be_grouped_into 'root' }
+        its(:content) { is_expected.to include 'User=vault' }
+        its(:content) { is_expected.to include 'Group=vault' }
+        its(:content) { is_expected.to include 'ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json ' }
+        its(:content) { is_expected.to match /Environment=GOMAXPROCS=\d+/ }
+      end
+      describe command('systemctl list-units') do
+        its(:stdout) { is_expected.to include 'vault.service' }
       end
     end
 
