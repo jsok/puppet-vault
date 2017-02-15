@@ -19,6 +19,13 @@ class vault::install {
           creates      => $vault_bin,
           before       => File[$vault_bin],
         }
+
+        if !defined(Package['unzip']) {
+          package { 'unzip':
+            ensure => installed,
+            before => Archive["${::vault::download_dir}/${::vault::download_filename}"],
+          }
+        }
       }
 
     'repo': {
