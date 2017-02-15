@@ -43,19 +43,8 @@ class vault::params {
 
   $manage_service = true
 
-  case $::osfamily {
-    'Debian': {
-      $service_provider = 'upstart'
-    }
-    'RedHat': {
-      if ($::operatingsystemmajrelease == '6' or $::operatingsystem == 'Amazon') {
-        $service_provider = 'redhat'
-      } else {
-        $service_provider = 'systemd'
-      }
-    }
-    default: {
+  $service_provider = $::initsystem
+  if $service_provider.empty {
       fail("Module ${module_name} is not supported on osfamily '${::osfamily}'")
-    }
   }
 }

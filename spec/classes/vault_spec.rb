@@ -7,6 +7,7 @@ describe 'vault' do
         :path           => '/usr/local/bin:/usr/bin:/bin',
         :osfamily       => "#{osfamily}",
         :processorcount => '3',
+        :initsystem     => 'systemd',
       }}
 
       context "vault class with simple configuration" do
@@ -150,6 +151,7 @@ describe 'vault' do
       :operatingsystem           => 'Amazon',
       :operatingsystemmajrelease => '7',
       :processorcount            => '3',
+      :initsystem                => 'redhat',
    }}
    context 'includes SysV init script' do
       it {
@@ -203,6 +205,7 @@ describe 'vault' do
       :osfamily                  => 'RedHat',
       :operatingsystemmajrelease => '6',
       :processorcount            => '3',
+      :initsystem                => 'redhat',
     }}
     context 'includes SysV init script' do
       it {
@@ -256,6 +259,7 @@ describe 'vault' do
       :osfamily                  => 'RedHat',
       :operatingsystemmajrelease => '7',
       :processorcount            => '3',
+      :initsystem                => 'systemd',
     }}
     context 'includes systemd init script' do
       it {
@@ -346,6 +350,7 @@ describe 'vault' do
       :path           => '/usr/local/bin:/usr/bin:/bin',
       :osfamily       => 'Debian',
       :processorcount => '3',
+      :initsystem     => 'upstart',
     }}
     context 'includes init link to upstart-job' do
       it {
@@ -411,6 +416,7 @@ describe 'vault' do
       :osfamily                  => 'RedHat',
       :operatingsystemmajrelease => '6',
       :processorcount            => '3',
+      :initsystem                => 'redhat',
     }}
     let(:params) {{
       :service_provider => 'foo',
@@ -427,6 +433,7 @@ describe 'vault' do
       :path           => '/usr/local/bin:/usr/bin:/bin',
       :osfamily       => 'nexenta',
       :processorcount => '3',
+      :initsystem     => nil,
     }}
     it {
       expect { should contain_class('vault') }.to raise_error(Puppet::Error, /Module vault is not supported on osfamily 'nexenta'/)
