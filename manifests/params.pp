@@ -10,7 +10,9 @@ class vault::params {
   $manage_group       = true
   $bin_dir            = '/usr/local/bin'
   $config_dir         = '/etc/vault'
-  $download_url       = 'https://releases.hashicorp.com/vault/0.6.5/vault_0.6.5_linux_amd64.zip'
+  $download_url       = undef
+  $download_url_base  = 'https://releases.hashicorp.com/vault/'
+  $version            = '0.6.5'
   $service_name       = 'vault'
   $num_procs          = $::processorcount
   $install_method     = 'archive'
@@ -58,4 +60,13 @@ class vault::params {
       fail("Module ${module_name} is not supported on osfamily '${::osfamily}'")
     }
   }
+	case $::architecture {
+    'x86_64', 'amd64': { $arch = 'amd64' }
+    'i386':            { $arch = '386'   }
+    /^arm.*/:          { $arch = 'arm'   }
+    default:           {
+      fail("Unsupported kernel architecture: ${::architecture}")
+    }
+  }
+	$os = downcase($::kernel)
 }
