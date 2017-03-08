@@ -60,7 +60,7 @@ class vault::params {
       fail("Module ${module_name} is not supported on osfamily '${::osfamily}'")
     }
   }
-	case $::architecture {
+  case $::architecture {
     'x86_64', 'amd64': { $arch = 'amd64' }
     'i386':            { $arch = '386'   }
     /^arm.*/:          { $arch = 'arm'   }
@@ -68,5 +68,5 @@ class vault::params {
       fail("Unsupported kernel architecture: ${::architecture}")
     }
   }
-	$os = downcase($::kernel)
+  $os = downcase($::kernel)
 }
