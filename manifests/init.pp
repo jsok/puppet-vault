@@ -34,6 +34,9 @@
 # * `download_url_base`
 #   Hashicorp base URL to download vault zip distribution from.
 #
+# * `download_extension`
+#   The extension of the vault download
+#
 # * `service_name`
 #   Customise the name of the system service
 #
@@ -68,9 +71,10 @@ class vault (
   $purge_config_dir    = true,
   $download_url        = $::vault::params::download_url,
   $download_url_base   = $::vault::params::download_url_base,
+  $download_extension  = $::vault::params::download_extension,
   $service_name        = $::vault::params::service_name,
   $service_provider    = $::vault::params::service_provider,
-  $manage_service     = $::vault::params::manage_service,
+  $manage_service      = $::vault::params::manage_service,
   $backend             = $::vault::params::backend,
   $manage_backend_dir  = $::vault::params::manage_backend_dir,
   $listener            = $::vault::params::listener,

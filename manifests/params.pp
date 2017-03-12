@@ -12,6 +12,7 @@ class vault::params {
   $config_dir         = '/etc/vault'
   $download_url       = undef
   $download_url_base  = 'https://releases.hashicorp.com/vault/'
+  $download_extension = 'zip'
   $version            = '0.6.5'
   $service_name       = 'vault'
   $num_procs          = $::processorcount
