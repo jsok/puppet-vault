@@ -7,6 +7,8 @@ describe 'vault' do
         :path           => '/usr/local/bin:/usr/bin:/bin',
         :osfamily       => "#{osfamily}",
         :processorcount => '3',
+        :architecture   => 'x86_64',
+        :kernel         => 'Linux',
       }}
 
       context "vault class with simple configuration" do
@@ -84,6 +86,29 @@ describe 'vault' do
           }
         end
 
+        context "default download options" do
+          it {
+            is_expected.to contain_archive('/tmp/vault.zip')
+              .with_source('https://releases.hashicorp.com/vault/0.6.5/vault_0.6.5_linux_amd64.zip')
+              .that_comes_before('File[/usr/local/bin/vault]')
+          }
+        end
+
+        context "specifying a custom download params" do
+          let(:params) {{
+            :version  => '0.6.0',
+            :download_url_base => 'http://my_site.example.com/vault/',
+            :package_name => 'vaultbinary',
+            :download_extension => 'tar.gz'
+          }}
+
+          it {
+            is_expected.to contain_archive('/tmp/vault.zip')
+              .with_source('http://my_site.example.com/vault/0.6.0/vaultbinary_0.6.0_linux_amd64.tar.gz')
+              .that_comes_before('File[/usr/local/bin/vault]')
+          }
+        end
+
         context "installs from download url" do
           let(:params) {{
             :download_url   => 'http://example.com/vault.zip',
@@ -150,6 +175,8 @@ describe 'vault' do
       :operatingsystem           => 'Amazon',
       :operatingsystemmajrelease => '7',
       :processorcount            => '3',
+      :architecture              => 'x86_64',
+      :kernel                    => 'Linux',
    }}
    context 'includes SysV init script' do
       it {
@@ -203,6 +230,8 @@ describe 'vault' do
       :osfamily                  => 'RedHat',
       :operatingsystemmajrelease => '6',
       :processorcount            => '3',
+      :architecture              => 'x86_64',
+      :kernel                    => 'Linux',
     }}
     context 'includes SysV init script' do
       it {
@@ -256,6 +285,8 @@ describe 'vault' do
       :osfamily                  => 'RedHat',
       :operatingsystemmajrelease => '7',
       :processorcount            => '3',
+      :architecture              => 'x86_64',
+      :kernel                    => 'Linux',
     }}
     context 'includes systemd init script' do
       it {
@@ -346,6 +377,8 @@ describe 'vault' do
       :path           => '/usr/local/bin:/usr/bin:/bin',
       :osfamily       => 'Debian',
       :processorcount => '3',
+      :architecture              => 'x86_64',
+      :kernel                    => 'Linux',
     }}
     context 'includes init link to upstart-job' do
       it {
@@ -411,6 +444,8 @@ describe 'vault' do
       :osfamily                  => 'RedHat',
       :operatingsystemmajrelease => '6',
       :processorcount            => '3',
+      :architecture              => 'x86_64',
+      :kernel                    => 'Linux',
     }}
     let(:params) {{
       :service_provider => 'foo',

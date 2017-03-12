@@ -14,7 +14,7 @@ class vault::install {
           ensure       => present,
           extract      => true,
           extract_path => $::vault::bin_dir,
-          source       => $::vault::download_url,
+          source       => $::vault::real_download_url,
           cleanup      => true,
           creates      => $vault_bin,
           before       => File[$vault_bin],

@@ -29,7 +29,13 @@
 #   generated config.
 #
 # * `download_url`
-#   URL to download the vault zip distribution from.
+#   Manual URL to download the vault zip distribution from.
+#
+# * `download_url_base`
+#   Hashicorp base URL to download vault zip distribution from.
+#
+# * `download_extension`
+#   The extension of the vault download
 #
 # * `service_name`
 #   Customise the name of the system service
@@ -52,6 +58,9 @@
 #   because Vault can block a scheduler thread". Default: number of CPUs
 #   on the system, retrieved from the ``processorcount`` Fact.
 #
+# * `version`
+#   The version of Vault to install
+#
 class vault (
   $user                = $::vault::params::user,
   $manage_user         = $::vault::params::manage_user,
@@ -61,9 +70,11 @@ class vault (
   $config_dir          = $::vault::params::config_dir,
   $purge_config_dir    = true,
   $download_url        = $::vault::params::download_url,
+  $download_url_base   = $::vault::params::download_url_base,
+  $download_extension  = $::vault::params::download_extension,
   $service_name        = $::vault::params::service_name,
   $service_provider    = $::vault::params::service_provider,
-  $manage_service     = $::vault::params::manage_service,
+  $manage_service      = $::vault::params::manage_service,
   $backend             = $::vault::params::backend,
   $manage_backend_dir  = $::vault::params::manage_backend_dir,
   $listener            = $::vault::params::listener,
@@ -81,6 +92,9 @@ class vault (
   $download_dir        = $::vault::params::download_dir,
   $manage_download_dir = $::vault::params::manage_download_dir,
   $download_filename   = $::vault::params::download_filename,
+  $version             = $::vault::params::version,
+  $os                  = $::vault::params::os,
+  $arch                = $::vault::params::arch,
   $extra_config        = {},
 ) inherits ::vault::params {
 
@@ -107,6 +121,10 @@ class vault (
   if $max_lease_ttl {
     validate_string($max_lease_ttl)
   }
+
+  # lint:ignore:140chars
+  $real_download_url    = pick($download_url, "${download_url_base}${version}/${package_name}_${version}_${os}_${arch}.${download_extension}")
+  # lint:endignore
 
   contain vault::install
   contain vault::config

@@ -68,10 +68,13 @@ When `repo` is set the module will attempt to install a package corresponding wi
 
 When `archive` the module will attempt to download and extract a zip file from the `download_url`, the extracted file will be placed in the `bin_dir` folder.
 
-* `download_url`: URL to download the vault zip distribution from.  You can specify a local file on the server with a fully qualified pathname, or use `http`, `https`, `ftp` or `s3` based URI's.
+* `download_url`: Manual URL to download the vault zip distribution from.  You can specify a local file on the server with a fully qualified pathname, or use `http`, `https`, `ftp` or `s3` based URI's. default: `undef`
+* `download_url_base`: This is the base URL for the hashicorp releases. If no manual `download_url` is specified, the module will download from hashicorp. default: `https://releases.hashicorp.com/vault/`
+* `download_extension`: The extension of the vault download when using hashicorp releases. default: `zip`
 * `download_dir`: Path to download the zip file to, default: `/tmp`
 * `manage_download_dir`: Boolean, whether or not to create the download directory, default: `false`
 * `download_filename`: Filename to (temporarily) save the downloaded zip file, default: `vault.zip`
+* `version`: The Version of vault to download. default: `0.6.5`
 
 ### Configuration parameters
 
