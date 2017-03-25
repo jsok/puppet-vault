@@ -372,70 +372,168 @@ describe 'vault' do
       }
     end
   end
-  context 'Debian-specific' do
-    let(:facts) {{
-      :path           => '/usr/local/bin:/usr/bin:/bin',
-      :osfamily       => 'Debian',
-      :processorcount => '3',
-      :architecture              => 'x86_64',
-      :kernel                    => 'Linux',
-    }}
-    context 'includes init link to upstart-job' do
-      it {
-        is_expected.to contain_file('/etc/init.d/vault')
-           .with_ensure('link')
-           .with_target('/lib/init/upstart-job')
-           .with_mode('0755')
-      }
-    end
-    context 'contains /etc/init/vault.conf' do
-      it {
-        is_expected.to contain_file('/etc/init/vault.conf')
-        .with_mode('0444')
-        .with_ensure('file')
-        .with_owner('root')
-        .with_group('root')
-        .with_content(/^# vault Agent \(Upstart unit\)/)
-        .with_content(/env USER=vault/)
-        .with_content(/env GROUP=vault/)
-        .with_content(/env CONFIG=\/etc\/vault\/config.json/)
-        .with_content(/env VAULT=\/usr\/local\/bin\/vault/)
-        .with_content(/exec start-stop-daemon -u \$USER -g \$GROUP -p \$PID_FILE -x \$VAULT -S -- server -config=\$CONFIG $/)
-        .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-3}/)
-      }
-    end
-    context "service with modified options" do
-      let(:params) {{
-        :bin_dir => '/opt/bin',
-        :config_dir => '/opt/etc/vault',
-        :service_options => '-log-level=info',
-        :user => 'root',
-        :group => 'admin',
-      }}
-      it {
-        is_expected.to contain_file('/etc/init/vault.conf')
-          .with_content(/env USER=root/)
-          .with_content(/env GROUP=admin/)
-          .with_content(/env CONFIG=\/opt\/etc\/vault\/config.json/)
-          .with_content(/env VAULT=\/opt\/bin\/vault/)
-          .with_content(/start-stop-daemon .* -log-level=info$/)
-      }
-      it {
-        is_expected.to contain_exec('setcap cap_ipc_lock=+ep /opt/bin/vault')
-          .with_unless('getcap /opt/bin/vault | grep cap_ipc_lock+ep')
-          .that_subscribes_to('File[/opt/bin/vault]')
-      }
-      it { is_expected.to contain_file('/opt/etc/vault/config.json') }
+  ['trusty','vivid'].each do |lsbdistcodename|
+    context "Ubuntu-#{lsbdistcodename}-specific" do
+      let(:facts) {{
+                     :path            => '/usr/local/bin:/usr/bin:/bin',
+                     :osfamily        => 'Debian',
+                     :lsbdistcodename => "#{lsbdistcodename}",
+                     :processorcount  => '3',
+                     :architecture    => 'x86_64',
+                     :kernel          => 'Linux',
+                   }}
+      context 'includes init link to upstart-job' do
+        it {
+          is_expected.to contain_file('/etc/init.d/vault')
+                          .with_ensure('link')
+                          .with_target('/lib/init/upstart-job')
+                          .with_mode('0755')
+        }
+      end
+      context 'contains /etc/init/vault.conf' do
+        it {
+          is_expected.to contain_file('/etc/init/vault.conf')
+                          .with_mode('0444')
+                          .with_ensure('file')
+                          .with_owner('root')
+                          .with_group('root')
+                          .with_content(/^# vault Agent \(Upstart unit\)/)
+                          .with_content(/env USER=vault/)
+                          .with_content(/env GROUP=vault/)
+                          .with_content(/env CONFIG=\/etc\/vault\/config.json/)
+                          .with_content(/env VAULT=\/usr\/local\/bin\/vault/)
+                          .with_content(/exec start-stop-daemon -u \$USER -g \$GROUP -p \$PID_FILE -x \$VAULT -S -- server -config=\$CONFIG $/)
+                          .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-3}/)
+        }
+      end
+      context "service with modified options" do
+        let(:params) {{
+                        :bin_dir => '/opt/bin',
+                        :config_dir => '/opt/etc/vault',
+                        :service_options => '-log-level=info',
+                        :user => 'root',
+                        :group => 'admin',
+                      }}
+        it {
+          is_expected.to contain_file('/etc/init/vault.conf')
+                          .with_content(/env USER=root/)
+                          .with_content(/env GROUP=admin/)
+                          .with_content(/env CONFIG=\/opt\/etc\/vault\/config.json/)
+                          .with_content(/env VAULT=\/opt\/bin\/vault/)
+                          .with_content(/start-stop-daemon .* -log-level=info$/)
+        }
+        it {
+          is_expected.to contain_exec('setcap cap_ipc_lock=+ep /opt/bin/vault')
+                          .with_unless('getcap /opt/bin/vault | grep cap_ipc_lock+ep')
+                          .that_subscribes_to('File[/opt/bin/vault]')
+        }
+        it { is_expected.to contain_file('/opt/etc/vault/config.json') }
 
-      it { is_expected.to contain_file('/opt/bin/vault').with_mode('0555') }
-      it {
-        is_expected.to contain_file('/opt/etc/vault')
-          .with_ensure('directory')
-          .with_purge('true') \
-          .with_recurse('true')
-      }
-      it { is_expected.to contain_user('root') }
-      it { is_expected.to contain_group('admin') }
+        it { is_expected.to contain_file('/opt/bin/vault').with_mode('0555') }
+        it {
+          is_expected.to contain_file('/opt/etc/vault')
+                          .with_ensure('directory')
+                          .with_purge('true') \
+                          .with_recurse('true')
+        }
+        it { is_expected.to contain_user('root') }
+        it { is_expected.to contain_group('admin') }
+      end
+    end
+  end
+  ['jessie','stretch','sid','xenial','yakketi', 'zesty'].each do |lsbdistcodename|
+    context "Debian/Ubuntu #{lsbdistcodename} specific (systemd)" do
+      let(:facts) {{
+                     :path            => '/usr/local/bin:/usr/bin:/bin',
+                     :osfamily        => 'Debian',
+                     :lsbdistcodename => "#{lsbdistcodename}",
+                     :processorcount  => '3',
+                     :architecture    => 'x86_64',
+                     :kernel          => 'Linux',
+                   }}
+      context 'includes systemd init script' do
+        it {
+          is_expected.to contain_file('/etc/systemd/system/vault.service')
+                          .with_mode('0644')
+                          .with_ensure('file')
+                          .with_owner('root')
+                          .with_group('root')
+                          .with_notify('Exec[systemd-reload]')
+                          .with_content(/^# vault systemd unit file/)
+                          .with_content(/^User=vault$/)
+                          .with_content(/^Group=vault$/)
+                          .with_content(/Environment=GOMAXPROCS=3/)
+                          .with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $})
+                          .with_content(/SecureBits=keep-caps/)
+                          .with_content(/Capabilities=CAP_IPC_LOCK\+ep/)
+                          .with_content(/CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK/)
+                          .with_content(/NoNewPrivileges=yes/)
+        }
+      end
+      context 'service with non-default options' do
+        let(:params) {{
+                        :bin_dir => '/opt/bin',
+                        :config_dir => '/opt/etc/vault',
+                        :service_options => '-log-level=info',
+                        :user => 'root',
+                        :group => 'admin',
+                        :num_procs => 8,
+                      }}
+        it {
+          is_expected.to contain_file('/etc/systemd/system/vault.service')
+                          .with_mode('0644')
+                          .with_ensure('file')
+                          .with_owner('root')
+                          .with_group('root')
+                          .with_notify('Exec[systemd-reload]')
+                          .with_content(/^# vault systemd unit file/)
+                          .with_content(/^User=root$/)
+                          .with_content(/^Group=admin$/)
+                          .with_content(/Environment=GOMAXPROCS=8/)
+                          .with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info$})
+        }
+      end
+      context 'with mlock disabled' do
+        let(:params) {{
+                        :disable_mlock   => true,
+                        :backend => {
+                          'file' => {
+                            'path' => '/data/vault'
+                          }
+                        },
+                        :listener => {
+                          'tcp' => {
+                            'address'     => '127.0.0.1:8200',
+                            'tls_disable' => 1,
+                          }
+                        }
+                      }}
+        it {
+          is_expected.to contain_file('/etc/systemd/system/vault.service')
+                          .with_mode('0644')
+                          .with_ensure('file')
+                          .with_owner('root')
+                          .with_group('root')
+                          .with_notify('Exec[systemd-reload]')
+                          .with_content(/^# vault systemd unit file/)
+                          .with_content(/^User=vault$/)
+                          .with_content(/^Group=vault$/)
+                          .with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $})
+                          .without_content(/SecureBits=keep-caps/)
+                          .without_content(/Capabilities=CAP_IPC_LOCK\+ep/)
+                          .with_content(/CapabilityBoundingSet=CAP_SYSLOG/)
+                          .with_content(/NoNewPrivileges=yes/)
+        }
+      end
+      context 'includes systemd reload' do
+        it {
+          is_expected.to contain_exec('systemd-reload')
+                          .with_command('systemctl daemon-reload')
+                          .with_path('/bin:/usr/bin:/sbin:/usr/sbin')
+                          .with_user('root')
+                          .with_refreshonly(true)
+        }
+      end
     end
   end
   context 'Invalid service_provider' do
