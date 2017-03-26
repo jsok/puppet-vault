@@ -1,3 +1,7 @@
+## 2017-03-27 v1.2.0
+- Support Debian 7 and 8
+- Update to vault 0.7.0
+
 ## 2017-03-13 v1.1.9
 - Make download URL configuration more fine-grained
 - Support upgrading when `version` changes and installing via `archive` method
