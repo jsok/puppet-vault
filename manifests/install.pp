@@ -10,10 +10,6 @@ class vault::install {
             ensure => directory,
           }
         }
-        if $::vault::manage_unzip {
-          ensure_packages(['unzip'])
-          Package['unzip'] -> Archive["${::vault::download_dir}/${::vault::download_filename}"]
-        }
 
         archive { "${::vault::download_dir}/${::vault::download_filename}":
           ensure       => present,

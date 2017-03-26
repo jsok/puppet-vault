@@ -48,11 +48,6 @@ class vault::params {
 
   case $::osfamily {
     'Debian': {
-
-      if $install_method == 'archive' {
-        $manage_unzip = true
-      }
-
       case $::lsbdistcodename {
         /(jessie|stretch|sid|xenial|yakketi|zesty)/: {
           $service_provider = 'systemd'

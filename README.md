@@ -44,8 +44,6 @@ Please see [The official documentation](https://www.vaultproject.io/docs/config/
 
 * `install_method`: Supports the values `repo` or `archive`. See [Installation parameters](#installation-parameters).
 
-* `manage_unzip`: Whether to manage the `unzip` package on Debian/Ubuntu systems. (defaults to true if `install_method` is set to `archive`)
-
 * `service_name`: Customise the name of the system service
 
 * `service_provider`: Customise the name of the system service provider; this also controls the init configuration files that are installed.

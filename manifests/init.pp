@@ -87,7 +87,6 @@ class vault (
   $service_options     = '',
   $num_procs           = $::vault::params::num_procs,
   $install_method      = $::vault::params::install_method,
-  $manage_unzip        = $::vault::params::manage_unzip,
   $package_name        = $::vault::params::package_name,
   $package_ensure      = $::vault::params::package_ensure,
   $download_dir        = $::vault::params::download_dir,
