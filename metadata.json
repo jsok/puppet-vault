@@ -33,7 +33,8 @@
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
-        "Jessie"
+        "7",
+        "8"
       ]
     },
     {
