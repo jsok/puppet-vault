@@ -10,6 +10,7 @@ class vault::install {
             ensure => directory,
           }
         }
+
         archive { "${::vault::download_dir}/${::vault::download_filename}":
           ensure       => present,
           extract      => true,

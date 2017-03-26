@@ -48,7 +48,18 @@ class vault::params {
 
   case $::osfamily {
     'Debian': {
-      $service_provider = 'upstart'
+      case $::lsbdistcodename {
+        /(jessie|stretch|sid|xenial|yakketi|zesty)/: {
+          $service_provider = 'systemd'
+        }
+        /(trusty|vivid)/: {
+          $service_provider = 'upstart'
+        }
+        default: {
+          $service_provider = 'systemd'
+          warning("Module ${module_name} is not supported on '${::lsbdistcodename}'")
+        }
+      }
     }
     'RedHat': {
       if ($::operatingsystemmajrelease == '6' or $::operatingsystem == 'Amazon') {

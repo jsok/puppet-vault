@@ -42,7 +42,7 @@ Please see [The official documentation](https://www.vaultproject.io/docs/config/
 
 * `purge_config_dir`: Whether the `config_dir` should be purged before installing the generated config.
 
-* `install method`: Supports the values `repo` or `archive`. See [Installation parameters](#installation-parameters).
+* `install_method`: Supports the values `repo` or `archive`. See [Installation parameters](#installation-parameters).
 
 * `service_name`: Customise the name of the system service
 
