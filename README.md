@@ -5,7 +5,7 @@
 
 Puppet module to install and run [Hashicorp Vault](https://vaultproject.io).
 
-Installs `v0.6.5` Linux AMD64 binary from the Hashicorp releases CDN by default.
+Installs `v0.7.0` Linux AMD64 binary from the Hashicorp releases CDN by default.
 
 ## Support
 
@@ -75,7 +75,7 @@ The module will **not** manage any required packages to un-archive, e.g. `unzip`
 * `download_dir`: Path to download the zip file to, default: `/tmp`
 * `manage_download_dir`: Boolean, whether or not to create the download directory, default: `false`
 * `download_filename`: Filename to (temporarily) save the downloaded zip file, default: `vault.zip`
-* `version`: The Version of vault to download. default: `0.6.5`
+* `version`: The Version of vault to download. default: `0.7.0`
 
 ### Configuration parameters
 

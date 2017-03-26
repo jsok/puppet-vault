@@ -87,9 +87,10 @@ describe 'vault' do
         end
 
         context "default download options" do
+          let(:params) {{ :version  => '0.7.0' }}
           it {
             is_expected.to contain_archive('/tmp/vault.zip')
-              .with_source('https://releases.hashicorp.com/vault/0.6.5/vault_0.6.5_linux_amd64.zip')
+              .with_source('https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip')
               .that_comes_before('File[/usr/local/bin/vault]')
           }
         end
