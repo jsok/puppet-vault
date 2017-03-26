@@ -1,3 +1,7 @@
+## 2017-03-13 v1.1.9
+- Make download URL configuration more fine-grained
+- Support upgrading when `version` changes and installing via `archive` method
+
 ## 2017-02-13 v1.1.8
 - Test with Puppet 4.9 by default
 - Test with bleedging edge Puppet 4
