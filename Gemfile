@@ -1,5 +1,7 @@
 source "https://rubygems.org"
 
+RUBY_2_OR_NEWER = RUBY_VERSION >= '2.0.0'
+
 group :test do
   gem "rake", '~> 11'
   gem "puppet", ENV['PUPPET_GEM_VERSION'] || '~> 4.9'
@@ -8,7 +10,8 @@ group :test do
   gem "puppetlabs_spec_helper"
   gem "metadata-json-lint"
   gem "rspec-puppet-facts"
-  gem "json_pure", '<= 2.0.1', :require => false if RUBY_VERSION < '2.0.0'
+  gem "json_pure"
+  gem "parallel_tests", RUBY_2_OR_NEWER ? '~> 2' : '2.9.0'
 end
 
 group :development do
