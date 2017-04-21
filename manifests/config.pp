@@ -21,6 +21,8 @@ class vault::config {
     ensure  => directory,
     purge   => $::vault::purge_config_dir,
     recurse => $::vault::purge_config_dir,
+    owner   => $::vault::user,
+    group   => $::vault::group,
   }
 
   file { "${::vault::config_dir}/config.json":
