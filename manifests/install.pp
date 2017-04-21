@@ -11,14 +11,23 @@ class vault::install {
           }
         }
 
+        if $::vault::checksum_type != 'none' {
+          $checksum = $::vault::checksums["${::vault::os}_${::vault::arch}"]
+        }
+        else {
+          $checksum = undef
+        }
+
         archive { "${::vault::download_dir}/${::vault::download_filename}":
-          ensure       => present,
-          extract      => true,
-          extract_path => $::vault::bin_dir,
-          source       => $::vault::real_download_url,
-          cleanup      => true,
-          creates      => $vault_bin,
-          before       => File[$vault_bin],
+          ensure        => present,
+          extract       => true,
+          extract_path  => $::vault::bin_dir,
+          source        => $::vault::real_download_url,
+          checksum_type => $::vault::checksum_type,
+          checksum      => $checksum,
+          cleanup       => true,
+          creates       => $vault_bin,
+          before        => File[$vault_bin],
         }
       }
 

@@ -77,6 +77,8 @@ The module will **not** manage any required packages to un-archive, e.g. `unzip`
 * `manage_download_dir`: Boolean, whether or not to create the download directory, default: `false`
 * `download_filename`: Filename to (temporarily) save the downloaded zip file, default: `vault.zip`
 * `version`: The Version of vault to download. default: `0.7.0`
+* `checksum_type`: The type of checksum that is used to verify the downloaded archive (`none` disables checksum verification), default: `sha256`
+* `checksums`: A hash containing checksums used for archive verification, default: checksums for the release which is the `$version` default
 
 ### Configuration parameters
 

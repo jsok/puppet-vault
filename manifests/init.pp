@@ -89,6 +89,8 @@ class vault (
   $install_method      = $::vault::params::install_method,
   $package_name        = $::vault::params::package_name,
   $package_ensure      = $::vault::params::package_ensure,
+  $checksum_type       = $::vault::params::checksum_type,
+  $checksums           = $::vault::params::checksums,
   $download_dir        = $::vault::params::download_dir,
   $manage_download_dir = $::vault::params::manage_download_dir,
   $download_filename   = $::vault::params::download_filename,
