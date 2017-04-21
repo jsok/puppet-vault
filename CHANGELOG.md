@@ -1,6 +1,7 @@
 ## UNRELEASED v1.2.1-dev
 - Update to rspec 3.5
 - Ruby 2.4 Fixnum deprecation
+- Correctly set config dir owner and group as vault user
 
 ## 2017-03-27 v1.2.0
 - Support Debian 7 and 8
