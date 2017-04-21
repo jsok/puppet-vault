@@ -54,11 +54,13 @@ describe 'vault' do
         it {
           is_expected.to contain_file('/etc/vault')
             .with_ensure('directory')
-            .with_purge('true') \
+            .with_purge('true')
             .with_recurse('true')
+            .with_owner('vault')
+            .with_group('vault')
         }
         it {
-          is_expected.to contain_file('/etc/vault/config.json') \
+          is_expected.to contain_file('/etc/vault/config.json')
             .with_owner('vault')
             .with_group('vault')
             .with_content(/"backend":\s*{\s*"file":\s*{\s*"path":\s*"\/data\/vault"/)
