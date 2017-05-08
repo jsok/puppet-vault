@@ -1,3 +1,6 @@
+## 2017-05-08 1.2.2-dev
+- Update to vault 0.7.1
+
 ## 2017-04-22 1.2.1
 - Update to rspec 3.5
 - Ruby 2.4 Fixnum deprecation
