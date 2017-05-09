@@ -19,7 +19,7 @@
 
 ## 2017-02-13 v1.1.8
 - Test with Puppet 4.9 by default
-- Test with bleedging edge Puppet 4
+- Test with bleeding edge Puppet 4
 - Allow legacy Puppet 3 builds to fail in CI
 - Add `manage_service` option
 
