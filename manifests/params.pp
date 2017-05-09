@@ -30,7 +30,7 @@ class vault::params {
   $manage_backend_dir  = false
   $listener            = {
     'tcp' => {
-      'address' => '127.0.0.1:8200',
+      'address'     => '127.0.0.1:8200',
       'tls_disable' => 1,
     }
   }
