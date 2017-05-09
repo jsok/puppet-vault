@@ -1,3 +1,6 @@
+## 2017-05-09 1.2.3-dev
+- Update to vault 0.7.2
+
 ## 2017-05-08 1.2.2
 - Update to vault 0.7.1
 
