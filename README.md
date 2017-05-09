@@ -23,7 +23,7 @@ include vault
 ```
 
 By default, with no parameters the module will configure vault with some sensible defaults to get you running, the following parameters may be specified to configure Vault.
-Please see [The official documentation](https://www.vaultproject.io/docs/config/) for further details of acceptable parameter values.
+Please see [The official documentation](https://www.vaultproject.io/docs/configuration/index.html) for further details of acceptable parameter values.
 
 ## Parameters
 
@@ -80,7 +80,7 @@ The module will **not** manage any required packages to un-archive, e.g. `unzip`
 
 ### Configuration parameters
 
-By default, with no parameters the module will configure vault with some sensible defaults to get you running, the following parameters may be specified to configure Vault.  Please see [The official documentation](https://www.vaultproject.io/docs/config/) for further details of acceptable parameter values.
+By default, with no parameters the module will configure vault with some sensible defaults to get you running, the following parameters may be specified to configure Vault.  Please see [The official documentation](https://www.vaultproject.io/docs/configuration/index.html) for further details of acceptable parameter values.
 
 * `backend`: A hash containing the Vault backend configuration, default:
 ```
