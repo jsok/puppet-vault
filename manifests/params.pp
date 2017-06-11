@@ -46,6 +46,8 @@ class vault::params {
 
   $manage_service = true
 
+  $mode               = 'server'
+
   case $::osfamily {
     'Debian': {
       case $::lsbdistcodename {

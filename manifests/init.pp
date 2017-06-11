@@ -47,7 +47,7 @@
 # * `service_options`
 #   Extra argument to pass to `vault server`, as per:
 #   `vault server --help`
-
+#
 # * `manage_service`
 #   Instruct puppet to manage service or not
 #
@@ -61,6 +61,8 @@
 # * `version`
 #   The version of Vault to install
 #
+# * `mode`
+#   Allows installing the client only by specifying client. Defalts to server.
 class vault (
   $user                = $::vault::params::user,
   $manage_user         = $::vault::params::manage_user,
@@ -95,6 +97,7 @@ class vault (
   $version             = $::vault::params::version,
   $os                  = $::vault::params::os,
   $arch                = $::vault::params::arch,
+  $mode                = $::vault::params::mode,
   $extra_config        = {},
 ) inherits ::vault::params {
 
@@ -127,10 +130,12 @@ class vault (
   # lint:endignore
 
   contain vault::install
-  contain vault::config
-  contain vault::service
 
-  Class['vault::install'] -> Class['vault::config']
-  Class['vault::config'] ~> Class['vault::service']
+  if $mode == 'server' {
+    contain vault::config
+    contain vault::service
 
+    Class['vault::install'] -> Class['vault::config']
+    Class['vault::config'] ~> Class['vault::service']
+  }
 }
