@@ -53,6 +53,7 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `manage_backend_dir`: When using the file backend, this boolean determines whether or not the path (as specified in the `['file']['path']` section of the backend config) is created, and the owner and group set to the vault user.  Default: `false`
 
+* `mode`: Defaults to server, set to Client to only install binary.
 ### Installation parameters
 
 #### When `install_method` is `repo`
