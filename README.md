@@ -74,7 +74,7 @@ The module will **not** manage any required packages to un-archive, e.g. `unzip`
 * `download_dir`: Path to download the zip file to, default: `/tmp`
 * `manage_download_dir`: Boolean, whether or not to create the download directory, default: `false`
 * `download_filename`: Filename to (temporarily) save the downloaded zip file, default: `vault.zip`
-* `version`: The Version of vault to download. default: `0.7.2`
+* `version`: The Version of vault to download. default: `0.7.3`
 
 ### Configuration parameters
 
