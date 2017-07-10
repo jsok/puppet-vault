@@ -1,4 +1,4 @@
-## Unreleased
+## 2017-07-10 1.2.4
 - Fix and update beaker tests
 - Update to vault 0.7.3
 
