@@ -32,7 +32,7 @@ class vault::params {
     'tcp' => {
       'address'     => '127.0.0.1:8200',
       'tls_disable' => 1,
-    }
+    },
   }
 
   # These should always be undef as they are optional settings that
@@ -45,6 +45,8 @@ class vault::params {
   $disable_mlock      = undef
 
   $manage_service = true
+
+  $manage_service_file = undef
 
   case $::osfamily {
     'Debian': {

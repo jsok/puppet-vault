@@ -53,6 +53,8 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `manage_backend_dir`: When using the file backend, this boolean determines whether or not the path (as specified in the `['file']['path']` section of the backend config) is created, and the owner and group set to the vault user.  Default: `false`
 
+* `manage_service_file`: Manages the service file regardless of the defaults. Default: See [Installation parameters](#installation-parameters).
+
 ### Installation parameters
 
 #### When `install_method` is `repo`
@@ -62,6 +64,7 @@ When `repo` is set the module will attempt to install a package corresponding wi
 * `package_name`:  Name of the package to install, default: `vault`
 * `package_ensure`: Desired state of the package, default: `installed`
 * `bin_dir`: Set to the path where the package will install the Vault binary, this is necessary to correctly manage the [`disable_mlock`](#mlock) option.
+* `manage_service_file`: Will manage the service file in case it's not included in the package, default: false
 
 #### When `install_method` is `archive`
 
@@ -75,6 +78,7 @@ The module will **not** manage any required packages to un-archive, e.g. `unzip`
 * `manage_download_dir`: Boolean, whether or not to create the download directory, default: `false`
 * `download_filename`: Filename to (temporarily) save the downloaded zip file, default: `vault.zip`
 * `version`: The Version of vault to download. default: `0.7.3`
+* `manage_service_file`: Will manage the service file. default: true
 
 ### Configuration parameters
 

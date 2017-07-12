@@ -75,6 +75,7 @@ class vault (
   $service_name        = $::vault::params::service_name,
   $service_provider    = $::vault::params::service_provider,
   $manage_service      = $::vault::params::manage_service,
+  $manage_service_file = $::vault::params::manage_service_file,
   $backend             = $::vault::params::backend,
   $manage_backend_dir  = $::vault::params::manage_backend_dir,
   $listener            = $::vault::params::listener,
@@ -126,9 +127,9 @@ class vault (
   $real_download_url    = pick($download_url, "${download_url_base}${version}/${package_name}_${version}_${os}_${arch}.${download_extension}")
   # lint:endignore
 
-  contain vault::install
-  contain vault::config
-  contain vault::service
+  contain ::vault::install
+  contain ::vault::config
+  contain ::vault::service
 
   Class['vault::install'] -> Class['vault::config']
   Class['vault::config'] ~> Class['vault::service']

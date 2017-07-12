@@ -226,6 +226,56 @@ describe 'vault' do
         is_expected.to_not contain_exec('systemd-reload')
       }
     end
+    context 'install through repo with default service management' do
+      let(:params) {{
+          :install_method      => 'repo',
+          :manage_service_file => :undef,
+      }}
+
+      it { is_expected.to_not contain_file('/etc/init.d/vault') }
+    end
+    context 'install through repo without service management' do
+      let(:params) {{
+          :install_method      => 'repo',
+          :manage_service_file => false,
+      }}
+
+      it { is_expected.to_not contain_file('/etc/init.d/vault') }
+    end
+    context 'install through repo with service management' do
+      let(:params) {{
+          :install_method      => 'repo',
+          :manage_service_file => true,
+      }}
+
+      it { is_expected.to contain_file('/etc/init.d/vault') }
+    end
+
+    context 'install through archive with default service management' do
+      let(:params) {{
+          :install_method      => 'archive',
+          :manage_service_file => :undef,
+      }}
+
+      it { is_expected.to contain_file('/etc/init.d/vault') }
+    end
+    context 'install through archive without service management' do
+      let(:params) {{
+          :install_method      => 'archive',
+          :manage_service_file => false,
+      }}
+
+      it { is_expected.to_not contain_file('/etc/init.d/vault') }
+    end
+    context 'install through archive with service management' do
+      let(:params) {{
+          :install_method      => 'archive',
+          :manage_service_file => true,
+      }}
+
+      it { is_expected.to contain_file('/etc/init.d/vault') }
+    end
+
   end
   context 'RedHat 6 specific' do
     let(:facts) {{
@@ -280,6 +330,55 @@ describe 'vault' do
       it {
         is_expected.to_not contain_exec('systemd-reload')
       }
+    end
+    context 'install through repo with default service management' do
+      let(:params) {{
+          :install_method      => 'repo',
+          :manage_service_file => :undef,
+      }}
+
+      it { is_expected.to_not contain_file('/etc/init.d/vault') }
+    end
+    context 'install through repo without service management' do
+      let(:params) {{
+          :install_method      => 'repo',
+          :manage_service_file => false,
+      }}
+
+      it { is_expected.to_not contain_file('/etc/init.d/vault') }
+    end
+    context 'install through repo with service management' do
+      let(:params) {{
+          :install_method      => 'repo',
+          :manage_service_file => true,
+      }}
+
+      it { is_expected.to contain_file('/etc/init.d/vault') }
+    end
+
+    context 'install through archive with default service management' do
+      let(:params) {{
+          :install_method      => 'archive',
+          :manage_service_file => :undef,
+      }}
+
+      it { is_expected.to contain_file('/etc/init.d/vault') }
+    end
+    context 'install through archive without service management' do
+      let(:params) {{
+          :install_method      => 'archive',
+          :manage_service_file => false,
+      }}
+
+      it { is_expected.to_not contain_file('/etc/init.d/vault') }
+    end
+    context 'install through archive with service management' do
+      let(:params) {{
+          :install_method      => 'archive',
+          :manage_service_file => true,
+      }}
+
+      it { is_expected.to contain_file('/etc/init.d/vault') }
     end
   end
   context 'RedHat >=7 specific' do
@@ -374,6 +473,55 @@ describe 'vault' do
           .with_refreshonly(true)
       }
     end
+    context 'install through repo with default service management' do
+      let(:params) {{
+          :install_method      => 'repo',
+          :manage_service_file => :undef,
+      }}
+
+      it { is_expected.to_not contain_file('/etc/systemd/system/vault.service') }
+    end
+    context 'install through repo without service management' do
+      let(:params) {{
+          :install_method      => 'repo',
+          :manage_service_file => false,
+      }}
+
+      it { is_expected.to_not contain_file('/etc/systemd/system/vault.service') }
+    end
+    context 'install through repo with service management' do
+      let(:params) {{
+          :install_method      => 'repo',
+          :manage_service_file => true,
+      }}
+
+      it { is_expected.to contain_file('/etc/systemd/system/vault.service') }
+    end
+
+    context 'install through archive with default service management' do
+      let(:params) {{
+          :install_method      => 'archive',
+          :manage_service_file => :undef,
+      }}
+
+      it { is_expected.to contain_file('/etc/systemd/system/vault.service') }
+    end
+    context 'install through archive without service management' do
+      let(:params) {{
+          :install_method      => 'archive',
+          :manage_service_file => false,
+      }}
+
+      it { is_expected.to_not contain_file('/etc/systemd/system/vault.service') }
+    end
+    context 'install through archive with service management' do
+      let(:params) {{
+          :install_method      => 'archive',
+          :manage_service_file => true,
+      }}
+
+      it { is_expected.to contain_file('/etc/systemd/system/vault.service') }
+    end
   end
   ['trusty','vivid'].each do |lsbdistcodename|
     context "Ubuntu-#{lsbdistcodename}-specific" do
@@ -441,6 +589,55 @@ describe 'vault' do
         }
         it { is_expected.to contain_user('root') }
         it { is_expected.to contain_group('admin') }
+      end
+      context 'install through repo with default service management' do
+        let(:params) {{
+            :install_method      => 'repo',
+            :manage_service_file => :undef,
+        }}
+
+        it { is_expected.to_not contain_file('/etc/init.d/vault') }
+      end
+      context 'install through repo without service management' do
+        let(:params) {{
+            :install_method      => 'repo',
+            :manage_service_file => false,
+        }}
+
+        it { is_expected.to_not contain_file('/etc/init.d/vault') }
+      end
+      context 'install through repo with service management' do
+        let(:params) {{
+            :install_method      => 'repo',
+            :manage_service_file => true,
+        }}
+
+        it { is_expected.to contain_file('/etc/init.d/vault') }
+      end
+
+      context 'install through archive with default service management' do
+        let(:params) {{
+            :install_method      => 'archive',
+            :manage_service_file => :undef,
+        }}
+
+        it { is_expected.to contain_file('/etc/init.d/vault') }
+      end
+      context 'install through archive without service management' do
+        let(:params) {{
+            :install_method      => 'archive',
+            :manage_service_file => false,
+        }}
+
+        it { is_expected.to_not contain_file('/etc/init.d/vault') }
+      end
+      context 'install through archive with service management' do
+        let(:params) {{
+            :install_method      => 'archive',
+            :manage_service_file => true,
+        }}
+
+        it { is_expected.to contain_file('/etc/init.d/vault') }
       end
     end
   end
@@ -536,6 +733,55 @@ describe 'vault' do
                           .with_user('root')
                           .with_refreshonly(true)
         }
+      end
+      context 'install through repo with default service management' do
+        let(:params) {{
+            :install_method      => 'repo',
+            :manage_service_file => :undef,
+        }}
+
+        it { is_expected.to_not contain_file('/etc/systemd/system/vault.service') }
+      end
+      context 'install through repo without service management' do
+        let(:params) {{
+            :install_method      => 'repo',
+            :manage_service_file => false,
+        }}
+
+        it { is_expected.to_not contain_file('/etc/systemd/system/vault.service') }
+      end
+      context 'install through repo with service management' do
+        let(:params) {{
+            :install_method      => 'repo',
+            :manage_service_file => true,
+        }}
+
+        it { is_expected.to contain_file('/etc/systemd/system/vault.service') }
+      end
+
+      context 'install through archive with default service management' do
+        let(:params) {{
+            :install_method      => 'archive',
+            :manage_service_file => :undef,
+        }}
+
+        it { is_expected.to contain_file('/etc/systemd/system/vault.service') }
+      end
+      context 'install through archive without service management' do
+        let(:params) {{
+            :install_method      => 'archive',
+            :manage_service_file => false,
+        }}
+
+        it { is_expected.to_not contain_file('/etc/systemd/system/vault.service') }
+      end
+      context 'install through archive with service management' do
+        let(:params) {{
+            :install_method      => 'archive',
+            :manage_service_file => true,
+        }}
+
+        it { is_expected.to contain_file('/etc/systemd/system/vault.service') }
       end
     end
   end
