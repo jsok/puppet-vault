@@ -1,3 +1,6 @@
+## 2017-07-15 1.2.5
+- Added `manage_service_file` option
+
 ## 2017-07-10 1.2.4
 - Fix and update beaker tests
 - Update to vault 0.7.3
