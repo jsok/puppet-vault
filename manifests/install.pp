@@ -24,7 +24,7 @@ class vault::install {
 
     'repo': {
       package { $::vault::package_name:
-        ensure  => $::vault::package_ensure
+        ensure  => $::vault::package_ensure,
       }
     }
 
