@@ -95,8 +95,8 @@ class vault::config {
             group   => 'root',
             mode    => '0644',
             content => "[Service]
-                        Environment=HTTPS_PROXY=${::vault::proxy_address}"
-            notify  => Exec['systemd-reload']
+                        Environment=HTTPS_PROXY=${::vault::proxy_address}",
+            notify  => Exec['systemd-reload'],
           }
         }
         if ! defined(Exec['systemd-reload']) {
