@@ -175,7 +175,7 @@ describe 'vault' do
           :manage_proxy => true,
           :proxy_address => 'proxy.domain.local:8080'
         }}
-        
+
         it {
           is_expected.to contain_file('/etc/systemd/system/vault.service.d/10-proxy.conf')
             .with_ensure('file')
@@ -221,6 +221,8 @@ describe 'vault' do
         :user => 'root',
         :group => 'admin',
         :num_procs => '5',
+        :manage_proxy => true,
+        :proxy_address => 'proxy.domain.local:8080',
       }}
       it {
         is_expected.to contain_file('/etc/init.d/vault')
@@ -230,6 +232,7 @@ describe 'vault' do
           .with_group('root')
           .with_content(%r{^#!/bin/sh})
           .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-5}/)
+          .with_content(/export HTTPS_PROXY=proxy.domain.local:8080/)
           .with_content(%r{daemon --user root "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
           .with_content(%r{OPTIONS=\$OPTIONS:-"-log-level=info"})
           .with_content(%r{exec="/opt/bin/vault"})
