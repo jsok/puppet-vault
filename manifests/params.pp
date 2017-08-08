@@ -45,7 +45,8 @@ class vault::params {
   $disable_mlock      = undef
 
   $manage_service = true
-
+  $manage_proxy = false
+  $proxy_address = undef
   $manage_service_file = undef
 
   case $::osfamily {

@@ -88,6 +88,17 @@ class vault::config {
           content => template('vault/vault.systemd.erb'),
           notify  => Exec['systemd-reload'],
         }
+        if $::vault::manage_proxy == true {
+          file { '/etc/systemd/system/vault.service.d/10-proxy.conf':
+            ensure  => file,
+            owner   => 'root',
+            group   => 'root',
+            mode    => '0644',
+            content => "[Service]
+                        Environment=HTTPS_PROXY=${::vault::proxy_address}"
+            notify  => Exec['systemd-reload']
+          }
+        }
         if ! defined(Exec['systemd-reload']) {
           exec {'systemd-reload':
             command     => 'systemctl daemon-reload',
