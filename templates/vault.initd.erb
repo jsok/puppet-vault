@@ -51,6 +51,9 @@ start() {
     touch $logfile $pidfile
     chown <%= scope['vault::user'] %> $logfile $pidfile
     export GOMAXPROCS=${GOMAXPROCS:-<%= scope['vault::num_procs'] %>}
+    <% if scope['vault::manage_proxy'] == true -%>
+    export HTTPS_PROXY=<%= scope['vault::proxy_address'] %>
+    <% end -%>
     daemon --user <%= scope['vault::user'] %> "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"
 
     RETVAL=$?
