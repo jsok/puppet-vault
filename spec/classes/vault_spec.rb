@@ -169,6 +169,22 @@ describe 'vault' do
             .with_group('vault')
         }
       end
+
+      context "when specifying manage_proxy" do
+        let(:params) {{
+          :manage_proxy => true,
+          :proxy_address => 'proxy.domain.local:8080'
+        }}
+        
+        it {
+          is_expected.to contain_file('/etc/systemd/system/vault.service.d/10-proxy.conf')
+            .with_ensure('file')
+            .with_owner('root')
+            .with_group('root')
+            .with_content(/\[Service\]/)
+            .with_content(/\s*Environment=HTTPS_PROXY=proxy.domain.local:8080/)
+        }
+      end
     end
   end
   context 'RedHat 7 Amazon Linux specific' do
