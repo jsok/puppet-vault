@@ -1,3 +1,6 @@
+## Unreleased 1.2.6-dev
+- Update to vault 0.8.0
+
 ## 2017-07-15 1.2.5
 - Added `manage_service_file` option
 
