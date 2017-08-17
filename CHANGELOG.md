@@ -1,3 +1,6 @@
+## Unreleased 1.2.7-dev
+- Update to vault 0.8.1
+
 ## 2017-08-10 1.2.6
 - Update to vault 0.8.0
 
