@@ -1,3 +1,6 @@
+## 2017-08-18 1.2.8-dev
+- Update to vault 0.8.3
+
 ## 2017-08-18 1.2.7
 - Update to vault 0.8.1
 
