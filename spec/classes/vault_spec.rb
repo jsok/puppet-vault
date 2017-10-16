@@ -70,6 +70,7 @@ describe 'vault' do
             with_owner('vault').
             with_group('vault').
             with_content(/"storage":\s*{\s*"file":\s*{\s*"path":\s*"\/data\/vault"/).
+            with_content(/"listener":\s*{"tcp":\s*{"address":\s*"127.0.0.1:8200"/).
             with_content(%r{"address":\s*"127.0.0.1:8200"}).
             with_content(%r{"tls_disable":\s*1})
         }
@@ -149,6 +150,24 @@ describe 'vault' do
 
           it { is_expected.to contain_package('vault') }
         end
+      end
+
+      context 'when specifying an array of listeners' do
+        let(:params) do
+          {
+            listener: [
+              { 'tcp' => { 'address' => '127.0.0.1:8200' } },
+              { 'tcp' => { 'address' => '0.0.0.0:8200' } }
+            ]
+          }
+        end
+
+        it {
+          is_expected.to contain_file('/etc/vault/config.json').
+            with_content(/"listener":\s*\[.*\]/).
+            with_content(/"tcp":\s*{"address":\s*"127.0.0.1:8200"/).
+            with_content(/"tcp":\s*{"address":\s*"0.0.0.0:8200"/)
+        }
       end
 
       context 'when specifying manage_service' do
@@ -469,20 +488,7 @@ describe 'vault' do
             end
             context 'with mlock disabled' do
               let(:params) do
-                {
-                  disable_mlock: true,
-                  storage: {
-                    'file' => {
-                      'path' => '/data/vault'
-                    }
-                  },
-                  listener: {
-                    'tcp' => {
-                      'address'     => '127.0.0.1:8200',
-                      'tls_disable' => 1
-                    }
-                  }
-                }
+                { disable_mlock: true }
               end
 
               it {
@@ -750,20 +756,7 @@ describe 'vault' do
             end
             context 'with mlock disabled' do
               let(:params) do
-                {
-                  disable_mlock: true,
-                  storage: {
-                    'file' => {
-                      'path' => '/data/vault'
-                    }
-                  },
-                  listener: {
-                    'tcp' => {
-                      'address'     => '127.0.0.1:8200',
-                      'tls_disable' => 1
-                    }
-                  }
-                }
+                { disable_mlock: true }
               end
 
               it {

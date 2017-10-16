@@ -1,3 +1,6 @@
+## 2.0.0-dev
+- Allow specifying `$listener` as an array of listener hashes
+
 ## 2017-10-16 1.2.8
 - Update to vault 0.8.3
 
