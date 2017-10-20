@@ -53,12 +53,14 @@ class vault::params {
       case $::lsbdistcodename {
         /(jessie|stretch|sid|xenial|yakketi|zesty)/: {
           $service_provider = 'systemd'
+          $systemd_version  = $facts['systemd_version']
         }
         /(trusty|vivid)/: {
           $service_provider = 'upstart'
         }
         default: {
           $service_provider = 'systemd'
+          $systemd_version  = $facts['systemd_version']
           warning("Module ${module_name} is not supported on '${::lsbdistcodename}'")
         }
       }
@@ -68,6 +70,7 @@ class vault::params {
         $service_provider = 'redhat'
       } else {
         $service_provider = 'systemd'
+        $systemd_version  = $facts['systemd_version']
       }
     }
     default: {

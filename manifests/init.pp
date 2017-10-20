@@ -96,6 +96,7 @@ class vault (
   $version             = $::vault::params::version,
   $os                  = $::vault::params::os,
   $arch                = $::vault::params::arch,
+  $systemd_version     = $::vault::params::systemd_version,
   $extra_config        = {},
 ) inherits ::vault::params {
 

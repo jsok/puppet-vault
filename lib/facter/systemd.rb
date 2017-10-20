@@ -7,6 +7,7 @@
 #  Check the output of systemctl --version
 
 Facter.add(:systemd_version) do
+  confine :systemd => true
   setcode do
     Facter::Util::Resolution.exec("systemctl --version")[/[0-9]+(\.[0-9]+)*/].to_i
   end
