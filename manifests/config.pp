@@ -80,6 +80,7 @@ class vault::config {
         }
       }
       'systemd': {
+        $systemd_version = $::vault::params::systemd_version
         file { '/etc/systemd/system/vault.service':
           ensure  => file,
           owner   => 'root',

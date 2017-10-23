@@ -23,7 +23,11 @@ CapabilityBoundingSet=CAP_SYSLOG
 NoNewPrivileges=yes
 <% else -%>
 SecureBits=keep-caps
+<% if scope['vault::systemd_version'] > 229 -%>
+AmbientCapabilities=CAP_IPC_LOCK
+<% else -%>
 Capabilities=CAP_IPC_LOCK+ep
+<% end -%>
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
 <% end -%>
