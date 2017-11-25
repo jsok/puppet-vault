@@ -70,7 +70,7 @@ describe 'vault' do
             .with_content(/"tls_disable":\s*1/)
         }
 
-        it { is_expected.to contain_file('/usr/local/bin/vault').with_mode('0555') }
+        it { is_expected.to contain_file('/usr/local/bin/vault').with_mode('0755') }
         it {
           is_expected.to contain_exec('setcap cap_ipc_lock=+ep /usr/local/bin/vault')
             .with_unless('getcap /usr/local/bin/vault | grep cap_ipc_lock+ep')
@@ -585,7 +585,7 @@ describe 'vault' do
         }
         it { is_expected.to contain_file('/opt/etc/vault/config.json') }
 
-        it { is_expected.to contain_file('/opt/bin/vault').with_mode('0555') }
+        it { is_expected.to contain_file('/opt/bin/vault').with_mode('0755') }
         it {
           is_expected.to contain_file('/opt/etc/vault')
                           .with_ensure('directory')
