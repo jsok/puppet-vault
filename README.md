@@ -6,6 +6,16 @@
 
 Puppet module to install and run [Hashicorp Vault](https://vaultproject.io).
 
+## Path to 2.0
+
+Development on a [2.0 release of this module](https://github.com/jsok/puppet-vault/milestone/1) has begun on the `master` branch.
+This includes:
+
+ * Dropping EOL Puppet 3 support
+ * Adding Puppet 5 support
+ * Introducing typed parameters wherever possible
+ * Some overdue vault config parameter updates/renames as they have evolved over time
+
 ## Support
 
 This module is currently only tested on:
