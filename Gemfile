@@ -1,11 +1,10 @@
 source ENV['GEM_SOURCE'] || "https://rubygems.org"
 
 group :test do
-  gem 'puppetlabs_spec_helper', '2.2.0',                            :require => false
-  gem 'rspec-puppet',                                               :require => false, :git => 'https://github.com/rodjek/rspec-puppet.git'
+  gem 'puppetlabs_spec_helper', '~> 2.5.0',                         :require => false
+  gem 'rspec-puppet', '~> 2.5',                                     :require => false
   gem 'rspec-puppet-facts',                                         :require => false
   gem 'rspec-puppet-utils',                                         :require => false
-  gem 'puppet-lint-absolute_classname-check',                       :require => false
   gem 'puppet-lint-leading_zero-check',                             :require => false
   gem 'puppet-lint-trailing_comma-check',                           :require => false
   gem 'puppet-lint-version_comparison-check',                       :require => false
@@ -13,15 +12,15 @@ group :test do
   gem 'puppet-lint-unquoted_string-check',                          :require => false
   gem 'puppet-lint-variable_contains_upcase',                       :require => false
   gem 'metadata-json-lint',                                         :require => false
-  gem 'puppet-strings', '1.1.0',                                    :require => false
-  gem 'puppet_facts',                                               :require => false
-  gem 'rubocop-rspec', '~> 1.6',                                    :require => false if RUBY_VERSION >= '2.3.0'
-  gem 'json_pure', '<= 2.0.1',                                      :require => false if RUBY_VERSION < '2.0.0'
-  gem 'safe_yaml', '~> 1.0.4',                                      :require => false
-  gem 'listen', '<= 3.0.6',                                         :require => false
-  gem 'puppet-syntax',                                              :require => false, git: 'https://github.com/gds-operations/puppet-syntax.git'
-  gem 'pry'
-  gem 'rb-readline'
+  gem 'redcarpet',                                                  :require => false
+  gem 'rubocop', '~> 0.49.1',                                       :require => false if RUBY_VERSION >= '2.3.0'
+  gem 'rubocop-rspec', '~> 1.15.0',                                 :require => false if RUBY_VERSION >= '2.3.0'
+  gem 'mocha', '>= 1.2.1',                                          :require => false
+  gem 'coveralls',                                                  :require => false
+  gem 'simplecov-console',                                          :require => false
+  gem 'rack', '~> 1.0',                                             :require => false if RUBY_VERSION < '2.2.2'
+  gem 'parallel_tests',                                             :require => false
+  gem 'fakefs',                                                     :require => false
 end
 
 group :development do
@@ -30,9 +29,9 @@ group :development do
 end
 
 group :system_tests do
-  gem "beaker", '2.41.0', :require => false
-  gem "beaker-rspec", '5.6.0', :require => false
-  gem 'beaker-puppet_install_helper',  :require => false
+  gem "beaker", '~> 3',               :require => false
+  gem "beaker-rspec", '~> 6',         :require => false
+  gem 'beaker-puppet_install_helper', :require => false
 end
 
 ENV['PUPPET_GEM_VERSION'].nil? ? puppetversion = '~> 5' : puppetversion = ENV['PUPPET_GEM_VERSION'].to_s
