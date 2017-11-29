@@ -8,7 +8,6 @@ class vault::params {
   $manage_user        = true
   $group              = 'vault'
   $manage_group       = true
-  $bin_dir            = '/usr/local/bin'
   $config_dir         = '/etc/vault'
   $download_url       = undef
   $download_url_base  = 'https://releases.hashicorp.com/vault/'
@@ -16,7 +15,6 @@ class vault::params {
   $version            = '0.8.3'
   $service_name       = 'vault'
   $num_procs          = $::processorcount
-  $install_method     = 'archive'
   $package_name       = 'vault'
   $package_ensure     = 'installed'
 
@@ -46,8 +44,6 @@ class vault::params {
 
   $manage_service = true
 
-  $manage_service_file = undef
-
   $service_provider = $facts['service_provider']
 
   case $::architecture {
@@ -59,4 +55,17 @@ class vault::params {
     }
   }
   $os = downcase($::kernel)
+
+  case $::osfamily {
+    'Archlinux': {
+      $install_method      = 'repo'
+      $bin_dir             = '/bin'
+      $manage_service_file = true
+    }
+    default: {
+      $install_method      = 'archive'
+      $bin_dir             = '/usr/local/bin'
+      $manage_service_file = undef
+    }
+  }
 }
