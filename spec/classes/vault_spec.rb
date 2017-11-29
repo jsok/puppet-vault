@@ -14,7 +14,7 @@ describe 'vault' do
 
       context "vault class with simple configuration" do
         let(:params) {{
-          :backend => {
+          :storage => {
             'file' => {
               'path' => '/data/vault'
             }
@@ -64,7 +64,7 @@ describe 'vault' do
           is_expected.to contain_file('/etc/vault/config.json')
             .with_owner('vault')
             .with_group('vault')
-            .with_content(/"backend":\s*{\s*"file":\s*{\s*"path":\s*"\/data\/vault"/)
+            .with_content(/"storage":\s*{\s*"file":\s*{\s*"path":\s*"\/data\/vault"/)
             .with_content(/"listener":\s*{\s*"tcp":/)
             .with_content(/"address":\s*"127.0.0.1:8200"/)
             .with_content(/"tls_disable":\s*1/)
@@ -140,7 +140,7 @@ describe 'vault' do
       context "when specifying manage_service" do
         let(:params) {{
           :manage_service => false,
-          :backend => {
+          :storage => {
             'file' => {
               'path' => '/data/vault'
             }
@@ -153,10 +153,10 @@ describe 'vault' do
         }
       end
 
-      context "when specifying manage_backend_dir" do
+      context "when specifying manage_storage_dir" do
         let(:params) {{
-          :manage_backend_dir => true,
-          :backend => {
+          :manage_storage_dir => true,
+          :storage => {
             'file' => {
               'path' => '/data/vault'
             }
@@ -439,7 +439,7 @@ describe 'vault' do
     context 'with mlock disabled' do
       let(:params) {{
         :disable_mlock   => true,
-        :backend => {
+        :storage => {
           'file' => {
             'path' => '/data/vault'
           }
@@ -702,7 +702,7 @@ describe 'vault' do
       context 'with mlock disabled' do
         let(:params) {{
                         :disable_mlock   => true,
-                        :backend => {
+                        :storage => {
                           'file' => {
                             'path' => '/data/vault'
                           }

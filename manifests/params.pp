@@ -24,10 +24,10 @@ class vault::params {
   $manage_download_dir = false
   $download_filename   = 'vault.zip'
 
-  # backend and listener are mandatory, we provide some sensible
+  # storage and listener are mandatory, we provide some sensible
   # defaults here
-  $backend             = { 'file' => { 'path' => '/var/lib/vault' }}
-  $manage_backend_dir  = false
+  $storage             = { 'file' => { 'path' => '/var/lib/vault' }}
+  $manage_storage_dir  = false
   $listener            = {
     'tcp' => {
       'address'     => '127.0.0.1:8200',
@@ -37,7 +37,7 @@ class vault::params {
 
   # These should always be undef as they are optional settings that
   # should not be configured unless explicitly declared.
-  $ha_backend         = undef
+  $ha_storage         = undef
   $disable_cache      = undef
   $telemetry          = undef
   $default_lease_ttl  = undef

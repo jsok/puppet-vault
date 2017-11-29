@@ -76,10 +76,10 @@ class vault (
   $service_provider    = $::vault::params::service_provider,
   $manage_service      = $::vault::params::manage_service,
   $manage_service_file = $::vault::params::manage_service_file,
-  $backend             = $::vault::params::backend,
-  $manage_backend_dir  = $::vault::params::manage_backend_dir,
+  $storage             = $::vault::params::storage,
+  $manage_storage_dir  = $::vault::params::manage_storage_dir,
   $listener            = $::vault::params::listener,
-  $ha_backend          = $::vault::params::ha_backend,
+  $ha_storage          = $::vault::params::ha_storage,
   $disable_cache       = $::vault::params::disable_cache,
   $telemetry           = $::vault::params::telemetry,
   $default_lease_ttl   = $::vault::params::default_lease_ttl,
@@ -99,12 +99,12 @@ class vault (
   $extra_config        = {},
 ) inherits ::vault::params {
 
-  validate_hash($backend)
+  validate_hash($storage)
   validate_hash($listener)
   validate_hash($extra_config)
 
-  if $ha_backend {
-    validate_hash($ha_backend)
+  if $ha_storage {
+    validate_hash($ha_storage)
   }
 
   if $disable_cache {

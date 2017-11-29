@@ -7,7 +7,7 @@ describe 'vault class' do
     it 'should work idempotently with no errors' do
       pp = <<-EOS
       class { '::vault':
-        backend => {
+        storage => {
           file => {
             path => '/tmp',
           }

@@ -5,8 +5,8 @@
 class vault::config {
 
   $_config_hash = delete_undef_values({
-    'backend'           => $::vault::backend,
-    'ha_backend'        => $::vault::ha_backend,
+    'storage'           => $::vault::storage,
+    'ha_storage'        => $::vault::ha_storage,
     'listener'          => $::vault::listener,
     'telemetry'         => $::vault::telemetry,
     'disable_cache'     => $::vault::disable_cache,
@@ -31,16 +31,16 @@ class vault::config {
     group   => $::vault::group,
   }
 
-  # If using the file backend then the path must exist and be readable
+  # If using the file storage then the path must exist and be readable
   # and writable by the vault user, if we have a file path and the
-  # manage_backend_dir attribute is true, then we create it here.
+  # manage_storage_dir attribute is true, then we create it here.
   #
-  if $::vault::backend['file'] and $::vault::manage_backend_dir {
-    if ! $::vault::backend['file']['path'] {
-      fail('Must provide a path attribute to backend file')
+  if $::vault::storage['file'] and $::vault::manage_storage_dir {
+    if ! $::vault::storage['file']['path'] {
+      fail('Must provide a path attribute to storage file')
     }
 
-    file { $::vault::backend['file']['path']:
+    file { $::vault::storage['file']['path']:
       ensure => directory,
       owner  => $::vault::user,
       group  => $::vault::group,

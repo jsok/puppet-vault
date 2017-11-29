@@ -61,7 +61,7 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `num_procs`: Sets the `GOMAXPROCS` environment variable, to determine how many CPUs Vault can use. The official Vault Terraform install.sh script sets this to the output of ``nprocs``, with the comment, "Make sure to use all our CPUs, because Vault can block a scheduler thread". Default: number of CPUs on the system, retrieved from the ``processorcount`` fact.
 
-* `manage_backend_dir`: When using the file backend, this boolean determines whether or not the path (as specified in the `['file']['path']` section of the backend config) is created, and the owner and group set to the vault user.  Default: `false`
+* `manage_storage_dir`: When using the file storage, this boolean determines whether or not the path (as specified in the `['file']['path']` section of the storage config) is created, and the owner and group set to the vault user.  Default: `false`
 
 * `manage_service_file`: Manages the service file regardless of the defaults. Default: See [Installation parameters](#installation-parameters).
 
@@ -94,7 +94,7 @@ The module will **not** manage any required packages to un-archive, e.g. `unzip`
 
 By default, with no parameters the module will configure vault with some sensible defaults to get you running, the following parameters may be specified to configure Vault.  Please see [The official documentation](https://www.vaultproject.io/docs/configuration/index.html) for further details of acceptable parameter values.
 
-* `backend`: A hash containing the Vault backend configuration, default:
+* `storage`: A hash containing the Vault storage configuration, default:
 ```
 { 'file' => { 'path' => '/var/lib/vault' }}
 ```
@@ -110,7 +110,7 @@ By default, with no parameters the module will configure vault with some sensibl
 }
 ```
 
-* `ha_backend`: An optional hash containing the `ha_backend` configuration
+* `ha_storage`: An optional hash containing the `ha_storage` configuration
 
 * `telemetry`: An optional hash containing the `telemetry` configuration
 
@@ -128,7 +128,7 @@ By default, with no parameters the module will configure vault with some sensibl
 
 ```puppet
 class { '::vault':
-  backend => {
+  storage => {
     file => {
       path => '/tmp',
     }
@@ -146,7 +146,7 @@ or alternatively using Hiera:
 
 ```yaml
 ---
-vault::backend:
+vault::storage:
   file:
     path: /tmp
 
@@ -190,4 +190,4 @@ where ``<nodeset name>`` is one of the filenames in ``spec/acceptance/nodesets``
 
 ## Related Projects
 
- * [`hiera-vault`](https://github.com/jsok/hiera-vault): A Hiera backend to retrieve secrets from Hashicorp's Vault
+ * [`hiera-vault`](https://github.com/jsok/hiera-vault): A Hiera storage backend to retrieve secrets from Hashicorp's Vault
