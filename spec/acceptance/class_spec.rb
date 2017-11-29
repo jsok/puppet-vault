@@ -40,7 +40,7 @@ describe 'vault class' do
 
     describe file('/usr/local/bin/vault') do
       it { is_expected.to exist }
-      it { is_expected.to be_mode 555 }
+      it { is_expected.to be_mode 755 }
       it { is_expected.to be_owned_by 'root' }
       it { is_expected.to be_grouped_into 'root' }
     end
