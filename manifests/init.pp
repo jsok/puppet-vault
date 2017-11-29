@@ -51,6 +51,12 @@
 # * `manage_service`
 #   Instruct puppet to manage service or not
 #
+# * `manage_proxy`
+#   Instruct puppet to set proxy environment variables for the Vault service
+#
+# * `proxy_address`
+#   Address of the proxy to set for the Vault service
+#
 # * `num_procs`
 #   Sets the GOMAXPROCS environment variable, to determine how many CPUs Vault
 #   can use. The official Vault Terraform install.sh script sets this to the
@@ -75,6 +81,8 @@ class vault (
   $service_name        = $::vault::params::service_name,
   $service_provider    = $::vault::params::service_provider,
   $manage_service      = $::vault::params::manage_service,
+  $manage_proxy        = $::vault::params::manage_proxy,
+  $proxy_address       = $::vault::params::proxy_address,
   $manage_service_file = $::vault::params::manage_service_file,
   $storage             = $::vault::params::storage,
   $manage_storage_dir  = $::vault::params::manage_storage_dir,

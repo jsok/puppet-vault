@@ -170,6 +170,22 @@ describe 'vault' do
             .with_group('vault')
         }
       end
+
+      context "when specifying manage_proxy" do
+        let(:params) {{
+          :manage_proxy => true,
+          :proxy_address => 'proxy.domain.local:8080'
+        }}
+
+        it {
+          is_expected.to contain_file('/etc/systemd/system/vault.service.d/10-proxy.conf')
+            .with_ensure('file')
+            .with_owner('root')
+            .with_group('root')
+            .with_content(/\[Service\]/)
+            .with_content(/\s*Environment=HTTPS_PROXY=proxy.domain.local:8080/)
+        }
+      end
     end
   end
   context 'RedHat 7 Amazon Linux specific' do
@@ -207,6 +223,8 @@ describe 'vault' do
         :user => 'root',
         :group => 'admin',
         :num_procs => '5',
+        :manage_proxy => true,
+        :proxy_address => 'proxy.domain.local:8080',
       }}
       it {
         is_expected.to contain_file('/etc/init.d/vault')
@@ -216,6 +234,7 @@ describe 'vault' do
           .with_group('root')
           .with_content(%r{^#!/bin/sh})
           .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-5}/)
+          .with_content(/export HTTPS_PROXY=proxy.domain.local:8080/)
           .with_content(%r{daemon --user root "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
           .with_content(%r{OPTIONS=\$OPTIONS:-"-log-level=info"})
           .with_content(%r{exec="/opt/bin/vault"})
@@ -313,6 +332,8 @@ describe 'vault' do
         :user => 'root',
         :group => 'admin',
         :num_procs => '5',
+        :manage_proxy => true,
+        :proxy_address => 'proxy.domain.local:8080',
       }}
       it {
         is_expected.to contain_file('/etc/init.d/vault')
@@ -322,6 +343,7 @@ describe 'vault' do
           .with_group('root')
           .with_content(%r{^#!/bin/sh})
           .with_content(/export GOMAXPROCS=\${GOMAXPROCS:-5}/)
+          .with_content(/export HTTPS_PROXY=proxy.domain.local:8080/)
           .with_content(%r{daemon --user root "{ \$exec server -config=\$conffile \$OPTIONS &>> \$logfile & }; echo \\\$\! >\| \$pidfile"})
           .with_content(%r{OPTIONS=\$OPTIONS:-"-log-level=info"})
           .with_content(%r{exec="/opt/bin/vault"})
@@ -477,6 +499,21 @@ describe 'vault' do
           .with_refreshonly(true)
       }
     end
+    context "when specifying manage_proxy" do
+      let(:params) {{
+        :manage_proxy => true,
+        :proxy_address => 'proxy.domain.local:8080'
+      }}
+
+      it {
+        is_expected.to contain_file('/etc/systemd/system/vault.service.d/10-proxy.conf')
+          .with_ensure('file')
+          .with_owner('root')
+          .with_group('root')
+          .with_content(/\[Service\]/)
+          .with_content(/\s*Environment=HTTPS_PROXY=proxy.domain.local:8080/)
+      }
+    end
     context 'install through repo with default service management' do
       let(:params) {{
           :install_method      => 'repo',
@@ -569,6 +606,8 @@ describe 'vault' do
                         :service_options => '-log-level=info',
                         :user => 'root',
                         :group => 'admin',
+                        :manage_proxy => true,
+                        :proxy_address => 'proxy.domain.local:8080',
                       }}
         it {
           is_expected.to contain_file('/etc/init/vault.conf')
@@ -577,6 +616,7 @@ describe 'vault' do
                           .with_content(/env CONFIG=\/opt\/etc\/vault\/config.json/)
                           .with_content(/env VAULT=\/opt\/bin\/vault/)
                           .with_content(/start-stop-daemon .* -log-level=info$/)
+                          .with_content(/export HTTPS_PROXY=proxy.domain.local:8080/)                          
         }
         it {
           is_expected.to contain_exec('setcap cap_ipc_lock=+ep /opt/bin/vault')
@@ -788,6 +828,21 @@ describe 'vault' do
         }}
 
         it { is_expected.to contain_file('/etc/systemd/system/vault.service') }
+      end
+      context "when specifying manage_proxy" do
+        let(:params) {{
+          :manage_proxy => true,
+          :proxy_address => 'proxy.domain.local:8080'
+        }}
+
+        it {
+          is_expected.to contain_file('/etc/systemd/system/vault.service.d/10-proxy.conf')
+            .with_ensure('file')
+            .with_owner('root')
+            .with_group('root')
+            .with_content(/\[Service\]/)
+            .with_content(/\s*Environment=HTTPS_PROXY=proxy.domain.local:8080/)
+        }
       end
     end
   end

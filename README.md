@@ -65,6 +65,10 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `manage_service_file`: Manages the service file regardless of the defaults. Default: See [Installation parameters](#installation-parameters).
 
+* `manage_proxy`: Whether or not Puppet will set the HTTPS_PROXY variable for the service. Default: `false`
+
+* `proxy_address`: Address of the proxy to use, in the format 'proxy.domain.tld:8080'. 
+
 ### Installation parameters
 
 #### When `install_method` is `repo`
