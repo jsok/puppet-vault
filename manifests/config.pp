@@ -97,7 +97,7 @@ class vault::config {
           }
         }
       }
-      /(redhat|sysv)/: {
+      /(redhat|sysv|init)/: {
         file { '/etc/init.d/vault':
           ensure  => file,
           owner   => 'root',
