@@ -1,0 +1,19 @@
+HOSTS:
+  ubuntu-1604-x64:
+    default_apply_opts:
+      order: random
+      strict_variables:
+    platform: ubuntu-16.04-amd64
+    hypervisor : docker
+    # Need upstart to tests services
+    image: ubuntu:16.04
+    docker_cmd: '["/sbin/init"]'
+    # This stops the image from being deleted on completion, speeding up the process.
+    docker_preserve_image: true
+    docker_image_commands:
+      - 'apt-get install -y curl unzip'
+CONFIG:
+  type: foss
+  log_level: debug
+  docker_options:
+    ssl_verify_peer: false
