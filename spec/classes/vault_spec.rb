@@ -258,8 +258,8 @@ describe 'vault' do
                   with_content(%r{chown root \$logfile \$pidfile})
               }
             end
-            context 'does not include systemd reload' do
-              it { is_expected.not_to contain_exec('systemd-reload') }
+            context 'does not include systemd magic' do
+              it { is_expected.not_to contain_class('systemd') }
             end
             context 'install through repo with default service management' do
               let(:params) do
@@ -370,8 +370,8 @@ describe 'vault' do
                   with_content(%r{chown root \$logfile \$pidfile})
               }
             end
-            context 'does not include systemd reload' do
-              it { is_expected.not_to contain_exec('systemd-reload') }
+            context 'does not include systemd magic' do
+              it { is_expected.not_to contain_class('systemd') }
             end
             context 'install through repo with default service management' do
               let(:params) do
@@ -444,11 +444,10 @@ describe 'vault' do
             context 'includes systemd init script' do
               it {
                 is_expected.to contain_file('/etc/systemd/system/vault.service').
-                  with_mode('0644').
+                  with_mode('0444').
                   with_ensure('file').
                   with_owner('root').
                   with_group('root').
-                  with_notify('Exec[systemd-reload]').
                   with_content(%r{^# vault systemd unit file}).
                   with_content(%r{^User=vault$}).
                   with_content(%r{^Group=vault$}).
@@ -474,11 +473,10 @@ describe 'vault' do
 
               it {
                 is_expected.to contain_file('/etc/systemd/system/vault.service').
-                  with_mode('0644').
+                  with_mode('0444').
                   with_ensure('file').
                   with_owner('root').
                   with_group('root').
-                  with_notify('Exec[systemd-reload]').
                   with_content(%r{^# vault systemd unit file}).
                   with_content(%r{^User=root$}).
                   with_content(%r{^Group=admin$}).
@@ -493,11 +491,10 @@ describe 'vault' do
 
               it {
                 is_expected.to contain_file('/etc/systemd/system/vault.service').
-                  with_mode('0644').
+                  with_mode('0444').
                   with_ensure('file').
                   with_owner('root').
                   with_group('root').
-                  with_notify('Exec[systemd-reload]').
                   with_content(%r{^# vault systemd unit file}).
                   with_content(%r{^User=vault$}).
                   with_content(%r{^Group=vault$}).
@@ -508,14 +505,8 @@ describe 'vault' do
                   with_content(%r{NoNewPrivileges=yes})
               }
             end
-            context 'includes systemd reload' do
-              it {
-                is_expected.to contain_exec('systemd-reload').
-                  with_command('systemctl daemon-reload').
-                  with_path('/bin:/usr/bin:/sbin:/usr/sbin').
-                  with_user('root').
-                  with_refreshonly(true)
-              }
+            context 'includes systemd magic' do
+              it { is_expected.to contain_class('systemd') }
             end
             context 'install through repo with default service management' do
               let(:params) do
@@ -712,11 +703,10 @@ describe 'vault' do
             context 'includes systemd init script' do
               it {
                 is_expected.to contain_file('/etc/systemd/system/vault.service').
-                  with_mode('0644').
+                  with_mode('0444').
                   with_ensure('file').
                   with_owner('root').
                   with_group('root').
-                  with_notify('Exec[systemd-reload]').
                   with_content(%r{^# vault systemd unit file}).
                   with_content(%r{^User=vault$}).
                   with_content(%r{^Group=vault$}).
@@ -742,11 +732,10 @@ describe 'vault' do
 
               it {
                 is_expected.to contain_file('/etc/systemd/system/vault.service').
-                  with_mode('0644').
+                  with_mode('0444').
                   with_ensure('file').
                   with_owner('root').
                   with_group('root').
-                  with_notify('Exec[systemd-reload]').
                   with_content(%r{^# vault systemd unit file}).
                   with_content(%r{^User=root$}).
                   with_content(%r{^Group=admin$}).
@@ -761,11 +750,10 @@ describe 'vault' do
 
               it {
                 is_expected.to contain_file('/etc/systemd/system/vault.service').
-                  with_mode('0644').
+                  with_mode('0444').
                   with_ensure('file').
                   with_owner('root').
                   with_group('root').
-                  with_notify('Exec[systemd-reload]').
                   with_content(%r{^# vault systemd unit file}).
                   with_content(%r{^User=vault$}).
                   with_content(%r{^Group=vault$}).
@@ -776,15 +764,8 @@ describe 'vault' do
                   with_content(%r{NoNewPrivileges=yes})
               }
             end
-            context 'includes systemd reload' do
-              it {
-                is_expected.to contain_exec('systemd-reload').
-                  with_command('systemctl daemon-reload').
-                  with_path('/bin:/usr/bin:/sbin:/usr/sbin').
-                  with_user('root').
-                  with_refreshonly(true)
-              }
-            end
+            it { is_expected.to contain_systemd__unit_file('vault.service')}
+
             context 'install through repo with default service management' do
               let(:params) do
                 {

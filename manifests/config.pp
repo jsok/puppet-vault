@@ -80,21 +80,8 @@ class vault::config {
         }
       }
       'systemd': {
-        file { '/etc/systemd/system/vault.service':
-          ensure  => file,
-          owner   => 'root',
-          group   => 'root',
-          mode    => '0644',
+        ::systemd::unit_file{'vault.service':
           content => template('vault/vault.systemd.erb'),
-          notify  => Exec['systemd-reload'],
-        }
-        if ! defined(Exec['systemd-reload']) {
-          exec {'systemd-reload':
-            command     => 'systemctl daemon-reload',
-            path        => '/bin:/usr/bin:/sbin:/usr/sbin',
-            user        => 'root',
-            refreshonly => true,
-          }
         }
       }
       /(redhat|sysv|init)/: {
