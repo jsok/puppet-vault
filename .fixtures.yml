@@ -2,5 +2,6 @@ fixtures:
   repositories:
     stdlib: "https://github.com/puppetlabs/puppetlabs-stdlib.git"
     archive: "https://github.com/voxpupuli/puppet-archive"
+    systemd: "https://github.com/camptocamp/puppet-systemd.git"
   symlinks:
     vault: "#{source_dir}"
