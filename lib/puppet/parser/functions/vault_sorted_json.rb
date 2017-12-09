@@ -25,12 +25,12 @@ def sorted_json(obj)
 end
 
 module Puppet::Parser::Functions
-  newfunction(:vault_sorted_json, type: :rvalue, doc: <<-EOS
+  newfunction(:vault_sorted_json, type: :rvalue, doc: <<-DOC
 This function takes data, outputs making sure the hash keys are sorted
 *Examples:*
     sorted_json({'key'=>'value'})
 Would return: {'key':'value'}
-    EOS
+    DOC
              ) do |arguments|
     if arguments.size != 1
       raise(Puppet::ParseError, 'sorted_json(): Wrong number of arguments ' \
