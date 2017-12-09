@@ -69,8 +69,8 @@ describe 'vault' do
           is_expected.to contain_file('/etc/vault/config.json').
             with_owner('vault').
             with_group('vault').
-            with_content(/"storage":\s*{\s*"file":\s*{\s*"path":\s*"\/data\/vault"/).
-            with_content(/"listener":\s*{"tcp":\s*{"address":\s*"127.0.0.1:8200"/).
+            with_content(%r|"storage":\s*{\s*"file":\s*{\s*"path":\s*"\/data\/vault"|).
+            with_content(%r|"listener":\s*{"tcp":\s*{"address":\s*"127.0.0.1:8200"|).
             with_content(%r{"address":\s*"127.0.0.1:8200"}).
             with_content(%r{"tls_disable":\s*1})
         }
@@ -164,9 +164,9 @@ describe 'vault' do
 
         it {
           is_expected.to contain_file('/etc/vault/config.json').
-            with_content(/"listener":\s*\[.*\]/).
-            with_content(/"tcp":\s*{"address":\s*"127.0.0.1:8200"/).
-            with_content(/"tcp":\s*{"address":\s*"0.0.0.0:8200"/)
+            with_content(%r{"listener":\s*\[.*\]}).
+            with_content(%r|"tcp":\s*{"address":\s*"127.0.0.1:8200"|).
+            with_content(%r|"tcp":\s*{"address":\s*"0.0.0.0:8200"|)
         }
       end
 
@@ -596,8 +596,8 @@ describe 'vault' do
                   with_content(%r{^# vault Agent \(Upstart unit\)}).
                   with_content(%r{env USER=vault}).
                   with_content(%r{env GROUP=vault}).
-                  with_content(/env CONFIG=\/etc\/vault\/config.json/).
-                  with_content(/env VAULT=\/usr\/local\/bin\/vault/).
+                  with_content(%r{env CONFIG=\/etc\/vault\/config.json}).
+                  with_content(%r{env VAULT=\/usr\/local\/bin\/vault}).
                   with_content(%r{exec start-stop-daemon -u \$USER -g \$GROUP -p \$PID_FILE -x \$VAULT -S -- server -config=\$CONFIG $}).
                   with_content(%r{export GOMAXPROCS=\${GOMAXPROCS:-3}})
               }
@@ -764,7 +764,7 @@ describe 'vault' do
                   with_content(%r{NoNewPrivileges=yes})
               }
             end
-            it { is_expected.to contain_systemd__unit_file('vault.service')}
+            it { is_expected.to contain_systemd__unit_file('vault.service') }
 
             context 'install through repo with default service management' do
               let(:params) do

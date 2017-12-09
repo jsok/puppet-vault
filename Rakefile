@@ -2,6 +2,7 @@ require 'puppetlabs_spec_helper/rake_tasks'
 require 'puppet/version'
 require 'puppet-lint/tasks/puppet-lint'
 require 'puppet-syntax/tasks/puppet-syntax'
+require 'rubocop/rake_task'
 
 # https://github.com/jsok/puppet-vault/issues/31
 ENV['STRICT_VARIABLES'] = "no" unless Puppet.version.to_f < 4
@@ -12,6 +13,8 @@ begin
   require 'puppet_blacksmith/rake_tasks'
 rescue LoadError
 end
+
+RuboCop::RakeTask.new
 
 Rake::Task[:lint].clear
 
@@ -49,6 +52,7 @@ desc "Run syntax, lint, and spec tests."
 task :test => [
   :syntax,
   :lint,
+  :rubocop,
   :spec,
   :metadata_lint,
 ]

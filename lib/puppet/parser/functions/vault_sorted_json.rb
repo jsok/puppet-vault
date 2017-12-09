@@ -8,11 +8,11 @@ def sorted_json(obj)
     # Convert quoted integers (string) to int
     (obj =~ %r{\A[-]?[0-9]+\z} ? obj.to_i : obj).to_json
   when Array
-    arrayRet = []
+    array_ret = []
     obj.each do |a|
-      arrayRet.push(sorted_json(a))
+      array_ret.push(sorted_json(a))
     end
-    '[' << arrayRet.join(',') << ']'
+    '[' << array_ret.join(',') << ']'
   when Hash
     ret = []
     obj.keys.sort.each do |k|
