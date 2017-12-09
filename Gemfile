@@ -13,8 +13,8 @@ group :test do
   gem 'puppet-lint-variable_contains_upcase',                       :require => false
   gem 'metadata-json-lint',                                         :require => false
   gem 'redcarpet',                                                  :require => false
-  gem 'rubocop', '~> 0.51',                                         :require => false if RUBY_VERSION >= '2.3.0'
-  gem 'rubocop-rspec', '~> 1.20',                                   :require => false if RUBY_VERSION >= '2.3.0'
+  gem 'rubocop', '~> 0.51',                                         :require => false
+  gem 'rubocop-rspec', '~> 1.20',                                   :require => false
   gem 'mocha', '>= 1.2.1',                                          :require => false
   gem 'coveralls',                                                  :require => false
   gem 'simplecov-console',                                          :require => false
