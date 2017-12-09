@@ -1,6 +1,6 @@
 require: rubocop-rspec
 AllCops:
-  TargetRubyVersion: 1.9
+  TargetRubyVersion: 2.1
   Include:
     - ./**/*.rb
   Exclude:
@@ -13,6 +13,7 @@ AllCops:
     - Rakefile
     - Guardfile
     - Vagrantfile
+
 Lint/ConditionPosition:
   Enabled: True
 
@@ -31,9 +32,6 @@ Lint/EnsureReturn:
 Lint/HandleExceptions:
   Enabled: True
 
-Lint/LiteralInCondition:
-  Enabled: True
-
 Lint/ShadowingOuterLocalVariable:
   Enabled: True
 
@@ -46,7 +44,7 @@ Style/HashSyntax:
 Style/RedundantReturn:
   Enabled: True
 
-Style/EndOfLine:
+Layout/EndOfLine:
   Enabled: False
 
 Lint/AmbiguousOperator:
@@ -126,7 +124,7 @@ Lint/Void:
 Layout/AccessModifierIndentation:
   Enabled: True
 
-Style/AccessorMethodName:
+Naming/AccessorMethodName:
   Enabled: True
 
 Style/Alias:
@@ -162,7 +160,7 @@ Layout/CaseIndentation:
 Style/CharacterLiteral:
   Enabled: True
 
-Style/ClassAndModuleCamelCase:
+Naming/ClassAndModuleCamelCase:
   Enabled: True
 
 Style/ClassAndModuleChildren:
@@ -260,7 +258,7 @@ Style/CommentAnnotation:
 Metrics/CyclomaticComplexity:
   Enabled: False
 
-Style/ConstantName:
+Naming/ConstantName:
   Enabled: True
 
 Style/Documentation:
@@ -369,7 +367,7 @@ Style/UnlessElse:
 Style/VariableInterpolation:
   Enabled: True
 
-Style/VariableName:
+Naming/VariableName:
   Enabled: True
 
 Style/WhileUntilDo:
@@ -378,7 +376,7 @@ Style/WhileUntilDo:
 Style/EvenOdd:
   Enabled: True
 
-Style/FileName:
+Naming/FileName:
   Enabled: True
 
 Style/For:
@@ -387,7 +385,7 @@ Style/For:
 Style/Lambda:
   Enabled: True
 
-Style/MethodName:
+Naming/MethodName:
   Enabled: True
 
 Style/MultilineTernaryOperator:
@@ -423,7 +421,7 @@ Style/NumericLiterals:
 Style/OneLineConditional:
   Enabled: True
 
-Style/OpMethod:
+Naming/BinaryOperatorParameterName:
   Enabled: True
 
 Style/ParenthesesAroundCondition:
@@ -435,7 +433,7 @@ Style/PercentLiteralDelimiters:
 Style/PerlBackrefs:
   Enabled: True
 
-Style/PredicateName:
+Naming/PredicateName:
   Enabled: True
 
 Style/RedundantException:
@@ -525,6 +523,9 @@ RSpec/RepeatedDescription:
   Enabled: False
 
 RSpec/NestedGroups:
+  Enabled: False
+
+RSpec/ContextWording:
   Enabled: False
 
 # this is broken on ruby1.9

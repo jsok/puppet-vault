@@ -8,11 +8,11 @@ def sorted_json(obj)
     # Convert quoted integers (string) to int
     (obj =~ %r{\A[-]?[0-9]+\z} ? obj.to_i : obj).to_json
   when Array
-    arrayRet = []
+    array_ret = []
     obj.each do |a|
-      arrayRet.push(sorted_json(a))
+      array_ret.push(sorted_json(a))
     end
-    '[' << arrayRet.join(',') << ']'
+    '[' << array_ret.join(',') << ']'
   when Hash
     ret = []
     obj.keys.sort.each do |k|
@@ -25,12 +25,12 @@ def sorted_json(obj)
 end
 
 module Puppet::Parser::Functions
-  newfunction(:vault_sorted_json, type: :rvalue, doc: <<-EOS
+  newfunction(:vault_sorted_json, type: :rvalue, doc: <<-DOC
 This function takes data, outputs making sure the hash keys are sorted
 *Examples:*
     sorted_json({'key'=>'value'})
 Would return: {'key':'value'}
-    EOS
+    DOC
              ) do |arguments|
     if arguments.size != 1
       raise(Puppet::ParseError, 'sorted_json(): Wrong number of arguments ' \
