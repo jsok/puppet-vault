@@ -4,8 +4,7 @@ require 'puppet-lint/tasks/puppet-lint'
 require 'puppet-syntax/tasks/puppet-syntax'
 require 'rubocop/rake_task'
 
-# https://github.com/jsok/puppet-vault/issues/31
-ENV['STRICT_VARIABLES'] = "no" unless Puppet.version.to_f < 4
+ENV['STRICT_VARIABLES'] = "yes"
 
 # These gems aren't always present, for instance
 # on Travis with --without development
