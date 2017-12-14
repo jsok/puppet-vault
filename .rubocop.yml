@@ -197,18 +197,6 @@ Layout/SpaceBeforeSemicolon:
 Layout/TrailingBlankLines:
   Enabled: True
 
-Layout/SpaceInsideBlockBraces:
-  Enabled: True
-
-Layout/SpaceInsideBrackets:
-  Enabled: True
-
-Layout/SpaceInsideHashLiteralBraces:
-  Enabled: True
-
-Layout/SpaceInsideParens:
-  Enabled: True
-
 Layout/LeadingCommentSpace:
   Enabled: True
 
