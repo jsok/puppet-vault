@@ -179,6 +179,9 @@ Style/ClassMethods:
 Style/ClassVars:
   Enabled: True
 
+Style/MixinUsage:
+  Enabled: False
+
 Style/WhenThen:
   Enabled: True
 
