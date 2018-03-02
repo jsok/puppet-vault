@@ -152,6 +152,19 @@ describe 'vault' do
         end
       end
 
+      context 'when specifying ui to be true' do
+        let(:params) do
+          {
+            enable_ui: true
+          }
+        end
+
+        it {
+          is_expected.to contain_file('/etc/vault/config.json').
+            with_content(%r{"ui":true})
+        }
+      end
+
       context 'when specifying an array of listeners' do
         let(:params) do
           {

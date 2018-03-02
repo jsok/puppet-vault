@@ -33,6 +33,8 @@ class vault::params {
     },
   }
 
+  $enable_ui          = undef
+
   # These should always be undef as they are optional settings that
   # should not be configured unless explicitly declared.
   $ha_storage         = undef
