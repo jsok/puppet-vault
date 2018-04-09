@@ -208,6 +208,22 @@ describe 'vault' do
             with_group('vault')
         }
       end
+
+      context 'when ensuring the service is disabled' do
+        let(:params) do
+          {
+            service_enable: false,
+            service_ensure: 'stopped'
+          }
+        end
+
+        it {
+          is_expected.to contain_service('vault').
+            with_ensure('stopped').
+            with_enable(false)
+        }
+      end
+
       case facts[:os]['family']
       when 'RedHat'
         case facts[:os]['release']['major'].to_i
