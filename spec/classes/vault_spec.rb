@@ -45,7 +45,7 @@ describe 'vault' do
         it { is_expected.to contain_group('vault') }
         it { is_expected.not_to contain_file('/data/vault') }
 
-        context 'do not manage user and group' do
+        context 'when not managing user and group' do
           let(:params) do
             {
               manage_user: false,
@@ -75,21 +75,20 @@ describe 'vault' do
             with_content(%r{"tls_disable":\s*1})
         }
 
-        it { is_expected.to contain_file('/usr/local/bin/vault').with_mode('0755') }
+        it { is_expected.to contain_file('vault_binary').with_mode('0755') }
         it {
-          is_expected.to contain_exec('setcap cap_ipc_lock=+ep /usr/local/bin/vault').
-            with_unless('getcap /usr/local/bin/vault | grep cap_ipc_lock+ep').
-            that_subscribes_to('File[/usr/local/bin/vault]')
+          is_expected.to contain_exec('setcap_vault_binary').
+            that_subscribes_to('File[vault_binary]')
         }
 
-        context 'disable mlock' do
+        context 'when disable mlock' do
           let(:params) do
             {
               disable_mlock: true
             }
           end
 
-          it { is_expected.not_to contain_exec('setcap cap_ipc_lock=+ep /usr/local/bin/vault') }
+          it { is_expected.not_to contain_exec('setcap_vault_binary') }
 
           it {
             is_expected.to contain_file('/etc/vault/config.json').
@@ -97,49 +96,54 @@ describe 'vault' do
           }
         end
 
-        context 'default download options' do
-          let(:params) { { version: '0.7.0' } }
+        context 'when installed from archive' do
+          let(:params) { { install_method: 'archive' } }
 
           it {
             is_expected.to contain_archive('/tmp/vault.zip').
-              with_source('https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip').
-              that_comes_before('File[/usr/local/bin/vault]')
+              that_comes_before('File[vault_binary]')
           }
-        end
 
-        context 'specifying a custom download params' do
-          let(:params) do
-            {
-              version: '0.6.0',
-              download_url_base: 'http://my_site.example.com/vault/',
-              package_name: 'vaultbinary',
-              download_extension: 'tar.gz'
+          context 'when installed with default download options' do
+            let(:params) do
+              super().merge(version: '0.7.0')
+            end
+
+            it {
+              is_expected.to contain_archive('/tmp/vault.zip').
+                with_source('https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip')
             }
           end
 
-          it {
-            is_expected.to contain_archive('/tmp/vault.zip').
-              with_source('http://my_site.example.com/vault/0.6.0/vaultbinary_0.6.0_linux_amd64.tar.gz').
-              that_comes_before('File[/usr/local/bin/vault]')
-          }
-        end
+          context 'when specifying a custom download params' do
+            let(:params) do
+              super().merge(
+                version: '0.6.0',
+                download_url_base: 'http://my_site.example.com/vault/',
+                package_name: 'vaultbinary',
+                download_extension: 'tar.gz'
+              )
+            end
 
-        context 'installs from download url' do
-          let(:params) do
-            {
-              download_url: 'http://example.com/vault.zip',
-              install_method: 'archive'
+            it {
+              is_expected.to contain_archive('/tmp/vault.zip').
+                with_source('http://my_site.example.com/vault/0.6.0/vaultbinary_0.6.0_linux_amd64.tar.gz')
             }
           end
 
-          it {
-            is_expected.to contain_archive('/tmp/vault.zip').
-              with_source('http://example.com/vault.zip').
-              that_comes_before('File[/usr/local/bin/vault]')
-          }
+          context 'when installed from download url' do
+            let(:params) do
+              super().merge(download_url: 'http://example.com/vault.zip')
+            end
+
+            it {
+              is_expected.to contain_archive('/tmp/vault.zip').
+                with_source('http://example.com/vault.zip')
+            }
+          end
         end
 
-        context 'installs from repository' do
+        context 'when installed from package repository' do
           let(:params) do
             {
               install_method: 'repo',
@@ -208,13 +212,14 @@ describe 'vault' do
             with_group('vault')
         }
       end
+
       case facts[:os]['family']
       when 'RedHat'
         case facts[:os]['release']['major'].to_i
         when 2017
           context 'RedHat 7 Amazon Linux specific' do
             let facts do
-              facts.merge(service_provider: 'sysv', processorcount: 3)
+              facts.merge(service_provider: 'sysv', grocessorcount: 3)
             end
 
             context 'includes SysV init script' do
@@ -326,7 +331,7 @@ describe 'vault' do
         when 6
           context 'RedHat 6 specific' do
             let :facts do
-              facts.merged(service_provider: 'sysv', processorcount: 3)
+              facts.merge(service_provider: 'sysv', processorcount: 3)
             end
 
             context 'includes SysV init script' do
@@ -617,14 +622,15 @@ describe 'vault' do
               }
             end
 
+            it { is_expected.to contain_file('vault_binary').with_path('/opt/bin/vault') }
             it {
-              is_expected.to contain_exec('setcap cap_ipc_lock=+ep /opt/bin/vault').
-                with_unless('getcap /opt/bin/vault | grep cap_ipc_lock+ep').
-                that_subscribes_to('File[/opt/bin/vault]')
+              is_expected.to contain_exec('setcap_vault_binary').
+                with_command('setcap cap_ipc_lock=+ep /opt/bin/vault').
+                with_unless('getcap /opt/bin/vault | grep cap_ipc_lock+ep')
             }
+
             it { is_expected.to contain_file('/opt/etc/vault/config.json') }
 
-            it { is_expected.to contain_file('/opt/bin/vault').with_mode('0755') }
             it {
               is_expected.to contain_file('/opt/etc/vault').
                 with_ensure('directory').
@@ -828,6 +834,15 @@ describe 'vault' do
               it { is_expected.to contain_file('/etc/systemd/system/vault.service') }
             end
           end
+        end
+      when 'Archlinux'
+        context 'defaults to repo install' do
+          it { is_expected.to contain_file('vault_binary').with_path('/bin/vault') }
+          it {
+            is_expected.to contain_exec('setcap_vault_binary').
+              with_command('setcap cap_ipc_lock=+ep /bin/vault').
+              with_unless('getcap /bin/vault | grep cap_ipc_lock+ep')
+          }
         end
       end
     end
