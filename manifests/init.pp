@@ -97,6 +97,7 @@ class vault (
   $version                             = $::vault::params::version,
   $os                                  = $::vault::params::os,
   $arch                                = $::vault::params::arch,
+  Optional[Boolean] $enable_ui         = $::vault::params::enable_ui,
   Hash $extra_config                   = {},
 ) inherits ::vault::params {
 
