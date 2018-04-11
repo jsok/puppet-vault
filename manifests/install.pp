@@ -18,7 +18,7 @@ class vault::install {
           source       => $::vault::real_download_url,
           cleanup      => true,
           creates      => $vault_bin,
-          before       => File[$vault_bin],
+          before       => File['vault_binary'],
         }
       }
 
@@ -33,16 +33,18 @@ class vault::install {
     }
   }
 
-  file { $vault_bin:
+  file { 'vault_binary':
+    path  =>  $vault_bin,
     owner => 'root',
     group => 'root',
     mode  => '0755',
   }
 
   if !$::vault::disable_mlock {
-    exec { "setcap cap_ipc_lock=+ep ${vault_bin}":
+    exec { 'setcap_vault_binary':
+      command   => "setcap cap_ipc_lock=+ep ${vault_bin}",
       path      => ['/sbin', '/usr/sbin', '/bin', '/usr/bin', ],
-      subscribe => File[$vault_bin],
+      subscribe => File['vault_binary'],
       unless    => "getcap ${vault_bin} | grep cap_ipc_lock+ep",
     }
   }
