@@ -77,7 +77,9 @@ describe 'vault' do
 
         it { is_expected.to contain_file('vault_binary').with_mode('0755') }
         it {
-          is_expected.to contain_exec('setcap_vault_binary').
+          is_expected.to contain_file_capability('vault_binary_capability').
+            with_ensure('present').
+            with_capability('cap_ipc_lock=ep').
             that_subscribes_to('File[vault_binary]')
         }
 
@@ -88,7 +90,7 @@ describe 'vault' do
             }
           end
 
-          it { is_expected.not_to contain_exec('setcap_vault_binary') }
+          it { is_expected.not_to contain_file_capability('vault_binary_capability') }
 
           it {
             is_expected.to contain_file('/etc/vault/config.json').
@@ -624,9 +626,8 @@ describe 'vault' do
 
             it { is_expected.to contain_file('vault_binary').with_path('/opt/bin/vault') }
             it {
-              is_expected.to contain_exec('setcap_vault_binary').
-                with_command('setcap cap_ipc_lock=+ep /opt/bin/vault').
-                with_unless('getcap /opt/bin/vault | grep cap_ipc_lock+ep')
+              is_expected.to contain_file_capability('vault_binary_capability').
+                with_file('/opt/bin/vault')
             }
 
             it { is_expected.to contain_file('/opt/etc/vault/config.json') }
@@ -839,9 +840,8 @@ describe 'vault' do
         context 'defaults to repo install' do
           it { is_expected.to contain_file('vault_binary').with_path('/bin/vault') }
           it {
-            is_expected.to contain_exec('setcap_vault_binary').
-              with_command('setcap cap_ipc_lock=+ep /bin/vault').
-              with_unless('getcap /bin/vault | grep cap_ipc_lock+ep')
+            is_expected.to contain_file_capability('vault_binary_capability').
+              with_file('/bin/vault')
           }
         end
       end

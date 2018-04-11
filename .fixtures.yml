@@ -1,7 +1,8 @@
 fixtures:
-  repositories:
-    stdlib: "https://github.com/puppetlabs/puppetlabs-stdlib.git"
-    archive: "https://github.com/voxpupuli/puppet-archive"
-    systemd: "https://github.com/camptocamp/puppet-systemd.git"
+  forge_modules:
+    stdlib: "puppetlabs/stdlib"
+    archive: "puppet/archive"
+    systemd: "camptocamp/systemd"
+    file_capability: "stm/file_capability"
   symlinks:
     vault: "#{source_dir}"
