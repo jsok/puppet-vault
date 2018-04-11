@@ -20,7 +20,8 @@ This includes:
 
 This module is currently only tested on:
 
-* Ubuntu 14.04.
+* Ubuntu 14.04
+* Ubuntu 16.04
 * CentOS/RedHat 6
 * CentOS/RedHat 7
 
