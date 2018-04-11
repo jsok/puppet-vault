@@ -56,6 +56,10 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `service_name`: Customise the name of the system service
 
+* `service_enable`: Tell the OS to enable or disable the service at system startup
+
+* `service_ensure`: Tell the OS whether the service should be running or stopped
+
 * `service_provider`: Customise the name of the system service provider; this also controls the init configuration files that are installed.
 
 * `service_options`: Extra argument to pass to `vault server`, as per: `vault server --help`
