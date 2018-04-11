@@ -89,6 +89,7 @@ The module will **not** manage any required packages to un-archive, e.g. `unzip`
 * `download_filename`: Filename to (temporarily) save the downloaded zip file, default: `vault.zip`
 * `version`: The Version of vault to download. default: `0.8.3`
 * `manage_service_file`: Will manage the service file. default: true
+* `manage_file_capabilities`: Will manage file capabilities of the vault binary. default: `true` unless `install_method` is `repo`.
 
 ### Configuration parameters
 

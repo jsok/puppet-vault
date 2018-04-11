@@ -42,6 +42,8 @@ class vault::params {
   $max_lease_ttl      = undef
   $disable_mlock      = undef
 
+  $manage_file_capabilities = undef
+
   $manage_service = true
 
   $service_provider = $facts['service_provider']

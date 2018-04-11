@@ -85,6 +85,7 @@ class vault (
   Optional[String] $default_lease_ttl  = $::vault::params::default_lease_ttl,
   Optional[String] $max_lease_ttl      = $::vault::params::max_lease_ttl,
   $disable_mlock                       = $::vault::params::disable_mlock,
+  $manage_file_capabilities            = $::vault::params::manage_file_capabilities,
   $service_options                     = '',
   $num_procs                           = $::vault::params::num_procs,
   $install_method                      = $::vault::params::install_method,

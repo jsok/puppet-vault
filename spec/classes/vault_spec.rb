@@ -76,12 +76,6 @@ describe 'vault' do
         }
 
         it { is_expected.to contain_file('vault_binary').with_mode('0755') }
-        it {
-          is_expected.to contain_file_capability('vault_binary_capability').
-            with_ensure('present').
-            with_capability('cap_ipc_lock=ep').
-            that_subscribes_to('File[vault_binary]')
-        }
 
         context 'when disable mlock' do
           let(:params) do
@@ -143,6 +137,19 @@ describe 'vault' do
                 with_source('http://example.com/vault.zip')
             }
           end
+
+          it {
+            is_expected.to contain_file_capability('vault_binary_capability').
+              with_ensure('present').
+              with_capability('cap_ipc_lock=ep').
+              that_subscribes_to('File[vault_binary]')
+          }
+
+          context 'when not managing file capabilities' do
+            let(:params) { { manage_file_capabilities: false } }
+
+            it { is_expected.not_to contain_file_capability('vault_binary_capability') }
+          end
         end
 
         context 'when installed from package repository' do
@@ -155,6 +162,13 @@ describe 'vault' do
           end
 
           it { is_expected.to contain_package('vault') }
+          it { is_expected.not_to contain_file_capability('vault_binary_capability') }
+
+          context 'when managing file capabilities' do
+            let(:params) { { manage_file_capabilities: true } }
+
+            it { is_expected.to contain_file_capability('vault_binary_capability') }
+          end
         end
       end
 
@@ -839,10 +853,7 @@ describe 'vault' do
       when 'Archlinux'
         context 'defaults to repo install' do
           it { is_expected.to contain_file('vault_binary').with_path('/bin/vault') }
-          it {
-            is_expected.to contain_file_capability('vault_binary_capability').
-              with_file('/bin/vault')
-          }
+          it { is_expected.not_to contain_file_capability('vault_binary_capability') }
         end
       end
     end
