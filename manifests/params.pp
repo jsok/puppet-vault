@@ -46,6 +46,9 @@ class vault::params {
 
   $manage_service = true
 
+  $service_enable = true
+  $service_ensure = 'running'
+
   $service_provider = $facts['service_provider']
 
   case $facts['architecture'] {
