@@ -20,12 +20,15 @@ class vault::install {
           creates      => $vault_bin,
           before       => File['vault_binary'],
         }
+
+        $_manage_file_capabilities = true
       }
 
     'repo': {
       package { $::vault::package_name:
         ensure  => $::vault::package_ensure,
       }
+      $_manage_file_capabilities = false
     }
 
     default: {
@@ -40,7 +43,7 @@ class vault::install {
     mode  => '0755',
   }
 
-  if !$::vault::disable_mlock {
+  if !$::vault::disable_mlock and pick($::vault::manage_file_capabilities, $_manage_file_capabilities) {
     file_capability { 'vault_binary_capability':
       ensure     => present,
       file       => $vault_bin,
