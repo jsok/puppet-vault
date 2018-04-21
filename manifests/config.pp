@@ -14,6 +14,7 @@ class vault::config {
     'max_lease_ttl'     => $::vault::max_lease_ttl,
     'disable_mlock'     => $::vault::disable_mlock,
     'ui'                => $::vault::enable_ui,
+    'pid_file'          => $::vault::pid_file,
   })
 
   $config_hash = merge($_config_hash, $::vault::extra_config)

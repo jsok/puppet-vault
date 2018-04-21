@@ -5,7 +5,7 @@
 # chkconfig: 3 85 15
 # processname: vault
 # description: Init.d script for Vault Project Server
-# pidfile: /var/run/vault.pid
+# pidfile: <%= scope['vault::pid_file'] %>
 # config: <%= scope['vault::config_dir'] %>/config.json
 ###########################################################################################################
 # this file has been put in place by the jsok/vault Puppet module (https://forge.puppetlabs.com/jsok/vault)
@@ -34,7 +34,7 @@ exec="<%= scope['vault::bin_dir'] %>/vault"
 prog=${exec##*/}
 
 lockfile="/var/lock/subsys/$prog"
-pidfile="/var/run/${prog}.pid"
+pidfile="<%= scope['vault::pid_file'] %>"
 logfile="/var/log/${prog}.log"
 sysconfig="/etc/sysconfig/$prog"
 conffile="<%= scope['vault::config_dir'] %>/config.json"
@@ -51,7 +51,7 @@ start() {
     touch $logfile $pidfile
     chown <%= scope['vault::user'] %> $logfile $pidfile
     export GOMAXPROCS=${GOMAXPROCS:-<%= scope['vault::num_procs'] %>}
-    daemon --user <%= scope['vault::user'] %> "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"
+    daemon --user <%= scope['vault::user'] %> "{ $exec server -config=$conffile $OPTIONS &>> $logfile & };"
 
     RETVAL=$?
     if [ $RETVAL -eq 0 ]; then

@@ -257,6 +257,52 @@ describe 'vault' do
         }
       end
 
+      context 'when PID file is specified' do
+        let(:params) do
+          {
+            pid_file: '/var/run/vault.pid'
+          }
+        end
+
+        it {
+          is_expected.to contain_file('/etc/vault/config.json').
+            with_content(%r{"pid_file":"/var/run/vault.pid"})
+        }
+
+        context 'when systemd' do
+          let :facts do
+            facts.merge(service_provider: 'systemd')
+          end
+
+          it {
+            is_expected.to contain_file('/etc/systemd/system/vault.service').
+              with_content(%r{^PIDFile=/var/run/vault.pid$})
+          }
+        end
+
+        context 'when upstart' do
+          let :facts do
+            facts.merge(service_provider: 'upstart')
+          end
+
+          it {
+            is_expected.to contain_file('/etc/init/vault.conf').
+              with_content(%r{env PID_FILE=/var/run/vault.pid})
+          }
+        end
+
+        context 'when sysv' do
+          let :facts do
+            facts.merge(service_provider: 'sysv')
+          end
+
+          it {
+            is_expected.to contain_file('/etc/init.d/vault').
+              with_content(%r{pidfile="/var/run/vault.pid"})
+          }
+        end
+      end
+
       case facts[:os]['family']
       when 'RedHat'
         case facts[:os]['release']['major'].to_i
