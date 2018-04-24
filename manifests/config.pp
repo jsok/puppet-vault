@@ -27,7 +27,7 @@ class vault::config {
   }
 
   file { "${::vault::config_dir}/config.json":
-    content => vault_sorted_json($config_hash),
+    content => to_json_pretty($config_hash),
     owner   => $::vault::user,
     group   => $::vault::group,
   }
