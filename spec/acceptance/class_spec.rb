@@ -96,7 +96,7 @@ describe 'vault class' do
 
     describe file('/etc/vault/config.json') do
       it { is_expected.to be_file }
-      its(:content) { is_expected.to include '"address":"127.0.0.1:8200"' }
+      its(:content) { is_expected.to include('"address": "127.0.0.1:8200"') }
     end
 
     describe service('vault') do
