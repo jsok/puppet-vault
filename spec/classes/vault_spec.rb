@@ -68,12 +68,43 @@ describe 'vault' do
         it {
           is_expected.to contain_file('/etc/vault/config.json').
             with_owner('vault').
-            with_group('vault').
-            with_content(%r|"storage":\s*{\s*"file":\s*{\s*"path":\s*"\/data\/vault"|).
-            with_content(%r|"listener":\s*{"tcp":\s*{"address":\s*"127.0.0.1:8200"|).
-            with_content(%r{"address":\s*"127.0.0.1:8200"}).
-            with_content(%r{"tls_disable":\s*1})
+            with_group('vault')
         }
+
+        context 'vault JSON config' do
+          subject { param_value(catalogue, 'File', '/etc/vault/config.json', 'content') }
+
+          it {
+            is_expected.to include_json(
+              storage: {
+                file: {
+                  path: '/data/vault'
+                }
+              }
+            )
+          }
+          it {
+            is_expected.to include_json(
+              listener: {
+                tcp: {
+                  address: '127.0.0.1:8200',
+                  tls_disable: 1
+                }
+              }
+            )
+          }
+          it 'excludes unconfigured config options' do
+            expect(subject).not_to include_json(
+              ha_storage: exist,
+              disable_cache: exist,
+              telemetry: exist,
+              default_lease_ttl: exist,
+              max_lease_ttl: exist,
+              disable_mlock: exist,
+              ui: exist
+            )
+          end
+        end
 
         it { is_expected.to contain_file('vault_binary').with_mode('0755') }
 
@@ -87,8 +118,9 @@ describe 'vault' do
           it { is_expected.not_to contain_file_capability('vault_binary_capability') }
 
           it {
-            is_expected.to contain_file('/etc/vault/config.json').
-              with_content(%r{"disable_mlock":\s*true})
+            expect(param_value(catalogue, 'File', '/etc/vault/config.json', 'content')).to include_json(
+              disable_mlock: true
+            )
           }
         end
 
@@ -180,8 +212,9 @@ describe 'vault' do
         end
 
         it {
-          is_expected.to contain_file('/etc/vault/config.json').
-            with_content(%r{"ui":true})
+          expect(param_value(catalogue, 'File', '/etc/vault/config.json', 'content')).to include_json(
+            ui: true
+          )
         }
       end
 
@@ -196,10 +229,20 @@ describe 'vault' do
         end
 
         it {
-          is_expected.to contain_file('/etc/vault/config.json').
-            with_content(%r{"listener":\s*\[.*\]}).
-            with_content(%r|"tcp":\s*{"address":\s*"127.0.0.1:8200"|).
-            with_content(%r|"tcp":\s*{"address":\s*"0.0.0.0:8200"|)
+          expect(param_value(catalogue, 'File', '/etc/vault/config.json', 'content')).to include_json(
+            listener: [
+              {
+                tcp: {
+                  address: '127.0.0.1:8200'
+                }
+              },
+              {
+                tcp: {
+                  address: '0.0.0.0:8200'
+                }
+              }
+            ]
+          )
         }
       end
 
