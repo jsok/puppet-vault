@@ -7,6 +7,11 @@
   "source": "https://github.com/jsok/puppet-vault.git",
   "project_page": "https://github.com/jsok/puppet-vault",
   "issues_url": "https://github.com/jsok/puppet-vault/issues",
+  "tags": [
+    "vault",
+    "hashicorp",
+    "secrets"
+  ],
   "requirements": [
     {
       "name": "puppet",
