@@ -207,7 +207,7 @@ describe 'vault' do
       context 'when specifying ui to be true' do
         let(:params) do
           {
-            enable_ui: true
+            ui: true
           }
         end
 

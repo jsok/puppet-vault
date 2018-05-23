@@ -13,7 +13,7 @@ class vault::config {
     'default_lease_ttl' => $::vault::default_lease_ttl,
     'max_lease_ttl'     => $::vault::max_lease_ttl,
     'disable_mlock'     => $::vault::disable_mlock,
-    'ui'                => $::vault::enable_ui,
+    'ui'                => $::vault::ui,
   })
 
   $config_hash = merge($_config_hash, $::vault::extra_config)
