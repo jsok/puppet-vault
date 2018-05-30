@@ -114,7 +114,7 @@ describe 'vault class' do
     it 'works idempotently with no errors' do
       pp = <<-MANIFEST
       class { 'vault':
-        version => '0.10.1'
+        version => '0.10.1',
         storage => {
           file => {
             path => '/tmp',
