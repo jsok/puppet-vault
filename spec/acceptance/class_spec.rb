@@ -108,4 +108,29 @@ describe 'vault class' do
       it { is_expected.to be_listening.on('127.0.0.1').with('tcp') }
     end
   end
+
+  # we will test if we can update vault to another version
+  context 'updated vault version' do
+    it 'works idempotently with no errors' do
+      pp = <<-MANIFEST
+      class { 'vault':
+        version => '0.10.1'
+        storage => {
+          file => {
+            path => '/tmp',
+          }
+        },
+        listener => [{
+          tcp => {
+            address => '127.0.0.1:8200',
+            tls_disable => 1,
+          }
+        }]
+      }
+      MANIFEST
+      # Run it twice and test for idempotency
+      apply_manifest(pp, catch_failures: true)
+      apply_manifest(pp, catch_changes: true)
+    end
+  end
 end
