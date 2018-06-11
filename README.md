@@ -129,7 +129,7 @@ By default, with no parameters the module will configure vault with some sensibl
 
 * `max_lease_ttl`: A string containing the max lease TTL (default: `undef`)
 
-* `ui`: Enable the vault UI (requires vault 0.10.0+ or Enterprise) (default: `undef`)
+* `enable_ui`: Enable the vault UI (requires vault 0.10.0+ or Enterprise) (default: `undef`)
 
 * `extra_config`: A hash containing extra configuration, intended for newly released configuration not yet supported by the module. This hash will get merged with other configuration attributes into the JSON config file.
 
