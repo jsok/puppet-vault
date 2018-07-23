@@ -50,6 +50,10 @@ class vault::install {
       capability => 'cap_ipc_lock=ep',
       subscribe  => File['vault_binary'],
     }
+
+    if $::vault::install_method == 'repo' {
+      Package['vault'] ~> File_capability['vault_binary_capability']
+    }
   }
 
   if $vault::manage_user {
