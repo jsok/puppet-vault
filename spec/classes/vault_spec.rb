@@ -198,12 +198,9 @@ describe 'vault' do
 
           context 'when managing file capabilities' do
             let(:params) do
-              {
-                install_method: 'repo',
-                package_name: 'vault',
-                package_ensure: 'installed',
-                manage_file_capabilities: true
-              }
+              super().merge(
+                manage_file_capabilities: true,
+              )
             end
 
             it { is_expected.to contain_file_capability('vault_binary_capability') }
