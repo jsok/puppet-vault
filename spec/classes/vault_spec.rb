@@ -197,9 +197,14 @@ describe 'vault' do
           it { is_expected.not_to contain_file_capability('vault_binary_capability') }
 
           context 'when managing file capabilities' do
-            let(:params) { { manage_file_capabilities: true } }
+            let(:params) do
+              super().merge(
+                manage_file_capabilities: true,
+              )
+            end
 
             it { is_expected.to contain_file_capability('vault_binary_capability') }
+            it { is_expected.to contain_package('vault').that_notifies(['File_capability[vault_binary_capability]']) }
           end
         end
       end
