@@ -1,6 +1,6 @@
 require: rubocop-rspec
 AllCops:
-  TargetRubyVersion: 2.1
+  TargetRubyVersion: 2.4
   Include:
     - ./**/*.rb
   Exclude:
@@ -14,7 +14,7 @@ AllCops:
     - Guardfile
     - Vagrantfile
 
-Lint/ConditionPosition:
+Layout/ConditionPosition:
   Enabled: True
 
 Lint/ElseLayout:
@@ -82,13 +82,13 @@ Lint/AmbiguousRegexpLiteral:
 Security/Eval:
   Enabled: True
 
-Lint/BlockAlignment:
+Layout/BlockAlignment:
   Enabled: True
 
-Lint/DefEndAlignment:
+Layout/DefEndAlignment:
   Enabled: True
 
-Lint/EndAlignment:
+Layout/EndAlignment:
   Enabled: True
 
 Lint/DeprecatedClassMethods:
