@@ -30,6 +30,7 @@ class vault::config {
     content => to_json_pretty($config_hash),
     owner   => $::vault::user,
     group   => $::vault::group,
+    mode    => $::vault::config_mode,
   }
 
   # If using the file storage then the path must exist and be readable

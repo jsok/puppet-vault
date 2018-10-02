@@ -24,6 +24,9 @@
 # * `config_dir`
 #   Directory the vault configuration will be kept in.
 #
+# * `config_mode`
+#   Mode of the configuration file (config.json). Defaults to '0750'
+#
 # * `purge_config_dir`
 #   Whether the `config_dir` should be purged before installing the
 #   generated config.
@@ -68,6 +71,7 @@ class vault (
   $manage_group                        = $::vault::params::manage_group,
   $bin_dir                             = $::vault::params::bin_dir,
   $config_dir                          = $::vault::params::config_dir,
+  $config_mode                         = $::vault::params::config_mode,
   $purge_config_dir                    = true,
   $download_url                        = $::vault::params::download_url,
   $download_url_base                   = $::vault::params::download_url_base,
