@@ -29,6 +29,7 @@ NoNewPrivileges=yes
 Environment=GOMAXPROCS=<%= scope.lookupvar('vault::num_procs') %>
 ExecStart=<%= scope.lookupvar('vault::bin_dir') %>/vault server -config=<%= scope.lookupvar('vault::config_dir') %>/config.json <%= scope.lookupvar('vault::service_options') %>
 KillSignal=SIGINT
+ExecReload=/bin/kill -HUP $MAINPID
 TimeoutStopSec=30s
 Restart=on-failure
 StartLimitInterval=60s
