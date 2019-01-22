@@ -41,3 +41,4 @@ ENV['PUPPET_GEM_VERSION'].nil? ? puppetversion = '~> 5' : puppetversion = ENV['P
 gem 'puppet', puppetversion, :require => false, :groups => [:test]
 
 # vim: syntax=ruby
+
