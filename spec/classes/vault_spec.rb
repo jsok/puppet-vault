@@ -223,6 +223,32 @@ describe 'vault' do
         }
       end
 
+      context 'install though archive with versioning' do
+        let(:params) do
+          {
+            versioning: true,
+            version: '1.0.2',
+            bin_dir: '/usr/bin',
+            install_method: 'archive'
+          }
+        end
+
+        it {
+          is_expected.to contain_file('vault_binary').
+            with_path('/usr/bin/vault1.0.2').
+            with_mode('0755').
+            with_owner('root').
+            with_group('root')
+        }
+
+        it {
+          is_expected.to contain_file('/usr/bin/vault').
+            with_ensure('link').
+            with_target('/usr/bin/vault1.0.2')
+        }
+
+      end
+
       context 'when specifying an array of listeners' do
         let(:params) do
           {

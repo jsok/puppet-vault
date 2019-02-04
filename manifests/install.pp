@@ -1,34 +1,46 @@
 # == Class vault::install
 #
 class vault::install {
-  $vault_bin = "${::vault::bin_dir}/vault"
 
   case $::vault::install_method {
-      'archive': {
-        if $::vault::manage_download_dir {
-          file { $::vault::download_dir:
-            ensure => directory,
-          }
+    'archive': {
+      if $::vault::manage_download_dir {
+        file { $::vault::download_dir:
+          ensure => directory,
         }
-
-        archive { "${::vault::download_dir}/${::vault::download_filename}":
-          ensure       => present,
-          extract      => true,
-          extract_path => $::vault::bin_dir,
-          source       => $::vault::real_download_url,
-          cleanup      => true,
-          creates      => $vault_bin,
-          before       => File['vault_binary'],
-        }
-
-        $_manage_file_capabilities = true
       }
+
+      if $::vault::versioning {
+        $vault_link = "${::vault::bin_dir}/vault"
+        $vault_bin = "${::vault::bin_dir}/vault${::vault::version}"
+        file { $vault_link:
+          ensure => link,
+          target => $vault_bin,
+        }
+      }
+      else {
+        $vault_bin = "${::vault::bin_dir}/vault"
+      }
+
+      archive { "${::vault::download_dir}/${::vault::download_filename}":
+        ensure       => present,
+        extract      => true,
+        extract_path => $::vault::bin_dir,
+        source       => $::vault::real_download_url,
+        cleanup      => true,
+        creates      => $vault_bin,
+        before       => File['vault_binary'],
+      }
+
+      $_manage_file_capabilities = true
+    }
 
     'repo': {
       package { $::vault::package_name:
         ensure  => $::vault::package_ensure,
       }
       $_manage_file_capabilities = false
+      $vault_bin = "${::vault::bin_dir}/vault"
     }
 
     default: {
@@ -37,7 +49,7 @@ class vault::install {
   }
 
   file { 'vault_binary':
-    path  =>  $vault_bin,
+    path  => $vault_bin,
     owner => 'root',
     group => 'root',
     mode  => '0755',

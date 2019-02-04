@@ -97,6 +97,7 @@ class vault (
   $manage_download_dir                 = $::vault::params::manage_download_dir,
   $download_filename                   = $::vault::params::download_filename,
   $version                             = $::vault::params::version,
+  Optional[Boolean] $versioning        = $::vault::params::versioning,
   $os                                  = $::vault::params::os,
   $arch                                = $::vault::params::arch,
   Optional[Boolean] $enable_ui         = $::vault::params::enable_ui,
