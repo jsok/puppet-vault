@@ -33,6 +33,9 @@ RSpec.configure do |c|
     # by default Puppet runs at warning level
     Puppet.settings[:strict] = :warning
   end
+  c.mock_with :rspec do |i|
+    i.syntax = :expect
+  end
 end
 
 def ensure_module_defined(module_name)
