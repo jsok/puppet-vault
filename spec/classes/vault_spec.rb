@@ -68,7 +68,8 @@ describe 'vault' do
         it {
           is_expected.to contain_file('/etc/vault/config.json').
             with_owner('vault').
-            with_group('vault')
+            with_group('vault').
+            with_mode('0640')
         }
 
         context 'vault JSON config' do
@@ -223,6 +224,18 @@ describe 'vault' do
         }
       end
 
+      context 'when specifying config mode to be 0700' do
+        let(:params) do
+          {
+            config_mode: '0700'
+          }
+        end
+
+        it {
+            is_expected.to contain_file('/etc/vault/config.json').with_mode('0700')
+        }
+      end
+
       context 'when specifying an array of listeners' do
         let(:params) do
           {
@@ -337,6 +350,7 @@ describe 'vault' do
                   service_options: '-log-level=info',
                   user: 'root',
                   group: 'admin',
+                  config_mode: '0600',
                   num_procs: '5'
                 }
               end
@@ -449,6 +463,7 @@ describe 'vault' do
                   service_options: '-log-level=info',
                   user: 'root',
                   group: 'admin',
+                  config_mode: '0600',
                   num_procs: '5'
                 }
               end
@@ -564,6 +579,7 @@ describe 'vault' do
                   service_options: '-log-level=info',
                   user: 'root',
                   group: 'admin',
+                  config_mode: '0600',
                   num_procs: 8
                 }
               end
@@ -710,7 +726,8 @@ describe 'vault' do
                 config_dir: '/opt/etc/vault',
                 service_options: '-log-level=info',
                 user: 'root',
-                group: 'admin'
+                group: 'admin',
+                config_mode: '0600'
               }
             end
 
@@ -720,7 +737,7 @@ describe 'vault' do
                 with_file('/opt/bin/vault')
             }
 
-            it { is_expected.to contain_file('/opt/etc/vault/config.json') }
+            it { is_expected.to contain_file('/opt/etc/vault/config.json').with_mode('0600') }
 
             it {
               is_expected.to contain_file('/opt/etc/vault').
@@ -728,6 +745,7 @@ describe 'vault' do
                 with_purge('true'). \
                 with_recurse('true')
             }
+
             it { is_expected.to contain_user('root') }
             it { is_expected.to contain_group('admin') }
           end
@@ -823,6 +841,7 @@ describe 'vault' do
                   service_options: '-log-level=info',
                   user: 'root',
                   group: 'admin',
+                  config_mode: '0600',
                   num_procs: 8
                 }
               end
