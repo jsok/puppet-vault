@@ -25,7 +25,7 @@
 #   Directory the vault configuration will be kept in.
 #
 # * `config_mode`
-#   Mode of the configuration file (config.json). Defaults to '0750'
+#   Mode of the configuration file (config.json). Defaults to '0640'
 #
 # * `purge_config_dir`
 #   Whether the `config_dir` should be purged before installing the

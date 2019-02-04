@@ -9,7 +9,7 @@ class vault::params {
   $group              = 'vault'
   $manage_group       = true
   $config_dir         = '/etc/vault'
-  $config_mode        = '0750'
+  $config_mode        = '0640'
   $download_url       = undef
   $download_url_base  = 'https://releases.hashicorp.com/vault/'
   $download_extension = 'zip'
