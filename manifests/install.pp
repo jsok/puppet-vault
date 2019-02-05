@@ -23,13 +23,14 @@ class vault::install {
       }
 
       archive { "${::vault::download_dir}/${::vault::download_filename}":
-        ensure       => present,
-        extract      => true,
-        extract_path => $::vault::bin_dir,
-        source       => $::vault::real_download_url,
-        cleanup      => true,
-        creates      => $vault_bin,
-        before       => File['vault_binary'],
+        ensure          => present,
+        extract         => true,
+        extract_path    => $::vault::bin_dir,
+        extract_command => "unzip -p > ${vault_bin} %s",
+        source          => $::vault::real_download_url,
+        cleanup         => true,
+        creates         => $vault_bin,
+        before          => File['vault_binary'],
       }
 
       $_manage_file_capabilities = true

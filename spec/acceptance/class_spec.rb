@@ -19,7 +19,7 @@ describe 'vault class' do
         }]
       }
       MANIFEST
-      # Run it twice and test for idempotency
+     # Run it twice and test for idempotency
       apply_manifest(pp, catch_failures: true)
       apply_manifest(pp, catch_changes: true)
     end
@@ -102,6 +102,50 @@ describe 'vault class' do
     describe service('vault') do
       it { is_expected.to be_enabled }
       it { is_expected.to be_running }
+    end
+
+    describe port(8200) do
+      it { is_expected.to be_listening.on('127.0.0.1').with('tcp') }
+    end
+  end
+  context 'with versioning' do
+    # Using puppet_apply as a helper
+    it 'works idempotently with no errors' do
+      pp = <<-MANIFEST
+      class { '::vault':
+          versioning => true,
+          version => '1.0.0',
+          bin_dir: '/usr/local/bin',
+          install_method: 'archive'
+      }
+      MANIFEST
+      # Run it twice and test for idempotency
+      apply_manifest(pp, catch_failures: true)
+      apply_manifest(pp, catch_changes: true)
+    end
+
+    describe service('vault') do
+      it { is_expected.to be_enabled }
+      it { is_expected.to be_running }
+    end
+
+    describe command('getcap /usr/local/bin/vault1.0.0') do
+      its(:exit_status) { is_expected.to eq 0 }
+      its(:stdout) { is_expected.to include '/usr/local/bin/vault = cap_ipc_lock+ep' }
+    end
+
+    describe file('/usr/local/bin/vault') do
+      it { is_expected.to exist }
+      it { is_expected.to be_mode 777 }
+      it { is_expected.to be_owned_by 'root' }
+      it { is_expected.to be_grouped_into 'root' }
+    end
+
+    describe file('/usr/local/bin/vault1.0.0') do
+      it { is_expected.to exist }
+      it { is_expected.to be_mode 755 }
+      it { is_expected.to be_owned_by 'root' }
+      it { is_expected.to be_grouped_into 'root' }
     end
 
     describe port(8200) do
