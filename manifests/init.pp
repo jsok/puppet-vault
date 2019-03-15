@@ -69,6 +69,7 @@ class vault (
   $bin_dir                             = $::vault::params::bin_dir,
   $config_dir                          = $::vault::params::config_dir,
   $purge_config_dir                    = true,
+  $pid_file                            = $::vault::params::pid_file,
   $download_url                        = $::vault::params::download_url,
   $download_url_base                   = $::vault::params::download_url_base,
   $download_extension                  = $::vault::params::download_extension,

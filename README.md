@@ -52,6 +52,8 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `purge_config_dir`: Whether the `config_dir` should be purged before installing the generated config.
 
+* `pid_file`: Sets the corresponding option in the vault config and configures the service file to be aware of it.
+
 * `install_method`: Supports the values `repo` or `archive`. See [Installation parameters](#installation-parameters).
 
 * `service_name`: Customise the name of the system service
