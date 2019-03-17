@@ -223,6 +223,16 @@ describe 'vault' do
         }
       end
 
+      context 'when specifying config mode' do
+        let(:params) do
+          {
+            config_mode: '0700'
+          }
+        end
+
+        it { is_expected.to contain_file('/etc/vault/config.json').with_mode('0700') }
+      end
+
       context 'when specifying an array of listeners' do
         let(:params) do
           {
