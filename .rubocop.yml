@@ -488,9 +488,6 @@ Metrics/AbcSize:
 Metrics/PerceivedComplexity:
   Enabled: False
 
-Lint/UselessAssignment:
-  Enabled: True
-
 Layout/ClosingParenthesisIndentation:
   Enabled: True
 
