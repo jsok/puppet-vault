@@ -1,15 +1,15 @@
 HOSTS:
-  ubuntu-1604-x64:
+  ubuntu-1804-x64:
     default_apply_opts:
       order: random
       strict_variables:
-    platform: ubuntu-16.04-amd64
+    platform: ubuntu-18.04-amd64
     hypervisor : docker
-    image: ubuntu:16.04
+    image: ubuntu:18.04
     docker_cmd: '["/sbin/init"]'
     docker_preserve_image: true
     docker_image_commands:
-      - 'apt-get install -y curl unzip'
+      - 'apt-get install -y curl iproute2 libcap2-bin unzip'
 CONFIG:
   type: foss
   log_level: debug
