@@ -7,35 +7,33 @@ script: bundle exec rake test
 matrix:
   include:
   # RSpec tests
-  - rvm: 2.1.9
-    env: PUPPET_GEM_VERSION="~> 4"
-  - rvm: 2.4.4
-    env: PUPPET_GEM_VERSION="~> 4" FUTURE=yes
-  - rvm: 2.5.1
-    env: PUPPET_GEM_VERSION="~> 5" DEPLOY_CANDIDATE=yes
+  - rvm: 2.4.5
+    env: PUPPET_GEM_VERSION="~> 5"
+  - rvm: 2.5.5
+    env: PUPPET_GEM_VERSION="~> 6" DEPLOY_CANDIDATE=yes
 
   # Beaker tests
   - sudo: required
     services: docker
-    rvm: 2.4.2
+    rvm: 2.5.5
     env: PUPPET_INSTALL_TYPE=agent BEAKER_PUPPET_COLLECTION=puppet5 BEAKER_set="centos-6-x86_64-docker"
     script: bundle exec rake acceptance
     bundler_args: --without development
   - sudo: required
     services: docker
-    rvm: 2.4.2
+    rvm: 2.5.5
     env: PUPPET_INSTALL_TYPE=agent BEAKER_PUPPET_COLLECTION=puppet5 BEAKER_set="centos-7-x86_64-docker"
     script: bundle exec rake acceptance
     bundler_args: --without development
   - sudo: required
     services: docker
-    rvm: 2.4.2
+    rvm: 2.5.5
     env: PUPPET_INSTALL_TYPE=agent BEAKER_PUPPET_COLLECTION=puppet5 BEAKER_set="ubuntu-16.04-x86_64-docker"
     script: bundle exec rake acceptance
     bundler_args: --without development
   - sudo: required
     services: docker
-    rvm: 2.4.2
+    rvm: 2.5.5
     env: PUPPET_INSTALL_TYPE=agent BEAKER_PUPPET_COLLECTION=puppet5 BEAKER_set="ubuntu-18.04-x86_64-docker"
     script: bundle exec rake acceptance
     bundler_args: --without development
@@ -47,4 +45,3 @@ deploy:
   on:
     tags: true
     condition: "$DEPLOY_CANDIDATE = yes"
-

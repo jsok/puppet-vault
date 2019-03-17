@@ -20,7 +20,6 @@ group :test do
   gem 'mocha', '>= 1.2.1',                                          :require => false
   gem 'coveralls',                                                  :require => false
   gem 'simplecov-console',                                          :require => false
-  gem 'rack', '~> 1.0',                                             :require => false if RUBY_VERSION < '2.2.2'
   gem 'parallel_tests',                                             :require => false
   gem 'fakefs',                                                     :require => false
 end
@@ -39,8 +38,7 @@ group :system_tests do
   gem 'beaker-module_install_helper', :require => false
 end
 
-ENV['PUPPET_GEM_VERSION'].nil? ? puppetversion = '~> 5' : puppetversion = ENV['PUPPET_GEM_VERSION'].to_s
+ENV['PUPPET_GEM_VERSION'].nil? ? puppetversion = '~> 6' : puppetversion = ENV['PUPPET_GEM_VERSION'].to_s
 gem 'puppet', puppetversion, :require => false, :groups => [:test]
 
 # vim: syntax=ruby
-
