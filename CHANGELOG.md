@@ -1,3 +1,8 @@
+## 2019-06-01 2.0.1
+- Allow puppetlabs/stdlib 6.x
+- Allow stm/file_capability 2.x
+- Allow puppet/archive 4.x
+
 ## 2019-03-17 2.0.0
 - Drop Puppet 3 support
 - Add Puppet 6 support

@@ -1,6 +1,6 @@
 {
   "name": "jsok-vault",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "jsok",
   "summary": "Puppet module to manage Vault (https://vaultproject.io)",
   "license": "Apache-2.0",
