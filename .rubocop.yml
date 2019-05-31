@@ -273,10 +273,10 @@ Style/EachWithObject:
 Layout/EmptyLineBetweenDefs:
   Enabled: True
 
-Layout/IndentArray:
+Layout/IndentFirstArrayElement:
   Enabled: True
 
-Layout/IndentHash:
+Layout/IndentFirstHashElement:
   Enabled: True
 
 Layout/IndentationConsistency:
