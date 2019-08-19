@@ -96,6 +96,7 @@ describe 'vault' do
           it 'excludes unconfigured config options' do
             expect(subject).not_to include_json(
               ha_storage: exist,
+              seal: exist,
               disable_cache: exist,
               telemetry: exist,
               default_lease_ttl: exist,

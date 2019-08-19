@@ -5,9 +5,10 @@
 class vault::config {
 
   $_config_hash = delete_undef_values({
+    'listener'          => $::vault::listener,
     'storage'           => $::vault::storage,
     'ha_storage'        => $::vault::ha_storage,
-    'listener'          => $::vault::listener,
+    'seal'              => $::vault::seal,
     'telemetry'         => $::vault::telemetry,
     'disable_cache'     => $::vault::disable_cache,
     'default_lease_ttl' => $::vault::default_lease_ttl,

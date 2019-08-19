@@ -111,6 +111,8 @@ By default, with no parameters the module will configure vault with some sensibl
 
 * `ha_storage`: An optional hash containing the `ha_storage` configuration
 
+* `seal`: An optional hash containing the `seal` configuration
+
 * `telemetry`: An optional hash containing the `telemetry` configuration
 
 * `disable_cache`: A boolean to disable or enable the cache (default: `undef`)

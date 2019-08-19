@@ -86,6 +86,7 @@ class vault (
   $manage_storage_dir                  = $::vault::params::manage_storage_dir,
   Variant[Hash, Array[Hash]] $listener = $::vault::params::listener,
   Optional[Hash] $ha_storage           = $::vault::params::ha_storage,
+  Optional[Hash] $seal                 = $::vault::params::seal,
   Optional[Boolean] $disable_cache     = $::vault::params::disable_cache,
   Optional[Hash] $telemetry            = $::vault::params::telemetry,
   Optional[String] $default_lease_ttl  = $::vault::params::default_lease_ttl,
