@@ -1,3 +1,8 @@
+## 2019-08-19 2.1.0
+- Add support for `seal` stanza
+- Remove duplicate TimeoutStopSec in systemd unit file
+- Update to vault 1.2.2
+
 ## 2019-06-01 2.0.1
 - Allow puppetlabs/stdlib 6.x
 - Allow stm/file_capability 2.x
