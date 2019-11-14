@@ -61,6 +61,13 @@
 #   because Vault can block a scheduler thread". Default: number of CPUs
 #   on the system, retrieved from the ``processorcount`` Fact.
 #
+# * `api_addr`
+#   Specifies the address (full URL) to advertise to other Vault servers in the
+#   cluster for client redirection. This value is also used for plugin backends.
+#   This can also be provided via the environment variable VAULT_API_ADDR. In
+#   general this should be set as a full URL that points to the value of the
+#   listener address
+#
 # * `version`
 #   The version of Vault to install
 #
@@ -105,6 +112,7 @@ class vault (
   $os                                  = $::vault::params::os,
   $arch                                = $::vault::params::arch,
   Optional[Boolean] $enable_ui         = $::vault::params::enable_ui,
+  Optional[String] $api_addr           = undef,
   Hash $extra_config                   = {},
 ) inherits ::vault::params {
 
