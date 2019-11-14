@@ -29,7 +29,7 @@ Lint/UselessComparison:
 Lint/EnsureReturn:
   Enabled: True
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Enabled: True
 
 Lint/ShadowingOuterLocalVariable:
@@ -103,7 +103,7 @@ Lint/ParenthesesAsGroupedExpression:
 Lint/RescueException:
   Enabled: True
 
-Lint/StringConversionInInterpolation:
+Lint/RedundantStringCoercion:
   Enabled: True
 
 Lint/UnusedBlockArgument:
@@ -130,13 +130,13 @@ Naming/AccessorMethodName:
 Style/Alias:
   Enabled: True
 
-Layout/AlignArray:
+Layout/ArrayAlignment:
   Enabled: True
 
-Layout/AlignHash:
+Layout/HashAlignment:
   Enabled: True
 
-Layout/AlignParameters:
+Layout/ParameterAlignment:
   Enabled: True
 
 Metrics/BlockNesting:
@@ -188,7 +188,7 @@ Style/WhenThen:
 Style/WordArray:
   Enabled: True
 
-Style/UnneededPercentQ:
+Style/RedundantPercentQ:
   Enabled: True
 
 Layout/Tab:
@@ -197,7 +197,7 @@ Layout/Tab:
 Layout/SpaceBeforeSemicolon:
   Enabled: True
 
-Layout/TrailingBlankLines:
+Layout/TrailingEmptyLines:
   Enabled: True
 
 Layout/LeadingCommentSpace:
@@ -273,10 +273,10 @@ Style/EachWithObject:
 Layout/EmptyLineBetweenDefs:
   Enabled: True
 
-Layout/IndentFirstArrayElement:
+Layout/FirstArrayElementIndentation:
   Enabled: True
 
-Layout/IndentFirstHashElement:
+Layout/FirstHashElementIndentation:
   Enabled: True
 
 Layout/IndentationConsistency:
@@ -520,7 +520,7 @@ RSpec/ContextWording:
   Enabled: False
 
 # this is broken on ruby1.9
-Layout/IndentHeredoc:
+Layout/HeredocIndentation:
   Enabled: False
 
 # disable Yaml safe_load. This is needed to support ruby2.0.0 development envs

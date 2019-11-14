@@ -126,7 +126,7 @@ describe 'vault' do
           }
         end
 
-        context 'when disable mlock' do
+        context 'when api address is set' do
           let(:params) do
             {
               api_addr: 'something'
