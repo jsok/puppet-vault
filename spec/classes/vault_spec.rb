@@ -102,7 +102,8 @@ describe 'vault' do
               default_lease_ttl: exist,
               max_lease_ttl: exist,
               disable_mlock: exist,
-              ui: exist
+              ui: exist,
+              api_addr: exist
             )
           end
         end
@@ -121,6 +122,21 @@ describe 'vault' do
           it {
             expect(param_value(catalogue, 'File', '/etc/vault/config.json', 'content')).to include_json(
               disable_mlock: true
+            )
+          }
+        end
+
+        context 'when disable mlock' do
+          let(:params) do
+            {
+              api_addr: 'something'
+            }
+          end
+
+
+          it {
+            expect(param_value(catalogue, 'File', '/etc/vault/config.json', 'content')).to include_json(
+              api_addr: 'something'
             )
           }
         end
