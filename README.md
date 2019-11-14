@@ -62,6 +62,8 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `manage_service_file`: Manages the service file regardless of the defaults. Default: See [Installation parameters](#installation-parameters).
 
+* `api_addr`: Specifies the address (full URL) to advertise to other Vault servers in the cluster for client redirection. This value is also used for plugin backends. This can also be provided via the environment variable VAULT_API_ADDR. In general this should be set as a full URL that points to the value of the listener address
+
 ### Installation parameters
 
 #### When `install_method` is `repo`
