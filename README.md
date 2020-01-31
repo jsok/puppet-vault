@@ -62,8 +62,6 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `manage_service_file`: Manages the service file regardless of the defaults. Default: See [Installation parameters](#installation-parameters).
 
-* `api_addr`: Specifies the address (full URL) to advertise to other Vault servers in the cluster for client redirection. This value is also used for plugin backends. This can also be provided via the environment variable VAULT_API_ADDR. In general this should be set as a full URL that points to the value of the listener address
-
 ### Installation parameters
 
 #### When `install_method` is `repo`
@@ -126,6 +124,8 @@ By default, with no parameters the module will configure vault with some sensibl
 * `max_lease_ttl`: A string containing the max lease TTL (default: `undef`)
 
 * `enable_ui`: Enable the vault UI (requires vault 0.10.0+ or Enterprise) (default: `undef`)
+
+* `api_addr`: Specifies the address (full URL) to advertise to other Vault servers in the cluster for client redirection. This value is also used for plugin backends. This can also be provided via the environment variable VAULT_API_ADDR. In general this should be set as a full URL that points to the value of the listener address (default: `undef`)
 
 * `extra_config`: A hash containing extra configuration, intended for newly released configuration not yet supported by the module. This hash will get merged with other configuration attributes into the JSON config file.
 
