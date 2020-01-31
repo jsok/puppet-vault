@@ -1,3 +1,7 @@
+## 2020-02-01 2.2.0
+- Add support for `api_addr` stanza
+- Update to vault 1.3.2
+
 ## 2019-08-19 2.1.0
 - Add support for `seal` stanza
 - Remove duplicate TimeoutStopSec in systemd unit file
