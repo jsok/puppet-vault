@@ -29,7 +29,7 @@ class vault::config {
   }
 
   file { "${::vault::config_dir}/config.json":
-    content => to_json_pretty($config_hash),
+    content => Sensitive(to_json_pretty($config_hash)),
     owner   => $::vault::user,
     group   => $::vault::group,
     mode    => $::vault::config_mode,
