@@ -1,47 +1,48 @@
 ---
-sudo: false
+dist: xenial
 language: ruby
-bundler_args: --without development system_tests
-before_install: rm -f Gemfile.lock
-script: bundle exec rake test
+cache: bundler
+before_install:
+  - bundle -v
+  - rm -f Gemfile.lock
+  - "# Update system gems if requested. This is useful to temporarily workaround troubles in the test runner"
+  - "# See https://github.com/puppetlabs/pdk-templates/commit/705154d5c437796b821691b707156e1b056d244f for an example of how this was used"
+  - "# Ignore exit code of SIGPIPE'd yes to not fail with shell's pipefail set"
+  - '[ -z "$RUBYGEMS_VERSION" ] || (yes || true) | gem update --system $RUBYGEMS_VERSION'
+  - gem --version
+  - bundle -v
+script:
+  - 'bundle exec rake $CHECK'
+bundler_args: --without system_tests
+rvm:
+  - 2.5.3
+stages:
+  - static
+  - spec
+  - acceptance
+  -
+    if: tag =~ ^v\d
+    name: deploy
 matrix:
+  fast_finish: true
   include:
-  # RSpec tests
-  - rvm: 2.4.5
-    env: PUPPET_GEM_VERSION="~> 5"
-  - rvm: 2.5.5
-    env: PUPPET_GEM_VERSION="~> 6" DEPLOY_CANDIDATE=yes
-
-  # Beaker tests
-  - sudo: required
-    services: docker
-    rvm: 2.5.5
-    env: PUPPET_INSTALL_TYPE=agent BEAKER_PUPPET_COLLECTION=puppet5 BEAKER_set="centos-6-x86_64-docker"
-    script: bundle exec rake acceptance
-    bundler_args: --without development
-  - sudo: required
-    services: docker
-    rvm: 2.5.5
-    env: PUPPET_INSTALL_TYPE=agent BEAKER_PUPPET_COLLECTION=puppet5 BEAKER_set="centos-7-x86_64-docker"
-    script: bundle exec rake acceptance
-    bundler_args: --without development
-  - sudo: required
-    services: docker
-    rvm: 2.5.5
-    env: PUPPET_INSTALL_TYPE=agent BEAKER_PUPPET_COLLECTION=puppet5 BEAKER_set="ubuntu-16.04-x86_64-docker"
-    script: bundle exec rake acceptance
-    bundler_args: --without development
-  - sudo: required
-    services: docker
-    rvm: 2.5.5
-    env: PUPPET_INSTALL_TYPE=agent BEAKER_PUPPET_COLLECTION=puppet5 BEAKER_set="ubuntu-18.04-x86_64-docker"
-    script: bundle exec rake acceptance
-    bundler_args: --without development
-deploy:
-  provider: puppetforge
-  user: jsok
-  password:
-    secure: Fpvb/pZBy+FBpcXkQua6eEWN/4/klJjgFvBzDocrEa8ud5MGs8YuERKENoZ16bFzCtnyytRGZbiXJtqo4+IkxY0EFuCWgw1BH0ekljXWsuTi0ZCrYgedjy0Tykj6cgPkLecBzqtPe5b1gXwmIamlYQkVdnyglZEkSKvo9GqYX/VYSs7cc5mJ5bP5zgAr7U1jBQCKxD95kSt28NwIliekX1KoUqEVhxsHW5fzQa+4eS8vz7HUBppkJoUpHJfjXuoZKWXR4lQka4VgIZXflHno6OH908B0JiFoZI6klOInrn6eZbpF10CmjbK7ZCMIKdiPiVqzDQJgsSqg2n+9fA6TGbEj5A3K8VZtqp7MGd3b5HBfeVNPTPEAFGi4SkWPGwb2l53fUxP7T/NQUQ130GGNKdJdFmVW6Y6i2q9zrWWYZB1zbHRac/lY3uDd6qRxmbDYJzzTqMUPpl5eyBtRbg0XWuxTR1R9yhSwNw+N1sz1CaqT27MvgHqNRrISPSAXRfA+KP5mV8n+gInZVKiXf1BkNtPZJ+t2WO7jhKkC05WRGy0HAi2jaZiSL39bBMQOuoTCGlgo3h146PE27dJ2E4Yd3OBPn3vV/FrU8zuRFt77kOlffCq7yL7zv4OORfIgUql2RvEJ0aLA3jIxrKve8uQZFQ6Y7NjuFMQnKpG+lntW5xw=
-  on:
-    tags: true
-    condition: "$DEPLOY_CANDIDATE = yes"
+    -
+      env: CHECK="check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop syntax lint metadata_lint"
+      stage: static
+    -
+      env: PUPPET_GEM_VERSION="~> 5.0" CHECK=parallel_spec
+      rvm: 2.4.5
+      stage: spec
+    -
+      env: PUPPET_GEM_VERSION="~> 6.0" CHECK=parallel_spec
+      rvm: 2.5.3
+      stage: spec
+    -
+      env: DEPLOY_TO_FORGE=yes
+      stage: deploy
+branches:
+  only:
+    - master
+    - /^v\d/
+notifications:
+  email: false
