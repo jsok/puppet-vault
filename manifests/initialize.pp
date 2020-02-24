@@ -8,6 +8,7 @@ class vault::initialize {
   $vault_dir        = $vault::install_dir
   $vault_min_keys   = $vault::min_keys
   $vault_total_keys = $vault::total_keys
+  $vault_addr       = "${vault::ip_address}:${vault::vault_port}"
 
   $init_cmd = @("EOC")
     vault operator init \
@@ -32,6 +33,15 @@ class vault::initialize {
       group => 'root',
       mode  => '0640',
     }
+  }
+
+  ## Create profile script
+  file { '/etc/profile.d/vault.sh':
+    ensure  => present,
+    content => template('vault/vault.profile.erb'),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
   }
 
 }

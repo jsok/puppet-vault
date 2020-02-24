@@ -1,0 +1,16 @@
+# This file is managed by Puppet, all manual changes will be lost.
+
+## Set vault URI address
+if [[ -z $VAULT_ADDR ]]; then
+  export VAULT_ADDR="http://<%= @vault_addr -%>"
+fi
+
+## Add bin directory to PATH environment
+if ! grep -q "<%= @vault_bin_dir -%>" <<< $PATH ; then
+  export PATH="$PATH:<%= @vault_bin_dir -%>"
+fi
+
+## Set vault autocomplete
+complete -C <%= @vault_bin_dir -%>/vault
+
+

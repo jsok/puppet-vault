@@ -6,10 +6,10 @@ class vault::unseal (
   String                   $vault_bin_dir     = $vault::bin_dir,
   String                   $vault_dir         = $vault::install_dir,
   Integer                  $vault_min_keys    = $vault::min_keys,
-  Optional[Array[String]]  $vault_keys        = lookup('vault::unseal::keys') |$k| undef,
+  Optional[Array[String]]  $vault_keys        = lookup('vault::unseal::keys') |$k| { undef },
   Integer                  $vault_total_keys  = $vault::total_keys,
-  String                   $vault_user        = $vault::user
-  String                   $vault_group       = $vault::group
+  String                   $vault_user        = $vault::user,
+  String                   $vault_group       = $vault::group,
 ) {
 
   file { "${vault_dir}/scripts":
