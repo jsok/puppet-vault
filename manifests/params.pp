@@ -4,54 +4,37 @@
 # It sets variables according to platform.
 #
 class vault::params {
-  $user               = 'vault'
-  $manage_user        = true
-  $group              = 'vault'
-  $manage_group       = true
-  $config_dir         = '/etc/vault'
-  $config_mode        = '0750'
-  $download_url       = undef
-  $download_url_base  = 'https://releases.hashicorp.com/vault/'
-  $download_extension = 'zip'
-  $version            = '1.3.2'
-  $service_name       = 'vault'
   $num_procs          = $facts['processorcount']
-  $package_name       = 'vault'
-  $package_ensure     = 'installed'
+  $ip_address         = $facts['networking']['ip']
+  $vault_port         = '8200'
 
-  $download_dir        = '/tmp'
-  $manage_download_dir = false
-  $download_filename   = 'vault.zip'
-
-  # storage and listener are mandatory, we provide some sensible
-  # defaults here
-  $storage             = { 'file' => { 'path' => '/var/lib/vault' }}
-  $manage_storage_dir  = false
-  $listener            = {
-    'tcp' => {
-      'address'     => '127.0.0.1:8200',
-      'tls_disable' => 1,
+  $listener = [
+    {
+      tcp => {
+        address     => "127.0.0.1:${vault_port}",
+        tls_disable => true,
+      },
     },
-  }
+    {
+      tcp => {
+        address     => "${ip_address}:${vault_port}",
+        tls_disable => true,
+      },
+    },
+  ]
 
-  $enable_ui          = undef
+  $api_addr = "http://${ip_address}:${vault_port}"
 
   # These should always be undef as they are optional settings that
   # should not be configured unless explicitly declared.
-  $ha_storage         = undef
-  $seal               = undef
-  $disable_cache      = undef
-  $telemetry          = undef
-  $default_lease_ttl  = undef
-  $max_lease_ttl      = undef
-  $disable_mlock      = undef
-
+  $default_lease_ttl        = undef
+  $disable_cache            = undef
+  $disable_mlock            = undef
+  $ha_storage               = undef
   $manage_file_capabilities = undef
-
-  $manage_service = true
-
-  $service_enable = true
-  $service_ensure = 'running'
+  $max_lease_ttl            = undef
+  $seal                     = undef
+  $telemetry                = undef
 
   $service_provider = $facts['service_provider']
 
