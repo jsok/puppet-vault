@@ -52,6 +52,8 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `service_ensure`: Tell the OS whether the service should be running or stopped
 
+* `service_type`: Tell vault to run as server or agent. Defaults to server.
+
 * `service_provider`: Customise the name of the system service provider; this also controls the init configuration files that are installed.
 
 * `service_options`: Extra argument to pass to `vault server`, as per: `vault server --help`

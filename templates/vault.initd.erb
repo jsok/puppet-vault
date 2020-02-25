@@ -51,7 +51,7 @@ start() {
     touch $logfile $pidfile
     chown <%= scope['vault::user'] %> $logfile $pidfile
     export GOMAXPROCS=${GOMAXPROCS:-<%= scope['vault::num_procs'] %>}
-    daemon --user <%= scope['vault::user'] %> "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"
+    daemon --user <%= scope['vault::user'] %> "{ $exec <%= scope['vault::service_type'] %> -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"
 
     RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
