@@ -101,17 +101,27 @@ class vault (
   Optional[String]           $download_filename         = 'vault.zip',
   String                     $download_url_base         = 'https://releases.hashicorp.com/vault/',
   Optional[String]           $download_url              = undef,
-  Boolean                    $enable_ldap               = true,
+  Boolean                    $enable_ldap               = false,
   Optional[Boolean]          $enable_ui                 = true,
   Optional[Hash]             $extra_config              = {},
   String                     $group                     = 'vault',
   Optional[Hash]             $ha_storage                = $vault::params::ha_storage,
   String                     $install_method            = $vault::params::install_method,
   String                     $install_dir               = '/opt/vault',
-  Optional[Boolean]          $initialize_vault          = true,
+  Optional[Boolean]          $initialize_vault          = false,
   Integer                    $total_keys                = 5,
   Integer                    $min_keys                  = 2,
   String                     $ip_address                = $vault::params::ip_address,
+  Optional[Array]            $ldap_servers              = undef,
+  Optional[String]           $ldap_ca_cert              = undef,
+  Optional[String]           $ldap_bind_dn              = undef,
+  Optional[String]           $ldap_bind_passwd          = undef,
+  Optional[String]           $ldap_user_dn              = undef,
+  Optional[String]           $ldap_user_attribute       = 'sAMAccountName',
+  Optional[String]           $ldap_group_dn             = undef,
+  Optional[String]           $ldap_group_attribute      = 'cn',
+  Optional[Boolean]          $ldap_insecure_tls         = false,
+  Optional[Hash]             $ldap_policies             = undef,
   Variant[Hash,Array[Hash]]  $listener                  = $vault::params::listener,
   Boolean                    $manage_download_dir       = false,
   Optional[Boolean]          $manage_file_capabilities  = $vault::params::manage_file_capabilities,
@@ -136,6 +146,7 @@ class vault (
   String                     $service_provider          = $vault::params::service_provider,
   Optional[Hash]             $storage                   = undef,
   Optional[Hash]             $telemetry                 = $vault::params::telemetry,
+  Optional[String]           $token                     = undef,
   String                     $user                      = 'vault',
   String                     $vault_port                = $vault::params::vault_port,
   String                     $version                   = '1.3.2',
@@ -146,15 +157,21 @@ class vault (
 
   $real_download_url = pick($download_url, "${_download_url}/${_download_file}")
 
-  contain ::vault::install
-  contain ::vault::config
-  contain ::vault::service
+  $vault_address = "${vault_ipaddress}:${vault_port}"
+
+  contain vault::install
+  contain vault::config
+  contain vault::service
 
   Class['vault::install'] -> Class['vault::config']
   Class['vault::config'] ~> Class['vault::service']
 
   if $initialize_vault {
     contain vault::initialize
+  }
+
+  if $enable_ldap {
+    contain vault::ldap
   }
 
 }

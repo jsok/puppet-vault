@@ -11,6 +11,6 @@ if ! grep -q "<%= @vault_bin_dir -%>" <<< $PATH ; then
 fi
 
 ## Set vault autocomplete
-complete -C <%= @vault_bin_dir -%>/vault
+complete -C <%= @vault_bin_dir -%>/vault vault
 
 
