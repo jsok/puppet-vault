@@ -3,7 +3,7 @@
 #  This class is called from vault to enable vault LDAP authentication.
 #
 class vault::ldap::config (
-  String         $vault_bin_dir    = $vault::bin_dir,
+  String         $bin_dir          = $vault::bin_dir,
   String         $vault_dir        = $vault::install_dir,
   Array[String]  $ldap_servers     = $vault::ldap_servers,
   String         $bind_dn          = $vault::ldap_bind_dn,
@@ -18,6 +18,14 @@ class vault::ldap::config (
 
   $_ldap_url = join($ldap_servers.map |$server| { "ldap://${server}" }, ",")
   $_ca_cert = "${vault_dir}/certs/${ldap_servers[0]}.crt"
+  $_ldap_auth_check_cmd = @("EOC")
+    ${bin_dir}/vault auth list -format=json |\
+      jq '.[] | {message: .type}' | grep -q 'ldap'
+    | EOC
+  $_ldap_config_check_cmd = @("EOC")
+    ${bin_dir}/vault read -format=json auth/ldap/config |\
+      jq '.data.url' | grep -q ${_ldap_url}
+    | EOC
   $_ldap_config_cmd = @("EOC")
     vault write auth/ldap/config \
       url="${_ldap_url}" \
@@ -33,24 +41,22 @@ class vault::ldap::config (
       groupattr="${group_attr}"
     | EOC
 
-  echo { '>>> DEBUG: _ldap_cmd':
-    message => "\n> ${_ldap_config_cmd}",
-  }
+#  echo { '>>> DEBUG: _ldap_cmd':
+#    message => "\n${_ldap_config_cmd}",
+#  }
 
   exec { 'vault_ldap_enable':
-    path        => [ $vault_bin_dir, '/bin', '/usr/bin' ],
+    path        => [ $bin_dir, '/bin', '/usr/bin' ],
     command     => 'vault auth enable ldap',
     environment => [ "VAULT_TOKEN=${vault_token}" ],
+    unless      => $_ldap_auth_check_cmd,
   }
 
   exec { 'vault_ldap_config':
-    path        => [ $vault_bin_dir, '/bin', '/usr/bin' ],
+    path        => [ $bin_dir, '/bin', '/usr/bin' ],
     command     => $_ldap_config_cmd,
     environment => [ "VAULT_TOKEN=${vault_token}" ],
-  }
-
-  facter::fact { 'vault_ldap_enabled':
-    value => true,
+    unless      => $_ldap_config_check_cmd,
   }
 
 }

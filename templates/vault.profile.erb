@@ -2,15 +2,14 @@
 
 ## Set vault URI address
 if [[ -z $VAULT_ADDR ]]; then
-  export VAULT_ADDR="http://<%= @vault_addr -%>"
+  export VAULT_ADDR="http://<%= scope['vault::vault_address'] -%>"
 fi
 
 ## Add bin directory to PATH environment
-if ! grep -q "<%= @vault_bin_dir -%>" <<< $PATH ; then
-  export PATH="$PATH:<%= @vault_bin_dir -%>"
+if ! grep -q "<%= scope['vault::bin_dir'] -%>" <<< $PATH ; then
+  export PATH="$PATH:<%= scope['vault::bin_dir'] -%>"
 fi
 
 ## Set vault autocomplete
-complete -C <%= @vault_bin_dir -%>/vault vault
-
+complete -C <%= scope['vault::bin_dir'] -%>/vault vault
 

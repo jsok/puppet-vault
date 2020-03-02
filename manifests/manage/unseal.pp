@@ -1,16 +1,16 @@
-# == Class vault::unseal
+# == Class vault::manage::unseal
 #
 #  This class is called from vault to initialize vault after installation.
 #
-class vault::unseal (
-  String                   $vault_bin_dir     = $vault::bin_dir,
+class vault::manage::unseal (
+  String                   $bin_dir           = $vault::bin_dir,
+  String                   $vault_addr        = $vault::vault_address,
   String                   $vault_dir         = $vault::install_dir,
-  Integer                  $vault_min_keys    = $vault::min_keys,
-  Optional[Array[String]]  $vault_keys        = lookup('vault::unseal::keys') |$k| { undef },
-  Integer                  $vault_total_keys  = $vault::total_keys,
+  Integer                  $minimum_keys      = $vault::min_keys,
+  Optional[Array[String]]  $vault_keys        = $vault::vault_keys,
   String                   $vault_user        = $vault::user,
   String                   $vault_group       = $vault::group,
-) {
+) inherits vault {
 
   file { "${vault_dir}/scripts":
     ensure => 'directory',
@@ -30,9 +30,9 @@ class vault::unseal (
 
   ## Unseal vault
   exec { "${vault_dir}/scripts/unseal.sh":
-    path    => "/bin:${vault_bin_dir}",
+    path    => [ $bin_dir, '/bin', '/usr/bin' ],
     require => File["${vault_dir}/scripts/unseal.sh"],
-    unless  => 'vault status',
+    unless  => "${bin_dir}/vault status",
   }
 
 }

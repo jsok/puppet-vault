@@ -5,8 +5,12 @@
 class vault::ldap (
   String             $vault_dir        = $vault::install_dir,
   Array[String]      $ldap_servers     = $vault::ldap_servers,
-  Optional[Hash]     $ldap_policies    = $vault::ldap_policies,
+  Optional[Hash]     $ldap_groups      = $vault::ldap_groups,
 ) inherits vault {
+
+  if $vault_initialized != true {
+    fail("\n---> You must initialize vault before configuring ldap.")
+  }
 
   $_ca_cert = "${vault_dir}/certs/${ldap_servers[0]}.crt"
   $_ca_cert_cmd = @("EOC")
@@ -16,12 +20,10 @@ class vault::ldap (
     | EOC
 
   ## Unseal vault if needed
-  contain vault::unseal
+  contain vault::manage::unseal
 
-  package { 'vault_openssl':
-    ensure => present,
-    name   => 'openssl',
-  }
+  $_vault_utils = [ 'openssl', 'jq' ]
+  package { $_vault_utils: ensure => present }
 
   file { "${vault_dir}/certs":
     ensure => directory,
@@ -31,15 +33,16 @@ class vault::ldap (
   }
 
   exec { "${ldap_servers[0]}.crt":
-    path        => [ '/bin', '/usr/bin' ],
-    command     => $_ca_cert_cmd,
+    path    => [ '/bin', '/usr/bin' ],
+    command => $_ca_cert_cmd,
+    creates => $_ca_cert,
   }
 
-  if str2bool($facts['vault_ldap_enabled']) != true {
-    contain vault::ldap::config
-  }
+  contain vault::ldap::config
 
-  create_resources ('vault::ldap::policies', $ldap_policies)
+  if $ldap_groups != undef {
+    create_resources ('vault::ldap::groups', $ldap_groups)
+  }
 
 }
 

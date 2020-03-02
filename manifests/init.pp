@@ -111,7 +111,8 @@ class vault (
   Optional[Boolean]          $initialize_vault          = false,
   Integer                    $total_keys                = 5,
   Integer                    $min_keys                  = 2,
-  String                     $ip_address                = $vault::params::ip_address,
+  Optional[Array[String]]    $vault_keys                = undef,
+  String                     $ip_address                = $facts['networking']['ip'],
   Optional[Array]            $ldap_servers              = undef,
   Optional[String]           $ldap_ca_cert              = undef,
   Optional[String]           $ldap_bind_dn              = undef,
@@ -121,7 +122,8 @@ class vault (
   Optional[String]           $ldap_group_dn             = undef,
   Optional[String]           $ldap_group_attribute      = 'cn',
   Optional[Boolean]          $ldap_insecure_tls         = false,
-  Optional[Hash]             $ldap_policies             = undef,
+  Optional[Hash]             $ldap_groups               = undef,
+  Optional[Hash]             $vault_policies            = undef,
   Variant[Hash,Array[Hash]]  $listener                  = $vault::params::listener,
   Boolean                    $manage_download_dir       = false,
   Optional[Boolean]          $manage_file_capabilities  = $vault::params::manage_file_capabilities,
@@ -148,30 +150,37 @@ class vault (
   Optional[Hash]             $telemetry                 = $vault::params::telemetry,
   Optional[String]           $token                     = undef,
   String                     $user                      = 'vault',
-  String                     $vault_port                = $vault::params::vault_port,
+  String                     $port                      = $vault::params::vault_port,
   String                     $version                   = '1.3.2',
-) inherits ::vault::params {
+) inherits vault::params {
 
   $_download_url  = "${download_url_base}${version}"
   $_download_file = "${package_name}_${version}_${os}_${arch}.${download_extension}"
-
   $real_download_url = pick($download_url, "${_download_url}/${_download_file}")
 
-  $vault_address = "${vault_ipaddress}:${vault_port}"
+  $vault_address = "${ip_address}:${port}"
 
   contain vault::install
   contain vault::config
   contain vault::service
 
-  Class['vault::install'] -> Class['vault::config']
-  Class['vault::config'] ~> Class['vault::service']
+  Class['vault::install']
+  -> Class['vault::config']
+  -> Class['vault::service']
 
   if $initialize_vault {
-    contain vault::initialize
+    contain vault::manage::initialize
   }
 
   if $enable_ldap {
     contain vault::ldap
   }
+
+  if $vault_policies != undef {
+    create_resources ('vault::manage::policies', $vault_policies)
+  }
+
+  Class['vault::manage::initialize']
+  -> Class['vault::ldap']
 
 }

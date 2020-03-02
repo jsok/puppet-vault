@@ -1,11 +1,11 @@
 #!/bin/bash
 
-if ! grep -q "<%= @vault_bin_dir -%>" <<< $PATH ; then
-  export PATH="$PATH:<%= @vault_bin_dir -%>"
+if ! grep -q "<%= scope['vault::bin_dir'] -%>" <<< "$PATH" ; then
+  export PATH="$PATH:<%= scope['vault::bin_dir'] -%>"
 fi
 
 if [[ -z $VAULT_ADDR ]]; then
-  export VAULT_ADDR="<%= @vault_addr -%>"
+  export VAULT_ADDR="<%= scope['vault::vault_address'] -%>"
 fi
 
 vault status >/dev/null 2>&1
@@ -19,25 +19,25 @@ else
   echo -e "> Vault is sealed, unsealing now.\n"
 fi
 
-if [[ -s <%= @vault_dir -%>/vault_init.txt ]]; then
+if [[ -s <%= scope['vault::install_dir'] -%>/vault_init.txt ]]; then
   ## Unseal vault with detected keys
-  mapfile -t keys < <(grep 'Unseal Key' <%= @vault_dir -%>/vault_init.txt | awk '{ print $4 }')
-<% if @vault_keys -%>
+  mapfile -t keys < <(grep 'Unseal Key' <%= scope['vault::install_dir'] -%>/vault_init.txt | awk '{ print $4 }')
+<% if scope['vault::vault_keys'] -%>
 else
   ## Unseal vault with hiera defined keys
-<% @vault_keys.each do |key| -%>
+<% scope['vault::vault_keys'].each do |key| -%>
   keys+="<%= key -%>"
 <% end -%>
 <% end -%>
 fi
 
-if [[ -z ${keys[0]} ]];
-  echo "No keys available to unseal vault."
+if [[ -z ${keys[0]} ]]; then
+  echo "No keys available to unseal vault with!"
   exit 2
 fi
 
 i=0
-while [[ $i -lt <%= @vault_min_keys -%> ]]; do
+while [[ $i -lt <%= scope['vault::min_keys'] -%> ]]; do
   vault operator unseal "${keys[$i]}" >/dev/null 2>&1
   ((i++))
 done
