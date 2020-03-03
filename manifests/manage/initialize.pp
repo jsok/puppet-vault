@@ -20,6 +20,7 @@ class vault::manage::initialize (
     exec { 'vault_initialize':
       path    => [$bin_dir, '/bin', '/usr/bin'],
       command => $_init_cmd,
+      creates => "${vault_dir}/vault_init.txt",
     }
 
     file { "${vault_dir}/vault_init.txt":

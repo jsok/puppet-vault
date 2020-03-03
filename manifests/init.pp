@@ -122,6 +122,7 @@ class vault (
   Optional[String]           $ldap_group_dn             = undef,
   Optional[String]           $ldap_group_attribute      = 'cn',
   Optional[Boolean]          $ldap_insecure_tls         = false,
+  Optional[Boolean]          $ldap_starttls             = true,
   Optional[Hash]             $ldap_groups               = undef,
   Optional[Hash]             $vault_policies            = undef,
   Variant[Hash,Array[Hash]]  $listener                  = $vault::params::listener,
@@ -172,15 +173,12 @@ class vault (
     contain vault::manage::initialize
   }
 
-  if $enable_ldap {
+  if $vault_policies != undef and $facts['vault_initialized'] {
+    create_resources ('vault::manage::policy', $vault_policies)
+  }
+
+  if $enable_ldap and $facts['vault_initialized'] {
     contain vault::ldap
   }
-
-  if $vault_policies != undef {
-    create_resources ('vault::manage::policies', $vault_policies)
-  }
-
-  Class['vault::manage::initialize']
-  -> Class['vault::ldap']
 
 }
