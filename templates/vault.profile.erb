@@ -1,0 +1,15 @@
+# This file is managed by Puppet, all manual changes will be lost.
+
+## Set vault URI address
+if [[ -z $VAULT_ADDR ]]; then
+  export VAULT_ADDR="http://<%= scope['vault::vault_address'] -%>"
+fi
+
+## Add bin directory to PATH environment
+if ! grep -q "<%= scope['vault::bin_dir'] -%>" <<< $PATH ; then
+  export PATH="$PATH:<%= scope['vault::bin_dir'] -%>"
+fi
+
+## Set vault autocomplete
+complete -C <%= scope['vault::bin_dir'] -%>/vault vault
+
