@@ -5,6 +5,7 @@ class vault::service {
       ensure   => $::vault::service_ensure,
       enable   => $::vault::service_enable,
       provider => $::vault::service_provider,
+      require  => File["${::vault::config_dir}/config.json"]
     }
   }
 }
