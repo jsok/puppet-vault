@@ -33,6 +33,7 @@ class vault::config {
     owner   => $::vault::user,
     group   => $::vault::group,
     mode    => $::vault::config_mode,
+    notify  => Service[$::vault::service_name]
   }
 
   # If using the file storage then the path must exist and be readable
