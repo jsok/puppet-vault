@@ -2,7 +2,7 @@
 #
 #  This class is called from vault to initialize vault after installation.
 #
-class vault::manage::unseal (
+class vault::configure::unseal (
   String                   $bin_dir           = $vault::bin_dir,
   String                   $vault_addr        = $vault::vault_address,
   String                   $vault_dir         = $vault::install_dir,
@@ -20,7 +20,7 @@ class vault::manage::unseal (
   }
 
   ## Create unseal bash script.
-  ~> file { "${vault_dir}/scripts/unseal.sh":
+  -> file { "${vault_dir}/scripts/unseal.sh":
     ensure  => file,
     content => template('vault/vault.unseal.erb'),
     owner   => $vault_user,

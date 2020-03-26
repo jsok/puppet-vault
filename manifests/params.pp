@@ -58,4 +58,21 @@ class vault::params {
     }
   }
   $os = downcase($facts['kernel'])
+
+  ## Default root CA role options
+  $_root_ca_options = {
+    'allow_any_name'        => true,
+    'allow_bare_domains'    => true,
+    'allow_glob_domains'    => true,
+    'allow_ip_sans'         => true,
+    'email_protection_flag' => true,
+    'enforce_hostnames'     => false,
+    'key_bits'              => '256',
+    'key_type'              => 'ec',
+    'max_ttl'               => '8760h',
+  }
+
+  $final_root_ca_options = merge($_root_ca_options, $vault::root_ca_options)
+
+
 }

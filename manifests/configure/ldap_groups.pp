@@ -1,5 +1,5 @@
 # == (PRIVATE) Class vault::ldap::groups
-define vault::ldap::groups (
+define vault::configure::ldap_groups (
   String          $bin_dir        = $vault::bin_dir,
   String          $vault_token    = $vault::token,
   String          $group          = undef,

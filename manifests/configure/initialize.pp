@@ -2,7 +2,7 @@
 #
 #  This class is called from vault to initialize vault after installation.
 #
-class vault::manage::initialize (
+class vault::configure::initialize (
   String         $bin_dir        = $vault::bin_dir,
   String         $vault_dir      = $vault::install_dir,
   Integer        $minimum_keys   = $vault::min_keys,

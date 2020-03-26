@@ -1,5 +1,5 @@
 # == (PRIVATE) Class vault::manage::policy
-define vault::manage::policy (
+define vault::configure::policy (
   String      $bin_dir      = $vault::bin_dir,
   String      $group        = $vault::group,
   Hash        $path         = undef,
