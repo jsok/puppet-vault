@@ -2,7 +2,7 @@
 #
 #  This class is called from vault to initialize vault after installation.
 #
-class vault::configure::unseal (
+class vault::config::unseal (
   String                   $bin_dir           = $vault::bin_dir,
   String                   $vault_addr        = $vault::vault_address,
   String                   $vault_dir         = $vault::install_dir,

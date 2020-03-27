@@ -9,7 +9,7 @@ define vault::pki::config (
 ) {
 
   ## Unseal vault if needed
-  contain vault::configure::unseal
+  contain vault::config::unseal
 
   ## Parse options if defined
   if $options != undef {

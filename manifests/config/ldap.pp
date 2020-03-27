@@ -2,7 +2,7 @@
 #
 #  This class is called from vault to enable vault LDAP authentication.
 #
-define vault::configure::ldap (
+define vault::config::ldap (
   String             $bin_dir          = $vault::bin_dir,
   String             $bind_dn          = undef,
   String             $bind_passwd      = undef,
@@ -43,7 +43,7 @@ define vault::configure::ldap (
   }
 
   ## Unseal vault if needed
-  contain vault::configure::unseal
+  contain vault::config::unseal
 
   file { "${vault_dir}/certs":
     ensure => directory,
@@ -66,7 +66,7 @@ define vault::configure::ldap (
     require     => Exec["${vault_dir}/scripts/unseal.sh"],
   }
 
-  $_vault_config_cmd = @("EOC")
+  $_ldap_config_cmd = @("EOC")
     vault write auth/ldap/config \
       url='${_ldap_url}' \
       starttls='${starttls}' \
@@ -81,22 +81,26 @@ define vault::configure::ldap (
       groupfilter='${group_filter}'
     | EOC
 
-  file { "${vault_dir}/scripts/.ldap_configure_${name}.cmd":
+  $_safe_ldap_cmd = regsubst($_ldap_config_cmd, "bindpass='.* ", "bindpass='********' ",)
+
+  #notify { 'DEBUG_safe_ldap_cmd': message => $_safe_ldap_cmd }
+
+  file { "${vault_dir}/scripts/.ldap_config_${name}.cmd":
     ensure  => present,
-    content => $_vault_config_cmd,
+    content => $_safe_ldap_cmd,
     mode    => '0640',
     notify  => Exec["ldap_config_${name}"],
   }
 
   exec { "ldap_config_${name}":
     path        => [ $bin_dir, '/bin', '/usr/bin' ],
-    command     => $_vault_config_cmd,
+    command     => $_ldap_config_cmd,
     environment => [ "VAULT_TOKEN=${vault_token}" ],
     refreshonly => true,
   }
 
   if $ldap_groups != undef {
-    create_resources ('vault::configure::ldap_groups', $ldap_groups)
+    create_resources ('vault::config::ldap_groups', $ldap_groups)
   }
 
 }

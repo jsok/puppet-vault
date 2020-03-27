@@ -198,15 +198,15 @@ class vault (
   -> Class['vault::service']
 
   if $initialize_vault {
-    contain vault::configure::initialize
+    contain vault::config::initialize
   }
 
   if $vault_policies != undef and $facts['vault_initialized'] {
-    create_resources ('vault::configure::policy', $vault_policies)
+    create_resources ('vault::config::policy', $vault_policies)
   }
 
   if $enable_ldap and $facts['vault_initialized'] {
-    create_resources ('vault::configure::ldap', $ldap_config)
+    create_resources ('vault::config::ldap', $ldap_config)
   }
 
   if $enable_root_ca and $facts['vault_initialized'] {

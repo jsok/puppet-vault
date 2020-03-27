@@ -18,7 +18,7 @@ define vault::pki::generate_cert (
   $cert_csr    = "${vault_dir}/certs/${path}.csr"
 
   ## Unseal vault if needed
-  contain vault::configure::unseal
+  contain vault::config::unseal
 
   ## Parse options if defined
   if $options != undef {
