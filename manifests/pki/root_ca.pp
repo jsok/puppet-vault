@@ -2,11 +2,9 @@
 define vault::pki::root_ca (
   Optional[Hash]      $cert_options          = undef,
   String              $common_name           = undef,
-  Optional[Hash]      $options               = undef,
   String              $path                  = undef,
   Optional[String]    $role_name             = undef,
   Optional[Hash]      $role_options          = undef,
-  String              $token                 = $vault::token,
   Optional[String]    $ttl                   = '720h',
   String              $vault_addr            = $vault::vault_address,
 ) {
@@ -14,7 +12,6 @@ define vault::pki::root_ca (
   ## Initialize pki secrets engine
   vault::secrets::engine { $path: 
     engine  => 'pki',
-    token   => $token,
     options => {
       #'default-lease-ttl' => (string),
       'max-lease-ttl' => $ttl,
@@ -23,12 +20,11 @@ define vault::pki::root_ca (
   
   ## Generate root public and private certs
   vault::pki::generate_cert { $path:
-    token       => $token,
-    common_name => $common_name,
-    pkey_mode   => 'exported',
-    options     => $cert_options,
-    ttl         => $ttl,
-    is_root_ca  => true,
+    common_name  => $common_name,
+    pkey_mode    => 'exported',
+    cert_options => $cert_options,
+    ttl          => $ttl,
+    is_root_ca   => true,
   }
 
   ## Configure root CA urls
@@ -40,7 +36,6 @@ define vault::pki::root_ca (
       'crl_distribution_points' => "http://${vault_addr}/v1/${path}/crl/pem",
       #'ocsp_servers'           => (slice),
     },
-    token   => $token,
   }
 
   ## Configure role for root CA
@@ -49,7 +44,6 @@ define vault::pki::root_ca (
       action  => 'write',
       path    => "${path}/roles/${role_name}",
       options => $role_options,
-      token   => $token,
     }
   }
 

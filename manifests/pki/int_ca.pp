@@ -10,7 +10,6 @@ define vault::pki::int_ca (
   Optional[Hash]      $role_options          = undef,
   Optional[String]    $root_path             = 'root_ca',
   Optional[Boolean]   $sign_intermediate     = true,
-  String              $token                 = $vault::token,
   Optional[String]    $ttl                   = '8760h',
   String              $vault_addr            = $vault::vault_address,
   String              $vault_dir             = $vault::install_dir,
@@ -23,7 +22,6 @@ define vault::pki::int_ca (
   ## Initialize pki secrets engine
   vault::secrets::engine { $path: 
     engine  => 'pki',
-    token   => $token,
     options => {
       #'default-lease-ttl' => (string),
       'max-lease-ttl' => $ttl,
@@ -32,7 +30,6 @@ define vault::pki::int_ca (
   
   ## Generate intermediate csr and private key
   vault::pki::generate_cert { $path:
-    token       => $token,
     common_name => $common_name,
     pkey_mode   => 'exported',
     options     => $cert_options,
@@ -59,7 +56,6 @@ define vault::pki::int_ca (
     ## Sign the intermediate CA CSR
     exec { 'sign_cert':
       command     => $_sign_int_ca_cmd,
-      environment => "VAULT_TOKEN=${token}",
       path        => [ $bin_dir, '/bin', '/usr/bin' ],
       refreshonly => true,
       notify      => Exec['import_cert'],
@@ -70,7 +66,6 @@ define vault::pki::int_ca (
 
     exec { 'import_cert':
       command     => $_import_int_ca_cert,
-      environment => "VAULT_TOKEN=${token}",
       path        => $bin_dir,
       refreshonly => true,
     }
@@ -85,7 +80,6 @@ define vault::pki::int_ca (
       'crl_distribution_points' => "http://${vault_addr}/v1/${path}/crl/pem",
       #'ocsp_servers'           => (slice),
     },
-    token   => $token,
   }
 
   ## Configure role for root CA
@@ -94,7 +88,6 @@ define vault::pki::int_ca (
       action  => 'write',
       path    => "${path}/roles/${role_name}",
       options => $role_options,
-      token   => $token,
     }
   }
 

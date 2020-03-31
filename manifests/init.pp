@@ -131,12 +131,10 @@ class vault (
   Optional[Hash]             $ha_storage                = $vault::params::ha_storage,
   String                     $install_method            = $vault::params::install_method,
   String                     $install_dir               = '/opt/vault',
-  Optional[Boolean]          $initialize_vault          = false,
   Integer                    $total_keys                = 5,
   Integer                    $min_keys                  = 2,
-  Optional[Array[String]]    $vault_keys                = undef,
+  Optional[Boolean]          $initialize_vault          = false,
   String                     $ip_address                = $facts['networking']['ip'],
-  Optional[Hash]             $vault_policies            = undef,
   Variant[Hash,Array[Hash]]  $listener                  = $vault::params::listener,
   Boolean                    $manage_download_dir       = false,
   Optional[Boolean]          $manage_file_capabilities  = $vault::params::manage_file_capabilities,
@@ -157,15 +155,14 @@ class vault (
 
   # Certificate of Authority Options (PKI)
   Boolean                    $enable_root_ca            = false,
-  Optional[Hash]             $intermediate_ca           = undef,
-  Optional[Hash]             $root_ca                   = undef,
+  Optional[Hash]             $root_ca_config            = undef,
   Boolean                    $enable_int_ca             = false,
+  Optional[Hash]             $int_ca_config             = undef,
 
   # LDAP Auth
   Boolean                    $enable_ldap               = false,
   Optional[Hash]             $ldap_config               = undef,
   Optional[Hash]             $ldap_groups               = undef,
-
 
   Optional[Hash]             $seal                      = $vault::params::seal,
   Boolean                    $service_enable            = true,
@@ -178,6 +175,8 @@ class vault (
   Optional[String]           $token                     = undef,
   String                     $user                      = 'vault',
   String                     $port                      = $vault::params::vault_port,
+  Optional[Array[String]]    $vault_keys                = undef,
+  Optional[Hash]             $vault_policies            = $vault::params::default_policies,
   String                     $version                   = '1.3.2',
 ) inherits vault::params {
 
@@ -192,29 +191,37 @@ class vault (
   contain vault::install
   contain vault::config
   contain vault::service
-
-  Class['vault::install']
-  -> Class['vault::config']
-  -> Class['vault::service']
-
   if $initialize_vault {
     contain vault::config::initialize
   }
 
-  if $vault_policies != undef and $facts['vault_initialized'] {
+
+  Class['vault::install']
+  -> Class['vault::config']
+  -> Class['vault::service']
+  -> Class['vault::config::initialize']
+  #  -> Class['vault::config::ldap']
+  #  -> Class['vault::config::root_ca']
+  #  -> Class['vault::config::int_ca']
+
+  ## Configure vault user policies
+  if $facts['vault_initialized'] {
     create_resources ('vault::config::policy', $vault_policies)
   }
 
-  if $enable_ldap and $facts['vault_initialized'] {
+  ## Setup ldap authentication for vault
+  if $enable_ldap {
     create_resources ('vault::config::ldap', $ldap_config)
   }
 
-  if $enable_root_ca and $facts['vault_initialized'] {
-    create_resources ('vault::pki::root_ca', $root_ca)
+  ## Setup root CA PKI infrastructure
+  if $enable_root_ca {
+    create_resources ('vault::pki::root_ca', $root_ca_config)
   }
 
-  if $enable_int_ca and $facts['vault_initialized'] {
-    create_resources ('vault::pki::int_ca', $intermediate_ca)
+  ## Setup intermediate CA PKI infrastrucutre
+  if $enable_int_ca {
+    create_resources ('vault::pki::int_ca', $int_ca_config)
   }
 
 }

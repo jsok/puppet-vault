@@ -1,9 +1,8 @@
 # == (PRIVATE) Class vault::ldap::groups
 define vault::config::ldap_groups (
-  String          $bin_dir        = $vault::bin_dir,
-  String          $vault_token    = $vault::token,
-  String          $group          = undef,
-  String          $policy         = undef,
+  String              $bin_dir        = $vault::bin_dir,
+  String              $group          = undef,
+  String              $policy         = undef,
 ) {
 
   $_group_add_cmd = @("EOC")
@@ -17,7 +16,7 @@ define vault::config::ldap_groups (
   exec { "vault_${group}":
     path        => [ $bin_dir, '/bin', '/usr/local/bin' ],
     command     => $_group_add_cmd,
-    environment => [ "VAULT_TOKEN=${vault_token}" ],
+    #environment => [ "VAULT_TOKEN=${vault_token}" ],
     unless      => $_group_check_cmd,
   }
 

@@ -74,5 +74,52 @@ class vault::params {
 
   $final_root_ca_options = merge($_root_ca_options, $vault::root_ca_options)
 
+  ## LDAP Groups
+    #    ldap_groups      => {
+    #      'Linux_Admins' => {
+    #        group        => 'Linux_Admins',
+    #        policy       => 'admin',
+    #      },
+    #      'Linux_Users'  => {
+    #        group  => 'Linux_Users',
+    #        policy => 'users',
+    #      },
+    #    },
+
+  ## These are default vault policies to limit users within vault.
+  $default_policies = {
+    'admin' => {
+      'path' => {
+        'auth/*'   => {
+          comment      => 'Manage auth methods broadly across Vault',
+          capabilities => [ 'create','read','update','delete','list','sudo' ],
+        },
+        'sys/*'    => {
+          comment      => 'List, create, update, and delete sys mounts.',
+          capabilities => [ 'create','read','update','delete','list','sudo' ],
+        },
+        'secret/*' => {
+          comment      => 'List, create, update, and delete sys mounts.',
+          capabilities => [ 'create','read','update','delete','list','sudo' ],
+        },
+      }, # end paths
+    }, # end admin policy
+    'user' => {
+      'path' => {
+        'auth/*'   => {
+          comment      => 'List and read auth methods',
+          capabilities => [ 'read','list' ],
+        },
+        'sys/*'    => {
+          comment      => 'List and read sys mounts.',
+          capabilities => [ 'read','list' ],
+        },
+        'secret/*' => {
+          comment      => 'List and read secret mounts.',
+          capabilities => [ 'read','list' ],
+        },
+      }, # end paths
+    }, # end user policy
+  } # end vault policies
 
 }

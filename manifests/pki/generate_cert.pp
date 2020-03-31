@@ -5,10 +5,9 @@ define vault::pki::generate_cert (
   String[1]                          $common_name      = undef,
   Boolean                            $is_int_ca        = false,
   Boolean                            $is_root_ca       = false,
-  Optional[Hash]                     $options          = undef,
+  Optional[Hash]                     $cert_options     = undef,
   String[1]                          $path             = $name,
   Optional[Enum[internal,exported]]  $pkey_mode        = 'exported',
-  String[1]                          $token            = undef,
   String[1]                          $ttl              = '8760h',
   String                             $vault_dir        = $vault::install_dir,
 ) {
@@ -21,8 +20,8 @@ define vault::pki::generate_cert (
   contain vault::config::unseal
 
   ## Parse options if defined
-  if $options != undef {
-    $_options = join($options.map |$key, $value| { "${key}='${value}'" }, ' ')
+  if $cert_options != undef {
+    $_cert_options = join($cert_options.map |$key, $value| { "${key}='${value}'" }, ' ')
   }
 
   if $is_root_ca {
@@ -40,21 +39,23 @@ define vault::pki::generate_cert (
 
   ## Check if root or intermediate CA cert
   if $is_root_ca {
+    notify { 'DEBUG': message => 'Generate root CA certificate' }
     $_gen_cert_cmd = @("EOC")
       vault write -format=json ${path}/root/generate/${pkey_mode} \
-        common_name='${common_name}' ttl='${ttl}' ${_options} |\
+        common_name='${common_name}' ttl='${ttl}' ${_cert_options} |\
         jq -r '.data.private_key, .data.certificate' > ${cert_bundle}
       | EOC
+  } elsif $is_int_ca {
+    notify { 'DEBUG': message => 'Generate intermediate CA certificate' }
+    $_gen_cert_cmd = @("EOC")
+      bash -c "vault write -format=json ${path}/intermediate/generate/${pkey_mode} \
+        common_name='${common_name}' ttl='${ttl}' ${_cert_options} |\
+        tee >(jq -r '.data.private_key' > ${cert_key}) |\
+        jq -r '.data.csr' > ${cert_csr}"
+      | EOC
   } else {
-    if $is_int_ca {
-      $_gen_cert_cmd = @("EOC")
-        bash -c "vault write -format=json ${path}/intermediate/generate/${pkey_mode} \
-          common_name='${common_name}' ttl='${ttl}' ${_options} |\
-          tee >(jq -r '.data.private_key' > ${cert_key}) |\
-          jq -r '.data.csr' > ${cert_csr}"
-        | EOC
-    }
-
+    # Issue client certificate
+    notify { 'DEBUG': message => 'Generate client certificate' }
   }
 
   $_safe_name = regsubst($common_name, ' ', '_', 'G')
@@ -68,7 +69,6 @@ define vault::pki::generate_cert (
 
   exec { "clear_${path}":
     command     => $_clear_cert_cmd,
-    environment => "VAULT_TOKEN=${token}",
     path        => [ $bin_dir, '/bin', '/usr/bin' ],
     refreshonly => true,
     notify      => Exec[$common_name],
@@ -79,7 +79,6 @@ define vault::pki::generate_cert (
   #       overwriting existing certificate file.
   exec { $common_name:
     command     => $_gen_cert_cmd,
-    environment => "VAULT_TOKEN=${token}",
     path        => [ $bin_dir, '/bin', '/usr/bin' ],
     refreshonly => true,
   }

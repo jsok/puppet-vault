@@ -20,7 +20,6 @@ define vault::config::ldap (
   String             $user             = $vault::user,
   String             $vault_address    = $vault::vault_address,
   String             $vault_dir        = $vault::install_dir,
-  String             $vault_token      = $vault::token,
 ) {
 
   $_ldap_cert = "${vault_dir}/certs/${ldap_servers[0]}.crt"
@@ -61,7 +60,7 @@ define vault::config::ldap (
   exec { 'vault_ldap_enable':
     path        => [ $bin_dir, '/bin', '/usr/bin' ],
     command     => 'vault auth enable ldap',
-    environment => [ "VAULT_TOKEN=${vault_token}" ],
+    #environment => [ "VAULT_TOKEN=${vault_token}" ],
     unless      => $_ldap_auth_check_cmd,
     require     => Exec["${vault_dir}/scripts/unseal.sh"],
   }
@@ -95,7 +94,7 @@ define vault::config::ldap (
   exec { "ldap_config_${name}":
     path        => [ $bin_dir, '/bin', '/usr/bin' ],
     command     => $_ldap_config_cmd,
-    environment => [ "VAULT_TOKEN=${vault_token}" ],
+    #environment => [ "VAULT_TOKEN=${vault_token}" ],
     refreshonly => true,
   }
 

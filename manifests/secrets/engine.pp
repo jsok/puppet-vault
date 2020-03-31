@@ -5,7 +5,6 @@ define vault::secrets::engine (
   Enum[kv,pki]                          $engine         = undef,
   Optional[Hash]                        $options        = undef,
   Optional[String]                      $path           = $name,
-  String                                $token          = $vault::token,
 ) {
 
   ## Parse options if defined
@@ -36,7 +35,7 @@ define vault::secrets::engine (
   ## Perform selected action
   exec { "pki_enable_${path}":
     command     => $_secret_cmd,
-    environment => "VAULT_TOKEN=${token}",
+    #environment => "VAULT_TOKEN=${token}",
     path        => [$bin_dir, '/bin', '/usr/bin'],
     unless      => $_check_secret_cmd,
   }

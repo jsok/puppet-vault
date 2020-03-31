@@ -4,7 +4,6 @@ define vault::pki::config (
   String                $bin_dir          = $vault::bin_dir,
   Optional[Hash]        $options          = undef,
   String[1]             $path             = undef,
-  String[1]             $token            = undef,
   String                $vault_dir        = $vault::install_dir,
 ) {
 
@@ -31,7 +30,6 @@ define vault::pki::config (
 
   exec { "${name}_cmd":
     command     => $_config_cmd,
-    environment => "VAULT_TOKEN=${token}",
     path        => $bin_dir,
     refreshonly => true,
   }
