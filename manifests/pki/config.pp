@@ -1,10 +1,8 @@
 # == Class to configure pki path
 define vault::pki::config (
   String[1]             $action           = undef,
-  String                $bin_dir          = $vault::bin_dir,
   Optional[Hash]        $options          = undef,
   String[1]             $path             = undef,
-  String                $vault_dir        = $vault::install_dir,
 ) {
 
   ## Unseal vault if needed
@@ -21,7 +19,7 @@ define vault::pki::config (
 
   ## Used for idempotencey 
   $_file_name = regsubst($path, '/', '_', 'G')
-  file { "${vault_dir}/scripts/.pki_config_${_file_name}.cmd":
+  file { "${vault::install_dir}/scripts/.pki_config_${_file_name}.cmd":
     ensure  => present,
     content => $_config_cmd,
     mode    => '0640',
@@ -30,7 +28,7 @@ define vault::pki::config (
 
   exec { "${name}_cmd":
     command     => $_config_cmd,
-    path        => $bin_dir,
+    path        => [ $vault::bin_dir, '/bin', '/usr/bin' ],
     refreshonly => true,
   }
 

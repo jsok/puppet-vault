@@ -44,13 +44,6 @@ define vault::config::ldap (
   ## Unseal vault if needed
   contain vault::config::unseal
 
-  file { "${vault_dir}/certs":
-    ensure => directory,
-    owner  => $vault::user,
-    group  => $vault::group,
-    mode   => '0750',
-  }
-
   exec { "${ldap_servers[0]}.crt":
     path    => [ '/bin', '/usr/bin' ],
     command => $_ldap_cert_cmd,

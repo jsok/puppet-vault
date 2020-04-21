@@ -39,14 +39,12 @@ define vault::pki::generate_cert (
 
   ## Check if root or intermediate CA cert
   if $is_root_ca {
-    notify { 'DEBUG': message => 'Generate root CA certificate' }
     $_gen_cert_cmd = @("EOC")
       vault write -format=json ${path}/root/generate/${pkey_mode} \
         common_name='${common_name}' ttl='${ttl}' ${_cert_options} |\
         jq -r '.data.private_key, .data.certificate' > ${cert_bundle}
       | EOC
   } elsif $is_int_ca {
-    notify { 'DEBUG': message => 'Generate intermediate CA certificate' }
     $_gen_cert_cmd = @("EOC")
       bash -c "vault write -format=json ${path}/intermediate/generate/${pkey_mode} \
         common_name='${common_name}' ttl='${ttl}' ${_cert_options} |\

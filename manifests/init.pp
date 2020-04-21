@@ -28,7 +28,8 @@
 #   Directory the vault configuration will be kept in (Default: /etc/vault).
 #
 # * `config_mode`
-#   Mode of the configuration file (config.json) (Default: '0750').
+#   TODO (REMOVE) Mode of the configuration file (config.json) (Default: '0750').
+#   Mode of the vault directories (Default: '0750').
 #
 # * `purge_config_dir`
 #   Whether the `config_dir` should be purged before installing the
@@ -195,14 +196,11 @@ class vault (
     contain vault::config::initialize
   }
 
-
   Class['vault::install']
   -> Class['vault::config']
   -> Class['vault::service']
   -> Class['vault::config::initialize']
   #  -> Class['vault::config::ldap']
-  #  -> Class['vault::config::root_ca']
-  #  -> Class['vault::config::int_ca']
 
   ## Configure vault user policies
   if $facts['vault_initialized'] {
