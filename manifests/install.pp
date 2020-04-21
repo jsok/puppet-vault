@@ -17,6 +17,13 @@ class vault::install {
     mode   => $vault::config_mode,
   }
 
+  ~> file { "${vault::install_dir}/certs":
+    ensure => directory,
+    owner  => $vault::user,
+    group  => $vault::group,
+    mode   => $vault::config_mode,
+  }
+
   case $vault::install_method {
       'archive': {
         if $vault::manage_download_dir {

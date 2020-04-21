@@ -28,7 +28,8 @@
 #   Directory the vault configuration will be kept in (Default: /etc/vault).
 #
 # * `config_mode`
-#   Mode of the configuration file (config.json) (Default: '0750').
+#   TODO (REMOVE) Mode of the configuration file (config.json) (Default: '0750').
+#   Mode of the vault directories (Default: '0750').
 #
 # * `purge_config_dir`
 #   Whether the `config_dir` should be purged before installing the
@@ -85,6 +86,27 @@
 # * `min_keys`
 #   The minimum number of keys needed to unseal Vault (Default: 2).
 #
+# == PKI Options
+# * cert_params options
+#   The following are optional parameters that can be passed to vault::pki::gen_cert resource.
+#     'alt_names'             => 'Subject Alternative Names, comma separated'
+#     'country'               => 'US',
+#     'exclude_cn_from_sans'  => (bool),
+#     'ip_sans'               => (slice),
+#     'key_bits'              => '256',
+#     'key_type'              => 'ec',
+#     'locality'              => (slice),
+#     'max_path_length'       => (int),
+#     'organization'          => 'Encore Technologies',
+#     'other_sans'            => (slice),
+#     'ou'                    => (slice),
+#     'permitted_dns_domains' => (slice),
+#     'postal_code'           => (slice),
+#     'province'              => (slice),
+#     'serial_number'         => (string),
+#     'street_address'        => (slice),
+#     'uri_sans'              => (slice),
+
 class vault (
   Optional[String]           $api_addr                  = $vault::params::api_addr,
   String                     $arch                      = $vault::params::arch,
@@ -100,31 +122,20 @@ class vault (
   String                     $download_extension        = 'zip',
   Optional[String]           $download_filename         = 'vault.zip',
   String                     $download_url_base         = 'https://releases.hashicorp.com/vault/',
+  String                     $domain                    = $facts['networking']['domain'],
   Optional[String]           $download_url              = undef,
-  Boolean                    $enable_ldap               = false,
+  Boolean                    $enable_pki                = true,
+  Boolean                    $enable_intermediate_ca    = false,
   Optional[Boolean]          $enable_ui                 = true,
   Optional[Hash]             $extra_config              = {},
   String                     $group                     = 'vault',
   Optional[Hash]             $ha_storage                = $vault::params::ha_storage,
   String                     $install_method            = $vault::params::install_method,
   String                     $install_dir               = '/opt/vault',
-  Optional[Boolean]          $initialize_vault          = false,
   Integer                    $total_keys                = 5,
   Integer                    $min_keys                  = 2,
-  Optional[Array[String]]    $vault_keys                = undef,
+  Optional[Boolean]          $initialize_vault          = false,
   String                     $ip_address                = $facts['networking']['ip'],
-  Optional[Array]            $ldap_servers              = undef,
-  Optional[String]           $ldap_ca_cert              = undef,
-  Optional[String]           $ldap_bind_dn              = undef,
-  Optional[String]           $ldap_bind_passwd          = undef,
-  Optional[String]           $ldap_user_dn              = undef,
-  Optional[String]           $ldap_user_attribute       = 'sAMAccountName',
-  Optional[String]           $ldap_group_dn             = undef,
-  Optional[String]           $ldap_group_attribute      = 'cn',
-  Optional[Boolean]          $ldap_insecure_tls         = false,
-  Optional[Boolean]          $ldap_starttls             = true,
-  Optional[Hash]             $ldap_groups               = undef,
-  Optional[Hash]             $vault_policies            = undef,
   Variant[Hash,Array[Hash]]  $listener                  = $vault::params::listener,
   Boolean                    $manage_download_dir       = false,
   Optional[Boolean]          $manage_file_capabilities  = $vault::params::manage_file_capabilities,
@@ -141,6 +152,19 @@ class vault (
     $package_ensure                                     = 'installed',
   Optional[String]           $package_name              = 'vault',
   Boolean                    $purge_config_dir          = true,
+  Optional[String]           $pki_path                  = undef,
+
+  # Certificate of Authority Options (PKI)
+  Boolean                    $enable_root_ca            = false,
+  Optional[Hash]             $root_ca_config            = undef,
+  Boolean                    $enable_int_ca             = false,
+  Optional[Hash]             $int_ca_config             = undef,
+
+  # LDAP Auth
+  Boolean                    $enable_ldap               = false,
+  Optional[Hash]             $ldap_config               = undef,
+  Optional[Hash]             $ldap_groups               = undef,
+
   Optional[Hash]             $seal                      = $vault::params::seal,
   Boolean                    $service_enable            = true,
   Enum['stopped','running']  $service_ensure            = 'running',
@@ -152,33 +176,50 @@ class vault (
   Optional[String]           $token                     = undef,
   String                     $user                      = 'vault',
   String                     $port                      = $vault::params::vault_port,
+  Optional[Array[String]]    $vault_keys                = undef,
+  Optional[Hash]             $vault_policies            = $vault::params::default_policies,
   String                     $version                   = '1.3.2',
 ) inherits vault::params {
 
-  $_download_url  = "${download_url_base}${version}"
-  $_download_file = "${package_name}_${version}_${os}_${arch}.${download_extension}"
+  $_download_url     = "${download_url_base}${version}"
+  $_download_file    = "${package_name}_${version}_${os}_${arch}.${download_extension}"
   $real_download_url = pick($download_url, "${_download_url}/${_download_file}")
+  $vault_address     = "${ip_address}:${port}"
+  $_vault_utils      = [ 'openssl', 'jq' ]
 
-  $vault_address = "${ip_address}:${port}"
+  package { $_vault_utils: ensure => present }
 
   contain vault::install
   contain vault::config
   contain vault::service
+  if $initialize_vault {
+    contain vault::config::initialize
+  }
 
   Class['vault::install']
   -> Class['vault::config']
   -> Class['vault::service']
+  -> Class['vault::config::initialize']
+  #  -> Class['vault::config::ldap']
 
-  if $initialize_vault {
-    contain vault::manage::initialize
+  ## Configure vault user policies
+  if $facts['vault_initialized'] {
+    create_resources ('vault::config::policy', $vault_policies)
   }
 
-  if $vault_policies != undef and $facts['vault_initialized'] {
-    create_resources ('vault::manage::policy', $vault_policies)
+  ## Setup ldap authentication for vault
+  if $enable_ldap {
+    create_resources ('vault::config::ldap', $ldap_config)
   }
 
-  if $enable_ldap and $facts['vault_initialized'] {
-    contain vault::ldap
+  ## Setup root CA PKI infrastructure
+  if $enable_root_ca {
+    create_resources ('vault::pki::root_ca', $root_ca_config)
+  }
+
+  ## Setup intermediate CA PKI infrastrucutre
+  if $enable_int_ca {
+    create_resources ('vault::pki::int_ca', $int_ca_config)
   }
 
 }

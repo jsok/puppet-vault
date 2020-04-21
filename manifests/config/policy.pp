@@ -1,10 +1,10 @@
 # == (PRIVATE) Class vault::manage::policy
-define vault::manage::policy (
-  String      $bin_dir      = $vault::bin_dir,
-  String      $group        = $vault::group,
-  Hash        $path         = undef,
-  String      $user         = $vault::user,
-  String      $vault_dir    = $vault::install_dir,
+define vault::config::policy (
+  String              $bin_dir         = $vault::bin_dir,
+  String              $group           = $vault::group,
+  Hash                $path            = undef,
+  String              $user            = $vault::user,
+  String              $vault_dir       = $vault::install_dir,
 ) {
 
   $_policy_file = "${vault_dir}/scripts/${name}.hcl"
@@ -39,6 +39,7 @@ define vault::manage::policy (
 
   exec { "write_${name}":
     command     => $_policy_write_cmd,
+    #environment => [ "VAULT_TOKEN=${vault_token}" ],
     path        => [ $bin_dir, '/bin', '/usr/bin' ],
     refreshonly => true,
     subscribe   => File[$_policy_file],
