@@ -17,20 +17,20 @@ Puppet::Type.newtype(:vault_cert) do
 
   ensurable
 
-  newparam(:path, namevar: true) do
+  newparam(:cert_path, namevar: true) do
     desc 'The path to the certificate'
-    validate do |value|
-      path = Pathname.new(value)
-      unless path.absolute?
-        raise ArgumentError, "Path must be absolute: #{path}"
-      end
-    end
+    #validate do |value|
+    #  path = Pathname.new(value)
+    #  unless path.absolute?
+    #    raise ArgumentError, "Path must be absolute: #{path}"
+    #  end
+    #end
   end
 
-  newparam(:private_key) do
+  newparam(:priv_key_path) do
     desc 'The path to the private key'
     defaultto do
-      path = Pathname.new(@resource[:path])
+      path = Pathname.new(@resource[:cert_path])
       "#{path.dirname}/#{path.basename(path.extname)}.key"
     end
     validate do |value|
@@ -41,6 +41,14 @@ Puppet::Type.newtype(:vault_cert) do
     end
   end
 
+  newparam(:password) do
+    desc 'The optional password for the private key'
+  end
+
+  newparam(:auth_type) do
+    desc 'authentication type of the private key'
+  end
+  
   newparam(:ttl_hours) do
     desc 'Number of hours remaining before the cert needs to be renewed'
     defaultto(3)
@@ -50,17 +58,26 @@ Puppet::Type.newtype(:vault_cert) do
     desc 'IP Subject Alternative Names'
   end
 
-  newparam(:api_url) do
-    desc 'URL of the Vault API'
+  newparam(:vault_server) do
+    desc 'Hostname of the Vault server'
+  end
+
+  newparam(:vault_port) do
+    desc 'Hostname of the Vault server'
+    defaultto(8200)
   end
 
   newparam(:api_token) do
     desc 'API token used to authenticate with Vault'
   end
 
-  newparam(:api_pki_path) do
+  newparam(:secret_engine) do
     desc 'Path to the PKI secrets engine'
     defaultto('/int_ca')
+  end
+
+  newparam(:secret_role) do
+    desc 'Name of the role that the new cert belongs to'
   end
 
 end
