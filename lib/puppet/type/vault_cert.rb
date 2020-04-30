@@ -29,10 +29,10 @@ Puppet::Type.newtype(:vault_cert) do
 
   newparam(:priv_key_path) do
     desc 'The path to the private key'
-    defaultto do
-      path = Pathname.new(@resource[:cert_path])
-      "#{path.dirname}/#{path.basename(path.extname)}.key"
-    end
+    #defaultto do
+    #  path = Pathname.new(@resource[:cert_path])
+    #  "#{path.dirname}/#{path.basename(path.extname)}.key"
+    #end
     validate do |value|
       path = Pathname.new(value)
       unless path.absolute?
@@ -49,9 +49,14 @@ Puppet::Type.newtype(:vault_cert) do
     desc 'authentication type of the private key'
   end
   
-  newparam(:ttl_hours) do
+  newparam(:ttl_hours_remaining) do
     desc 'Number of hours remaining before the cert needs to be renewed'
     defaultto(3)
+  end
+
+  newparam(:cert_ttl) do
+    desc 'TTL to give the new cert'
+    defaultto('30d')
   end
 
   newparam(:sans) do
@@ -60,6 +65,11 @@ Puppet::Type.newtype(:vault_cert) do
 
   newparam(:vault_server) do
     desc 'Hostname of the Vault server'
+  end
+
+  newparam(:vault_scheme) do
+    desc 'Hostname of the Vault server'
+    defaultto('http')
   end
 
   newparam(:vault_port) do

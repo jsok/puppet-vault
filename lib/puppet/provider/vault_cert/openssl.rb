@@ -1,8 +1,6 @@
 require 'pathname'
 require 'time'
 require 'net/https'
-#require 'net/ssh'
-#require 'net/scp'
 require 'json'
 # prepreqs
 # - assume a certificate on the filesystem
@@ -37,18 +35,12 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
 
   commands openssl: 'openssl'
 
-  #def self.check_private_key(resource)
-  #  cert = OpenSSL::X509::Certificate.new(File.read(resource[:path]))
-  #  priv = private_key(resource)
-  #  cert.check_private_key(priv)
-  #end
-
   # Return a Net::HTTP::Response object
   def send_request(operation = 'GET', path = '', data = nil, headers = {}, search_path = {})
     request = nil
     encoded_search = ''
 
-    vault_scheme = 'http'
+    vault_scheme = resource[:vault_scheme]
     vault_server = resource[:vault_server]
     vault_port = resource[:vault_port]
 
@@ -81,9 +73,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     end
 
     request.content_type = 'application/json'
-    #if resource[:grafana_user] && resource[:grafana_password]
-    #  request.basic_auth resource[:grafana_user], resource[:grafana_password]
-    #end
+    
     resp = nil
     Net::HTTP.start(vault_server, vault_port,
                     use_ssl: vault_scheme == 'https',
@@ -106,13 +96,11 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   end  
     
   def get_client_fqdn
-    Puppet.info(Facter.value('fqdn'))
     return @client_fqdn unless @client_fqdn.nil?
     @client_fqdn = Facter.value('fqdn')
   end
 
   def create_cert
-    Puppet.info("create_cert")
     common_name = get_client_fqdn
     api_path = '/v1/' + resource[:secret_engine] + '/issue/' + resource[:secret_role]
 
@@ -123,7 +111,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     payload = {
       name: resource[:secret_role],
       common_name: common_name,
-      ttl: resource[:ttl_hours]
+      ttl: resource[:cert_ttl]
     }
 
     response = send_request('POST', api_path, payload, headers)
@@ -135,11 +123,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   end
 
   def revoke_cert
-    cert = get_certificate
-    # Get the serial number from the cert object
-    serial_number = cert.serial.to_s(16)
-    # Add colons to the returned serial number
-    serial_number = serial_number.scan(/\w{2}/).join(':')
+    serial_number = get_cert_serial
 
     api_path = '/v1/' + resource[:secret_engine] + '/revoke'
 
@@ -160,19 +144,45 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   end
 
   # Check whether the time left on the cert is less than the ttl
-  def cert_expiring
+  # Return true if the cert is about to expire
+  def check_cert_expiring
     cert = get_certificate
     expire_date = cert.not_after
 
     now = Time.now
     # Calculate the difference in time (seconds) and convert to hours
     hours_until_expired = (expire_date - now) / 60 / 60
-    Puppet.info("Time until expired: #{hours_until_expired.to_s}")
 
-    if hours_until_expired < resource[:ttl_hours]
+    if hours_until_expired < resource[:ttl_hours_remaining]
       true
     else
       false
+    end
+  end
+
+  # Check whether the cert has been revoked
+  # Return true if the cert is revoked
+  def check_cert_revoked
+    cert_serial = get_cert_serial
+    api_path = '/v1/' + resource[:secret_engine] + '/cert/' + cert_serial
+
+    headers = {
+      "X-Vault-Token" => resource[:api_token]
+    }
+
+    response = send_request('GET', api_path, headers=headers)
+
+    # Verify that a response was returned
+    if response.body
+      response_body = JSON.parse(response.body)
+      # Check the revocation time on the cert object
+      if response_body['data']['revocation_time'] > 0
+        return true
+      else
+        return false
+      end
+    else
+      return true
     end
   end
 
@@ -211,21 +221,37 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
                 end
   end
 
+  # Read the serial number from the certificate, convert it to base 16, and add colons
+  def get_cert_serial
+    cert = get_certificate
+    # Get the serial number from the cert object
+    serial_number = cert.serial.to_s(16)
+    # Add a colon every 2 characters to the returned serial number
+    serial_number.scan(/\w{2}/).join(':')
+  end
+
+  # Save the certificate and private key on the client server
   def client_cert_save(cert)
-    common_name = get_client_fqdn
+    cert_name = get_client_fqdn + '.crt'
+    # Get the directory from the given cert path
+    cert_dir = File.dirname(resource[:cert_path])
     # Save the new cert in the certs directory on the client server
-    cert_path = '/etc/pki/tls/certs/' + common_name + '.crt'
+    cert_path = File.join(cert_dir, cert_name)
     File.open(cert_path, 'w') do |f|
       f.write(cert['data']['certificate'])
     end
 
+    key_name = get_client_fqdn + '.key'
+    # Get the directory from the given key path
+    key_dir = File.dirname(resource[:priv_key_path])
     # Save the new private key in the tls directory on the client
-    key_path = '/etc/pki/tls/private/' + common_name + '.pem'
+    key_path = File.join(key_dir, key_name)
     File.open(key_path, 'w') do |f|
       f.write(cert['data']['private_key'])
     end
   end
 
+  # TODO: Save a copy of the newly generated cert on the vault server
   def vault_cert_save(cert)
     common_name = get_client_fqdn
     # Save the new cert in the certs directory on the vault server
@@ -233,61 +259,45 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     File.open(cert_path, 'w') do |f|
       f.write(cert['data']['certificate'])
     end
-
-
   end
 
   def exists?
-    # TODO
-    #  - check for the certificate existing at all
-    #  - check for the certificate being expired or not
-    #    - if expired, returned false, so we create a new one
-    #  - check if cert is revoked (if we want to get crazy)
-    #    - if we have the cert ID, we can ask Vault for this
     cert = get_certificate
-    Puppet.info(cert.serial)
     priv_key = get_private_key
+    # Check for the certificate existing at all
     if cert && priv_key
+      # Check if the given private key matches the given cert
       if !cert.check_private_key(priv_key)
-        Puppet.info("FALSE")
         return false
       end
-      if cert_expiring
-        Puppet.info("TRUE")
-        return true
-        #return false
+      # Check if the certificate is expired or not
+      if check_cert_expiring
+        return false
       end
-      #unless self.class.old_cert_is_equal(resource)
-      #  return false
-      #end
-      Puppet.info("TRUE 2")
+      # Check if the cert is revoked or not
+      if check_cert_revoked
+        return false
+      end
       true
     else
-      Puppet.info("FALSE 2")
       false
     end
   end
 
+  # Create a new certificate with the vault API and save it on the filesystem
   def create
-    # TODO
-    #  - this is where we'll go to Vault and request a new cert
-    #  - drop the cert on the filesystem
-    # This is where we want to use the Grafana resource reference
-    Puppet.info("CREATE")
-    #cert = get_certificate
-    #save_certificate
+    # Revoke the old cert before creating a new one
+    revoke_cert
     new_cert = create_cert
     client_cert_save(new_cert)
-    vault_cert_save(new_cert)
   end
 
   def destroy
-    # TODO
-    #  - delete the cert off the filesystem
-    #  - revoke the cert in Vault
-    Puppet.info("DESTROY")
+    #  Revoke the cert in Vault
     revoke_cert
-    #Pathname.new(resource[:cert_path]).delete
+    #  Delete the cert and key off the filesystem
+    Pathname.new(resource[:cert_path]).delete
+    Pathname.new(resource[:priv_key_path]).delete
   end
 
 end
