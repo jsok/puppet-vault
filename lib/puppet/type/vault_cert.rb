@@ -1,14 +1,15 @@
 require 'pathname'
 # example:
 # vault_cert { 'name/title':
-#   path         => '/path/to/cert.crt',
-#   private_key  => '/path/to/key.key',
-#   # refresh if the cert is going to expire in the next 3 hours
-#   ttl_hours    => 3,
-#   sans         => 'cname.blah.domain.tld,127.0.0.1',
-#   api_url      => 'https://vault.domain.tld:9100',
-#   api_token    => 'xzy123',
-#   api_pki_path => '/pki',
+#   cert_path           => '/path/to/cert.crt',
+#   priv_key_path       => '/path/to/key.key',
+#   ttl_hours_remaining => 3,
+#   cert_ttl            => '720h',
+#   sans                => 'cname.blah.domain.tld,127.0.0.1',
+#   api_url             => 'https://vault.domain.tld:9100',
+#   api_token           => 'xzy123',
+#   secret_engine       => '/pki',
+#   secret_role         => 'role_name',
 # }
 #
 
@@ -19,20 +20,16 @@ Puppet::Type.newtype(:vault_cert) do
 
   newparam(:cert_path, namevar: true) do
     desc 'The path to the certificate'
-    #validate do |value|
-    #  path = Pathname.new(value)
-    #  unless path.absolute?
-    #    raise ArgumentError, "Path must be absolute: #{path}"
-    #  end
-    #end
+    validate do |value|
+      path = Pathname.new(value)
+      unless path.absolute?
+        raise ArgumentError, "Path must be absolute: #{path}"
+      end
+    end
   end
 
   newparam(:priv_key_path) do
     desc 'The path to the private key'
-    #defaultto do
-    #  path = Pathname.new(@resource[:cert_path])
-    #  "#{path.dirname}/#{path.basename(path.extname)}.key"
-    #end
     validate do |value|
       path = Pathname.new(value)
       unless path.absolute?
@@ -47,6 +44,12 @@ Puppet::Type.newtype(:vault_cert) do
 
   newparam(:auth_type) do
     desc 'authentication type of the private key'
+    validate do |value|
+      acceptable_values = ['dsa', 'rsa', 'ec']
+      unless acceptable_values.include? value.downcase
+        raise ArgumentError, "auth_type must be one of: #{acceptable_values.join(', ')}"
+      end
+    end
   end
   
   newparam(:ttl_hours_remaining) do
@@ -56,7 +59,7 @@ Puppet::Type.newtype(:vault_cert) do
 
   newparam(:cert_ttl) do
     desc 'TTL to give the new cert'
-    defaultto('30d')
+    defaultto('720h')
   end
 
   newparam(:sans) do
@@ -83,7 +86,7 @@ Puppet::Type.newtype(:vault_cert) do
 
   newparam(:secret_engine) do
     desc 'Path to the PKI secrets engine'
-    defaultto('/int_ca')
+    defaultto('/pki')
   end
 
   newparam(:secret_role) do
