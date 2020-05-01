@@ -41,6 +41,7 @@ group :development do
   gem "puppet-lint-version_comparison-check", '>= 0.2.1',                      require: false
   gem "r10k", '>= 3.0.0',                                                      require: false
   gem "cri", '2.15.6',                                                         require: false
+  gem "rspec-json_expectations", '>= 2.2.0',                                   require: false
   gem "yaml-lint", '>= 0.0.10',                                                require: false
 end
 

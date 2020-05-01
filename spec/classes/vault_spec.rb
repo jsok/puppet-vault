@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'rspec/json_expectations'
 
 describe 'vault' do
   let :node do

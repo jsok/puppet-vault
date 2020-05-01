@@ -46,6 +46,8 @@ Gemfile:
       # see: https://github.com/puppetlabs/r10k/issues/930
       - gem: 'cri'
         version: '2.15.6'
+      - gem: 'rspec-json_expectations'
+        version: '>= 2.2.0'
       - gem: 'yaml-lint'
         version: '>= 0.0.10'
 # Rakefile:
