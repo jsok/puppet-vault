@@ -23,14 +23,13 @@ require 'json'
 # - https://github.com/voxpupuli/puppet-grafana/blob/master/lib/puppet/provider/grafana_datasource/grafana.rb
 # - https://github.com/voxpupuli/puppet-grafana/blob/master/lib/puppet/provider/grafana.rb
 # - https://github.com/StackStorm/puppet-st2/blob/master/lib/puppet/provider/st2_pack/default.rb
-# 
+#
 # Blog:
 # - http://garylarizza.com/blog/2013/11/25/fun-with-providers/
 # - http://garylarizza.com/blog/2013/11/26/fun-with-providers-part-2/
 # - http://garylarizza.com/blog/2013/12/15/seriously-what-is-this-provider-doing/
 #
 Puppet::Type.type(:vault_cert).provide(:openssl) do
-
   desc 'Manages a certificates from HashiCorp Vault OpenSSL'
 
   commands openssl: 'openssl'
@@ -44,7 +43,6 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     vault_server = resource[:api_server]
     vault_port = resource[:api_port]
 
-
     if URI.respond_to?(:encode_www_form)
       encoded_search = URI.encode_www_form(search_path)
     else
@@ -55,7 +53,8 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
       end
       encoded_search = encoded_search.join('&')
     end
-    uri = URI.parse format('%s://%s:%d%s?%s', vault_scheme, vault_server, vault_port, path, encoded_search)
+    # uri = URI.parse format('%s://%s:%d%s?%s', vault_scheme, vault_server, vault_port, path, encoded_search)
+    uri = URI.parse '%s://%s:%d%s?%s' % [vault_scheme, vault_server, vault_port, path, encoded_search]
 
     case operation.upcase
     when 'POST'
