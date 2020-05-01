@@ -67,7 +67,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     when 'DELETE'
       request = Net::HTTP::Delete.new(uri.request_uri, headers)
     else
-      raise Puppet::Error, format('Unsupported HTTP operation %s', operation)
+      raise Puppet::Error, 'Unsupported HTTP operation %s' % operation
     end
 
     request.content_type = 'application/json'
