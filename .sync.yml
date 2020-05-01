@@ -1,0 +1,56 @@
+---
+.gitignore:
+  paths:
+    - .rerun.json
+    - .librarian
+    - .kitchen
+    - .tmp
+    - .bundle
+    - bolt.log
+    - Puppetfile.lock
+    - modules
+.gitlab-ci.yml:
+  # we don't use GitLab
+  unmanaged: true
+appveyor.yml:
+  # we don't use Appveyor
+  unmanaged: true
+Gemfile:
+  required:
+    ':development':
+      - gem: 'puppet-lint-absolute_template_path'
+        version: '>= 1.0.1'
+      - gem: 'puppet-lint-alias-check'
+        version: '>= 0.1.1'
+      - gem: 'puppet-lint-classes_and_types_beginning_with_digits-check'
+        version: '>= 0.1.2'
+      - gem: 'puppet-lint-concatenated_template_files-check'
+        version: '>= 0.1.1'
+      - gem: 'puppet-lint-file_ensure-check'
+        version: '>= 0.3.1'
+      - gem: 'puppet-lint-file_source_rights-check'
+        version: '>= 0.1.1'
+      - gem: 'puppet-lint-leading_zero-check'
+        version: '>= 0.1.1'
+      - gem: 'puppet-lint-resource_reference_syntax'
+        version: '>= 1.0.10'
+      - gem: 'puppet-lint-trailing_comma-check'
+        version: '>= 0.3.2'
+      - gem: 'puppet-lint-unquoted_string-check'
+        version: '>= 0.3.0'
+      - gem: 'puppet-lint-version_comparison-check'
+        version: '>= 0.2.1'
+      - gem: 'r10k'
+        version: '>= 3.0.0'
+      # cri is needed by r10k, but due to a bug in the cri gem v2.15.7 it breaks r10k
+      # see: https://github.com/puppetlabs/r10k/issues/930
+      - gem: 'cri'
+        version: '2.15.6'
+      - gem: 'rspec-json_expectations'
+        version: '>= 2.2.0'
+      - gem: 'yaml-lint'
+        version: '>= 0.0.10'
+# Rakefile:
+#   extras:
+#     - "# exclude plans because puppet-syntax doesn't support them yet: https://github.com/voxpupuli/puppet-syntax/issues/95"
+#     - 'PuppetSyntax.exclude_paths = ["plans/**/*", "vendor/**/*"]'

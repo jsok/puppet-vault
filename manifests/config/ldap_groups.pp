@@ -14,10 +14,10 @@ define vault::config::ldap_groups (
     | EOC
 
   exec { "vault_${group}":
-    path        => [ $bin_dir, '/bin', '/usr/local/bin' ],
-    command     => $_group_add_cmd,
+    path    => [ $bin_dir, '/bin', '/usr/local/bin' ],
+    command => $_group_add_cmd,
     #environment => [ "VAULT_TOKEN=${vault_token}" ],
-    unless      => $_group_check_cmd,
+    unless  => $_group_check_cmd,
   }
 
 }

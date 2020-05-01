@@ -6,9 +6,9 @@ class vault::config {
 
   if $vault::consul_url == undef {
     $_storage_hash = {
-      file   => {
+      file => {
         path => "${vault::install_dir}/data",
-      }
+      },
     }
     file { "${vault::install_dir}/data":
       ensure => directory,

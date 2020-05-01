@@ -26,10 +26,9 @@ define vault::secrets::engine (
 
   ## Perform selected action
   exec { "pki_enable_${path}":
-    command     => $_secret_cmd,
-    path        => [ $vault::bin_dir, '/bin', '/usr/bin' ],
-    unless      => $_check_secret_cmd,
+    command => $_secret_cmd,
+    path    => [ $vault::bin_dir, '/bin', '/usr/bin' ],
+    unless  => $_check_secret_cmd,
   }
 
 }
-

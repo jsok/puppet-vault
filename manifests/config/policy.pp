@@ -28,7 +28,7 @@ define vault::config::policy (
 
   ## Write policy content to HCL file format.
   file { $_policy_file:
-    ensure  => present,
+    ensure  => file,
     content => $_full_policy,
     group   => $group,
     owner   => $user,
