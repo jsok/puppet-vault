@@ -27,7 +27,7 @@ Puppet::Type.newtype(:vault_cert) do
         raise ArgumentError, "Path must be absolute: #{value}"
       end
       # Verify that the given cert exists
-      unless File.exists?(value)
+      unless File.exist?(value)
         raise ArgumentError, "File not found for: #{value}"
       end
     end
@@ -46,7 +46,7 @@ Puppet::Type.newtype(:vault_cert) do
         raise ArgumentError, "Path must be absolute: #{path}"
       end
       # Verify that the given cert exists
-      unless File.exists?(value)
+      unless File.exist?(value)
         raise ArgumentError, "File not found for: #{value}"
       end
     end
@@ -104,8 +104,7 @@ Puppet::Type.newtype(:vault_cert) do
       end
     end
   end
-  
-  #newparam(:ttl_hours_remaining) do
+
   newparam(:regenerate_ttl) do
     desc 'Re-generate and replace the certificate this many hours before it expires.'
     defaultto(3)
@@ -146,5 +145,4 @@ Puppet::Type.newtype(:vault_cert) do
   newparam(:secret_role) do
     desc 'Name of the role that the new cert belongs to'
   end
-
 end

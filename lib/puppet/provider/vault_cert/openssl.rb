@@ -23,7 +23,7 @@ require 'json'
 # - https://github.com/voxpupuli/puppet-grafana/blob/master/lib/puppet/provider/grafana_datasource/grafana.rb
 # - https://github.com/voxpupuli/puppet-grafana/blob/master/lib/puppet/provider/grafana.rb
 # - https://github.com/StackStorm/puppet-st2/blob/master/lib/puppet/provider/st2_pack/default.rb
-# 
+#
 # Blog:
 # - http://garylarizza.com/blog/2013/11/25/fun-with-providers/
 # - http://garylarizza.com/blog/2013/11/26/fun-with-providers-part-2/
@@ -103,7 +103,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     api_path = '/v1/' + resource[:secret_engine] + '/issue/' + resource[:secret_role]
 
     headers = {
-      "X-Vault-Token" => resource[:api_token],
+      'X-Vault-Token' => resource[:api_token],
     }
 
     payload = {
@@ -123,7 +123,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     api_path = '/v1/' + resource[:secret_engine] + '/revoke'
 
     headers = {
-      "X-Vault-Token" => resource[:api_token],
+      'X-Vault-Token' => resource[:api_token],
     }
 
     payload = {
@@ -131,11 +131,8 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     }
 
     response = send_request('POST', api_path, payload, headers)
-    if response.body
-      return JSON.parse(response.body)
-    else
-      return response
-    end
+    return JSON.parse(response.body) if response.body
+    response
   end
 
   # Check whether the time left on the cert is less than the ttl
@@ -147,7 +144,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     now = Time.now
     # Calculate the difference in time (seconds) and convert to hours
     hours_until_expired = (expire_date - now) / 60 / 60
-    #Puppet.info("Time until expired: #{hours_until_expired.to_s}")
+    # Puppet.info("Time until expired: #{hours_until_expired.to_s}")
 
     if hours_until_expired < resource[:regenerate_ttl]
       true
@@ -163,22 +160,19 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     api_path = '/v1/' + resource[:secret_engine] + '/cert/' + cert_serial
 
     headers = {
-      "X-Vault-Token" => resource[:api_token]
+      'X-Vault-Token' => resource[:api_token],
     }
 
-    response = send_request('GET', api_path, headers=headers)
+    response = send_request('GET', api_path, nil, headers)
 
     # Verify that a response was returned
-    if response.body
-      response_body = JSON.parse(response.body)
-      # Check the revocation time on the cert object
-      if response_body['data']['revocation_time'] > 0
-        return true
-      else
-        return false
-      end
-    else
+    return true unless response.body
+    response_body = JSON.parse(response.body)
+    # Check the revocation time on the cert object
+    if response_body['data']['revocation_time'] > 0
       return true
+    else
+      return false
     end
   end
 
@@ -201,18 +195,17 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
                   auth_type = resource[:auth_type].downcase
                   if auth_type == 'dsa'
                     OpenSSL::PKey::DSA.new(file, resource[:key_password])
-                    #OpenSSL::PKey::DSA.new(file)
+                    # OpenSSL::PKey::DSA.new(file)
                   elsif auth_type == 'rsa'
                     OpenSSL::PKey::RSA.new(file, resource[:key_password])
-                    #OpenSSL::PKey::RSA.new(file)
+                    # OpenSSL::PKey::RSA.new(file)
                   elsif auth_type == 'ec'
                     OpenSSL::PKey::EC.new(file, resource[:key_password])
-                    #OpenSSL::PKey::EC.new(file)
+                    # OpenSSL::PKey::EC.new(file)
                   else
-                     raise Puppet::Error,
-                           "Unknown authentication type '#{auth_type}'"
+                    raise Puppet::Error, "Unknown authentication type '#{auth_type}'"
                   end
-                  #OpenSSL::PKey::RSA.new(file)
+                  # OpenSSL::PKey::RSA.new(file)
                 else
                   false
                 end
@@ -224,7 +217,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     # Get the serial number from the cert object
     serial_number = cert.serial.to_s(16)
     # Add a colon every 2 characters to the returned serial number
-    serial_number.scan(/\w{2}/).join(':')
+    serial_number.scan(%r{\w{2}}).join(':')
   end
 
   # Save the certificate and private key on the client server
@@ -254,21 +247,21 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     # Check for the certificate existing at all
     if cert && priv_key
       # Check if the given private key matches the given cert
-      if !cert.check_private_key(priv_key)
-        Puppet.info("PRIVATE KEY FAILED")
+      unless cert.check_private_key(priv_key)
+        Puppet.info('PRIVATE KEY FAILED')
         return false
       end
       # Check if the certificate is expired or not
       if check_cert_expiring
-        Puppet.info("CERT EXPIRING")
+        Puppet.info('CERT EXPIRING')
         return false
       end
       # Check if the cert is revoked or not
       if check_cert_revoked
-        Puppet.info("CERT REVOKED")
+        Puppet.info('CERT REVOKED')
         return false
       end
-      Puppet.info("CERT GOOD")
+      Puppet.info('CERT GOOD')
       true
     else
       Puppet.info("CERT OR KEY DOES NOT EXIST: #{resource[:cert_path]}")
@@ -278,7 +271,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
 
   # Create a new certificate with the vault API and save it on the filesystem
   def create
-    Puppet.info("CREATE")
+    Puppet.info('CREATE')
     # Revoke the old cert before creating a new one
     cert = certificate_get
     priv_key = private_key_get
@@ -290,13 +283,11 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   end
 
   def destroy
-    Puppet.info("DESTROY")
+    Puppet.info('DESTROY')
     #  Revoke the cert in Vault
     revoke_cert
     #  Delete the cert and key off the filesystem
     Pathname.new(resource[:cert_path]).delete
     Pathname.new(resource[:priv_key_path]).delete
   end
-
 end
-
