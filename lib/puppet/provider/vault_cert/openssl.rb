@@ -170,9 +170,9 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     response_body = JSON.parse(response.body)
     # Check the revocation time on the cert object
     if response_body['data']['revocation_time'] > 0
-      return true
+      true
     else
-      return false
+      false
     end
   end
 
