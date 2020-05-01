@@ -4,69 +4,90 @@
 #
 class vault::config {
 
-  $_config_hash = delete_undef_values({
-    'listener'          => $::vault::listener,
-    'storage'           => $::vault::storage,
-    'ha_storage'        => $::vault::ha_storage,
-    'seal'              => $::vault::seal,
-    'telemetry'         => $::vault::telemetry,
-    'disable_cache'     => $::vault::disable_cache,
-    'default_lease_ttl' => $::vault::default_lease_ttl,
-    'max_lease_ttl'     => $::vault::max_lease_ttl,
-    'disable_mlock'     => $::vault::disable_mlock,
-    'ui'                => $::vault::enable_ui,
-    'api_addr'          => $::vault::api_addr,
-  })
-
-  $config_hash = merge($_config_hash, $::vault::extra_config)
-
-  file { $::vault::config_dir:
-    ensure  => directory,
-    purge   => $::vault::purge_config_dir,
-    recurse => $::vault::purge_config_dir,
-    owner   => $::vault::user,
-    group   => $::vault::group,
+  if $vault::consul_url == undef {
+    $_storage_hash = {
+      file   => {
+        path => "${vault::install_dir}/data",
+      }
+    }
+    file { "${vault::install_dir}/data":
+      ensure => directory,
+      owner  => $vault::user,
+      group  => $vault::group,
+      mode   => $vault::config_mode,
+    }
+  } else {
+    $_storage_hash = {
+      consul => {
+        address => "${vault::consul_url}:${vault::consul_port}",
+        path    => 'vault',
+      },
+    }
   }
 
-  file { "${::vault::config_dir}/config.json":
+  $_config_hash = delete_undef_values({
+    'listener'          => $vault::listener,
+    'storage'           => pick($vault::storage, $_storage_hash),
+    'ha_storage'        => $vault::ha_storage,
+    'seal'              => $vault::seal,
+    'telemetry'         => $vault::telemetry,
+    'disable_cache'     => $vault::disable_cache,
+    'default_lease_ttl' => $vault::default_lease_ttl,
+    'max_lease_ttl'     => $vault::max_lease_ttl,
+    'disable_mlock'     => $vault::disable_mlock,
+    'ui'                => $vault::enable_ui,
+    'api_addr'          => $vault::api_addr,
+  })
+
+  $config_hash = merge($_config_hash, $vault::extra_config)
+
+  file { $vault::config_dir:
+    ensure  => directory,
+    purge   => $vault::purge_config_dir,
+    recurse => $vault::purge_config_dir,
+    owner   => $vault::user,
+    group   => $vault::group,
+  }
+
+  file { "${vault::config_dir}/config.json":
     content => to_json_pretty($config_hash),
-    owner   => $::vault::user,
-    group   => $::vault::group,
-    mode    => $::vault::config_mode,
+    owner   => $vault::user,
+    group   => $vault::group,
+    mode    => $vault::config_mode,
   }
 
   # If using the file storage then the path must exist and be readable
   # and writable by the vault user, if we have a file path and the
   # manage_storage_dir attribute is true, then we create it here.
   #
-  if $::vault::storage['file'] and $::vault::manage_storage_dir {
-    if ! $::vault::storage['file']['path'] {
+  if $vault::storage != undef and $vault::manage_storage_dir {
+    if ! $vault::storage['file']['path'] {
       fail('Must provide a path attribute to storage file')
     }
 
-    file { $::vault::storage['file']['path']:
+    file { $vault::storage['file']['path']:
       ensure => directory,
-      owner  => $::vault::user,
-      group  => $::vault::group,
+      owner  => $vault::user,
+      group  => $vault::group,
     }
   }
 
   # If nothing is specified for manage_service_file, defaults will be used
   # depending on the install_method.
   # If a value is passed, it will be interpretted as a boolean.
-  if $::vault::manage_service_file == undef {
-    case $::vault::install_method {
+  if $vault::manage_service_file == undef {
+    case $vault::install_method {
       'archive': { $real_manage_service_file = true  }
       'repo':    { $real_manage_service_file = false }
       default:   { $real_manage_service_file = false }
     }
   } else {
-    validate_bool($::vault::manage_service_file)
-    $real_manage_service_file = $::vault::manage_service_file
+    validate_bool($vault::manage_service_file)
+    $real_manage_service_file = $vault::manage_service_file
   }
 
   if $real_manage_service_file {
-    case $::vault::service_provider {
+    case $vault::service_provider {
       'upstart': {
         file { '/etc/init/vault.conf':
           ensure  => file,
@@ -84,7 +105,7 @@ class vault::config {
         }
       }
       'systemd': {
-        ::systemd::unit_file{'vault.service':
+        systemd::unit_file{'vault.service':
           content => template('vault/vault.systemd.erb'),
         }
       }
@@ -98,7 +119,7 @@ class vault::config {
         }
       }
       default: {
-        fail("vault::service_provider '${::vault::service_provider}' is not valid")
+        fail("vault::service_provider '${vault::service_provider}' is not valid")
       }
     }
   }
