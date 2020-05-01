@@ -3,23 +3,24 @@
 #  This class is called from vault to enable vault LDAP authentication.
 #
 define vault::config::ldap (
-  String             $bin_dir          = $vault::bin_dir,
-  String             $bind_dn          = undef,
-  String             $bind_passwd      = undef,
-  String             $group_attr       = undef,
-  String             $group_dn         = undef,
-  String             $group_filter     =
+  String           $bin_dir          = $vault::bin_dir,
+  String           $bind_dn          = undef,
+  String           $bind_passwd      = undef,
+  String           $group_attr       = undef,
+  String           $group_dn         = undef,
+  String           $group_filter     =
     '(&(objectClass=group)(member:1.2.840.113556.1.4.1941:={{.UserDN}}))',
-  String             $group            = $vault::group,
-  Boolean            $insecure_tls     = undef,
-  Optional[Hash]     $ldap_groups      = $vault::ldap_groups,
-  Array[String]      $ldap_servers     = undef,
-  Boolean            $starttls         = undef,
-  String             $user_attr        = undef,
-  String             $user_dn          = undef,
-  String             $user             = $vault::user,
-  String             $vault_address    = $vault::vault_address,
-  String             $vault_dir        = $vault::install_dir,
+  String           $group            = $vault::group,
+  Boolean          $insecure_tls     = undef,
+  Optional[Hash]   $ldap_groups      = $vault::ldap_groups,
+  Optional[String] $ldap_url         = undef,
+  Array[String]    $ldap_servers     = undef,
+  Boolean          $starttls         = undef,
+  String           $user_attr        = undef,
+  String           $user_dn          = undef,
+  String           $user             = $vault::user,
+  String           $vault_address    = $vault::vault_address,
+  String           $vault_dir        = $vault::install_dir,
 ) {
 
   $_ldap_cert = "${vault_dir}/certs/${ldap_servers[0]}.crt"
@@ -36,7 +37,7 @@ define vault::config::ldap (
     | EOC
 
   if $ldap_url == undef {
-    $_ldap_url = join($ldap_servers.map |$server| { "ldap://${server}" }, ",")
+    $_ldap_url = $ldap_servers.map |$server| { "ldap://${server}" }.join(',')
   }
   else {
     $_ldap_url = $ldap_url
