@@ -40,9 +40,9 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     request = nil
     encoded_search = ''
 
-    vault_scheme = resource[:vault_scheme]
-    vault_server = resource[:vault_server]
-    vault_port = resource[:vault_port]
+    vault_scheme = resource[:api_scheme]
+    vault_server = resource[:api_server]
+    vault_port = resource[:api_port]
 
 
     if URI.respond_to?(:encode_www_form)
@@ -153,7 +153,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     # Calculate the difference in time (seconds) and convert to hours
     hours_until_expired = (expire_date - now) / 60 / 60
 
-    if hours_until_expired < resource[:ttl_hours_remaining]
+    if hours_until_expired < resource[:regenerate_ttl]
       true
     else
       false
@@ -202,18 +202,19 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     return @priv_key unless @priv_key.nil?
     @priv_key = if Pathname.new(resource[:priv_key_path]).exist?
                   file = File.read(resource[:priv_key_path])
-                  if resource[:auth_type] == 'dsa'
-                    #OpenSSL::PKey::DSA.new(file, resource[:password])
-                    OpenSSL::PKey::DSA.new(file)
-                  elsif resource[:auth_type] == 'rsa'
-                    #OpenSSL::PKey::RSA.new(file, resource[:password])
-                    OpenSSL::PKey::RSA.new(file)
-                  elsif resource[:auth_type] == 'ec'
-                    #OpenSSL::PKey::EC.new(file, resource[:password])
-                    OpenSSL::PKey::EC.new(file)
+                  auth_type = resource[:auth_type].downcase
+                  if auth_type == 'dsa'
+                    OpenSSL::PKey::DSA.new(file, resource[:key_password])
+                    #OpenSSL::PKey::DSA.new(file)
+                  elsif auth_type == 'rsa'
+                    OpenSSL::PKey::RSA.new(file, resource[:key_password])
+                    #OpenSSL::PKey::RSA.new(file)
+                  elsif auth_type == 'ec'
+                    OpenSSL::PKey::EC.new(file, resource[:key_password])
+                    #OpenSSL::PKey::EC.new(file)
                   else
                      raise Puppet::Error,
-                           "Unknown authentication type '#{resource[:auth_type]}'"
+                           "Unknown authentication type '#{auth_type}'"
                   end
                   #OpenSSL::PKey::RSA.new(file)
                 else
@@ -232,32 +233,22 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
 
   # Save the certificate and private key on the client server
   def client_cert_save(cert)
+    # Name the certificate after the client FQDN
     cert_name = get_client_fqdn + '.crt'
-    # Get the directory from the given cert path
-    cert_dir = File.dirname(resource[:cert_path])
+    cert_dir = resource[:new_cert_path]
     # Save the new cert in the certs directory on the client server
     cert_path = File.join(cert_dir, cert_name)
     File.open(cert_path, 'w') do |f|
       f.write(cert['data']['certificate'])
     end
 
+    # Name the private key after the client FQDN
     key_name = get_client_fqdn + '.key'
-    # Get the directory from the given key path
-    key_dir = File.dirname(resource[:priv_key_path])
+    key_dir = resource[:new_priv_key_path]
     # Save the new private key in the tls directory on the client
     key_path = File.join(key_dir, key_name)
     File.open(key_path, 'w') do |f|
       f.write(cert['data']['private_key'])
-    end
-  end
-
-  # TODO: Save a copy of the newly generated cert on the vault server
-  def vault_cert_save(cert)
-    common_name = get_client_fqdn
-    # Save the new cert in the certs directory on the vault server
-    cert_path = '/opt/vault/certs/' + common_name + '.crt'
-    File.open(cert_path, 'w') do |f|
-      f.write(cert['data']['certificate'])
     end
   end
 

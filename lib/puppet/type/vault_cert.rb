@@ -22,28 +22,81 @@ Puppet::Type.newtype(:vault_cert) do
     desc 'The path to the certificate'
     validate do |value|
       path = Pathname.new(value)
+      # Verify that an absolute path was given
       unless path.absolute?
-        raise ArgumentError, "Path must be absolute: #{path}"
+        raise ArgumentError, "Path must be absolute: #{value}"
+      end
+      # Verify that the given cert exists
+      unless File.exists?(value)
+        raise ArgumentError, "File not found for: #{value}"
       end
     end
   end
 
   newparam(:priv_key_path) do
     desc 'The path to the private key'
+    defaultto do
+      path = Pathname.new(@resource[:cert_path])
+      "#{path.dirname}/#{path.basename(path.extname)}.key"
+    end
     validate do |value|
       path = Pathname.new(value)
+      # Verify that an absolute path was given
       unless path.absolute?
         raise ArgumentError, "Path must be absolute: #{path}"
+      end
+      # Verify that the given cert exists
+      unless File.exists?(value)
+        raise ArgumentError, "File not found for: #{value}"
       end
     end
   end
 
-  newparam(:password) do
+  newparam(:new_cert_path) do
+    desc 'The path to save the new certificate in'
+    # Default to the directory of the given cert
+    defaultto do
+      File.dirname(@resource[:cert_path])
+    end
+    validate do |value|
+      path = Pathname.new(value)
+      # Verify that an absolute path was given
+      unless path.absolute?
+        raise ArgumentError, "Path must be absolute: #{path}"
+      end
+      # Verify that the given directory exist
+      unless File.directory?(value)
+        raise ArgumentError, "Directory not found for: #{value}"
+      end
+    end
+  end
+
+  newparam(:new_priv_key_path) do
+    desc 'The path to save the new certificate in'
+    # Default to the directory of the given private key
+    defaultto do
+      File.dirname(@resource[:priv_key_path])
+    end
+    validate do |value|
+      path = Pathname.new(value)
+      # Verify that an absolute path was given
+      unless path.absolute?
+        raise ArgumentError, "Path must be absolute: #{path}"
+      end
+      # Verify that the given directory exist
+      unless File.directory?(value)
+        raise ArgumentError, "Directory not found for: #{value}"
+      end
+    end
+  end
+
+  newparam(:key_password) do
     desc 'The optional password for the private key'
   end
 
   newparam(:auth_type) do
     desc 'authentication type of the private key'
+    defaultto('ec')
     validate do |value|
       acceptable_values = ['dsa', 'rsa', 'ec']
       unless acceptable_values.include? value.downcase
@@ -52,8 +105,9 @@ Puppet::Type.newtype(:vault_cert) do
     end
   end
   
-  newparam(:ttl_hours_remaining) do
-    desc 'Number of hours remaining before the cert needs to be renewed'
+  #newparam(:ttl_hours_remaining) do
+  newparam(:regenerate_ttl) do
+    desc 'Re-generate and replace the certificate this many hours before it expires.'
     defaultto(3)
   end
 
@@ -66,17 +120,17 @@ Puppet::Type.newtype(:vault_cert) do
     desc 'IP Subject Alternative Names'
   end
 
-  newparam(:vault_server) do
-    desc 'Hostname of the Vault server'
+  newparam(:api_server) do
+    desc 'Hostname/IP Address of the Vault server'
   end
 
-  newparam(:vault_scheme) do
-    desc 'Hostname of the Vault server'
-    defaultto('http')
+  newparam(:api_scheme) do
+    desc 'Communication scheme/transport for the API ("http", "https")'
+    defaultto('https')
   end
 
-  newparam(:vault_port) do
-    desc 'Hostname of the Vault server'
+  newparam(:api_port) do
+    desc 'Port for communicating with the Vault server'
     defaultto(8200)
   end
 
