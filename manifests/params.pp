@@ -4,54 +4,37 @@
 # It sets variables according to platform.
 #
 class vault::params {
-  $user               = 'vault'
-  $manage_user        = true
-  $group              = 'vault'
-  $manage_group       = true
-  $config_dir         = '/etc/vault'
-  $config_mode        = '0750'
-  $download_url       = undef
-  $download_url_base  = 'https://releases.hashicorp.com/vault/'
-  $download_extension = 'zip'
-  $version            = '1.3.2'
-  $service_name       = 'vault'
   $num_procs          = $facts['processorcount']
-  $package_name       = 'vault'
-  $package_ensure     = 'installed'
+  $ip_address         = $facts['networking']['ip']
+  $vault_port         = '8200'
 
-  $download_dir        = '/tmp'
-  $manage_download_dir = false
-  $download_filename   = 'vault.zip'
-
-  # storage and listener are mandatory, we provide some sensible
-  # defaults here
-  $storage             = { 'file' => { 'path' => '/var/lib/vault' }}
-  $manage_storage_dir  = false
-  $listener            = {
-    'tcp' => {
-      'address'     => '127.0.0.1:8200',
-      'tls_disable' => 1,
+  $listener = [
+    {
+      tcp => {
+        address     => "127.0.0.1:${vault_port}",
+        tls_disable => true,
+      },
     },
-  }
+    {
+      tcp => {
+        address     => "${ip_address}:${vault_port}",
+        tls_disable => true,
+      },
+    },
+  ]
 
-  $enable_ui          = undef
+  $api_addr = "http://${ip_address}:${vault_port}"
 
   # These should always be undef as they are optional settings that
   # should not be configured unless explicitly declared.
-  $ha_storage         = undef
-  $seal               = undef
-  $disable_cache      = undef
-  $telemetry          = undef
-  $default_lease_ttl  = undef
-  $max_lease_ttl      = undef
-  $disable_mlock      = undef
-
+  $default_lease_ttl        = undef
+  $disable_cache            = undef
+  $disable_mlock            = undef
+  $ha_storage               = undef
   $manage_file_capabilities = undef
-
-  $manage_service = true
-
-  $service_enable = true
-  $service_ensure = 'running'
+  $max_lease_ttl            = undef
+  $seal                     = undef
+  $telemetry                = undef
 
   $service_provider = $facts['service_provider']
 
@@ -75,4 +58,68 @@ class vault::params {
     }
   }
   $os = downcase($facts['kernel'])
+
+  ## Default root CA role options
+  $_root_ca_options = {
+    'allow_any_name'        => true,
+    'allow_bare_domains'    => true,
+    'allow_glob_domains'    => true,
+    'allow_ip_sans'         => true,
+    'email_protection_flag' => true,
+    'enforce_hostnames'     => false,
+    'key_bits'              => '256',
+    'key_type'              => 'ec',
+    'max_ttl'               => '8760h',
+  }
+
+  $final_root_ca_options = merge($_root_ca_options, $vault::root_ca_options)
+
+  ## LDAP Groups
+    #    ldap_groups      => {
+    #      'Linux_Admins' => {
+    #        group        => 'Linux_Admins',
+    #        policy       => 'admin',
+    #      },
+    #      'Linux_Users'  => {
+    #        group  => 'Linux_Users',
+    #        policy => 'users',
+    #      },
+    #    },
+
+  ## These are default vault policies to limit users within vault.
+  $default_policies = {
+    'admin' => {
+      'path' => {
+        'auth/*'   => {
+          comment      => 'Manage auth methods broadly across Vault',
+          capabilities => [ 'create','read','update','delete','list','sudo' ],
+        },
+        'sys/*'    => {
+          comment      => 'List, create, update, and delete sys mounts.',
+          capabilities => [ 'create','read','update','delete','list','sudo' ],
+        },
+        'secret/*' => {
+          comment      => 'List, create, update, and delete sys mounts.',
+          capabilities => [ 'create','read','update','delete','list','sudo' ],
+        },
+      }, # end paths
+    }, # end admin policy
+    'user' => {
+      'path' => {
+        'auth/*'   => {
+          comment      => 'List and read auth methods',
+          capabilities => [ 'read','list' ],
+        },
+        'sys/*'    => {
+          comment      => 'List and read sys mounts.',
+          capabilities => [ 'read','list' ],
+        },
+        'secret/*' => {
+          comment      => 'List and read secret mounts.',
+          capabilities => [ 'read','list' ],
+        },
+      }, # end paths
+    }, # end user policy
+  } # end vault policies
+
 }
