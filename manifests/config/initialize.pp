@@ -1,4 +1,4 @@
-# == Class vault::manage::initialize 
+# == Class vault::manage::initialize
 #
 #  This class is called from vault to initialize vault after installation.
 #
@@ -33,7 +33,7 @@ class vault::config::initialize (
 
   ## Create profile script
   file { '/etc/profile.d/vault.sh':
-    ensure  => present,
+    ensure  => file,
     content => template('vault/vault.profile.erb'),
     owner   => 'root',
     group   => 'root',
@@ -59,7 +59,7 @@ class vault::config::initialize (
 
     # Set vault token to defined $vault_token
     file { '/root/.vault-token':
-      ensure  => 'present',
+      ensure  => file,
       content => $vault_token,
       owner   => root,
       group   => root,

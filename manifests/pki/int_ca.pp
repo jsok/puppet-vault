@@ -19,13 +19,13 @@ define vault::pki::int_ca (
   $_safe_name  = regsubst($common_name, ' ', '_', 'G')
 
   ## Initialize pki secrets engine
-  vault::secrets::engine { $path: 
+  vault::secrets::engine { $path:
     engine  => 'pki',
     options => {
       'max-lease-ttl' => $ttl,
     },
   }
-  
+
   ## Generate intermediate csr and private key
   vault::pki::generate_cert { $path:
     common_name  => $common_name,
@@ -55,7 +55,7 @@ define vault::pki::int_ca (
       #        "Vault::Pki::Config[${root_path}_role]",
       #      ],
       #    }
- 
+
     ## Sign the intermediate CA CSR
     exec { 'sign_cert':
       command => $_sign_int_ca_cmd,

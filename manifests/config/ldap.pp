@@ -1,4 +1,4 @@
-# == Class vault::ldap 
+# == Class vault::ldap
 #
 #  This class is called from vault to enable vault LDAP authentication.
 #
@@ -37,7 +37,8 @@ define vault::config::ldap (
 
   if $ldap_url == undef {
     $_ldap_url = join($ldap_servers.map |$server| { "ldap://${server}" }, ",")
-  } else {
+  }
+  else {
     $_ldap_url = $ldap_url
   }
 
@@ -51,11 +52,11 @@ define vault::config::ldap (
   }
 
   exec { 'vault_ldap_enable':
-    path        => [ $bin_dir, '/bin', '/usr/bin' ],
-    command     => 'vault auth enable ldap',
+    path    => [ $bin_dir, '/bin', '/usr/bin' ],
+    command => 'vault auth enable ldap',
     #environment => [ "VAULT_TOKEN=${vault_token}" ],
-    unless      => $_ldap_auth_check_cmd,
-    require     => Exec["${vault_dir}/scripts/unseal.sh"],
+    unless  => $_ldap_auth_check_cmd,
+    require => Exec["${vault_dir}/scripts/unseal.sh"],
   }
 
   $_ldap_config_cmd = @("EOC")
@@ -78,7 +79,7 @@ define vault::config::ldap (
   #notify { 'DEBUG_safe_ldap_cmd': message => $_safe_ldap_cmd }
 
   file { "${vault_dir}/scripts/.ldap_config_${name}.cmd":
-    ensure  => present,
+    ensure  => file,
     content => $_safe_ldap_cmd,
     mode    => '0640',
     notify  => Exec["ldap_config_${name}"],
@@ -96,4 +97,3 @@ define vault::config::ldap (
   }
 
 }
-

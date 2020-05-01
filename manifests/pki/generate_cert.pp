@@ -1,4 +1,4 @@
-# == Class to generate pki certificates 
+# == Class to generate pki certificates
 define vault::pki::generate_cert (
   String                             $bin_dir          = $vault::bin_dir,
   Optional[String]                   $cert_sn          = undef,
@@ -59,7 +59,7 @@ define vault::pki::generate_cert (
   $_safe_name = regsubst($common_name, ' ', '_', 'G')
   ## Idempotent command generate certificate script
   file { "${vault_dir}/scripts/.gen_cert_${_safe_name}.cmd":
-    ensure  => present,
+    ensure  => file,
     content => $_gen_cert_cmd,
     mode    => '0640',
     notify  => Exec["clear_${path}"],
@@ -82,4 +82,3 @@ define vault::pki::generate_cert (
   }
 
 }
-

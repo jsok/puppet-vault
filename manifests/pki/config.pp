@@ -17,10 +17,10 @@ define vault::pki::config (
 
   #notify { "DEBUG: pki_config:\n\n> ${_config_cmd}" : }
 
-  ## Used for idempotencey 
+  ## Used for idempotencey
   $_file_name = regsubst($path, '/', '_', 'G')
   file { "${vault::install_dir}/scripts/.pki_config_${_file_name}.cmd":
-    ensure  => present,
+    ensure  => file,
     content => $_config_cmd,
     mode    => '0640',
     notify  => Exec["${name}_cmd"],
@@ -33,4 +33,3 @@ define vault::pki::config (
   }
 
 }
-

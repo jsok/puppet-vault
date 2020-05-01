@@ -10,14 +10,14 @@ define vault::pki::root_ca (
 ) {
 
   ## Initialize pki secrets engine
-  vault::secrets::engine { $path: 
+  vault::secrets::engine { $path:
     engine  => 'pki',
     options => {
       #'default-lease-ttl' => (string),
       'max-lease-ttl' => $ttl,
     },
   }
-  
+
   ## Generate root public and private certs
   vault::pki::generate_cert { $path:
     common_name  => $common_name,
@@ -48,7 +48,7 @@ define vault::pki::root_ca (
   }
 
   ## Configure root CA role.
-  # allow_any_name (false) 
+  # allow_any_name (false)
   # ======================
   #   If set, clients can request certificates for any CN they like. See the
   #   documentation for more information.
@@ -57,7 +57,7 @@ define vault::pki::root_ca (
   # ==========================
   #   If set, clients can request certificates for the base domains themselves,
   #   e.g. "example.com".  This is a separate option as in some cases this can
-  #   be considered a security threat.  
+  #   be considered a security threat.
   #
   # allow_glob_domains (false)
   # ==========================
@@ -177,7 +177,7 @@ define vault::pki::root_ca (
   #
   # max_ttl ("")
   # ============
-  #   The maximum allowed lease duration 
+  #   The maximum allowed lease duration
   #
   # name ("")
   # =========
