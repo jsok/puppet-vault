@@ -7,11 +7,6 @@
   "source": "https://github.com/jsok/puppet-vault.git",
   "project_page": "https://github.com/jsok/puppet-vault",
   "issues_url": "https://github.com/jsok/puppet-vault/issues",
-  "tags": [
-    "vault",
-    "hashicorp",
-    "secrets"
-  ],
   "dependencies": [
     {
       "name": "puppetlabs-stdlib",
@@ -89,7 +84,7 @@
     "hashicorp",
     "secrets"
   ],
-  "pdk-version": "1.8.0",
-  "template-url": "file:///opt/puppetlabs/pdk/share/cache/pdk-templates.git",
-  "template-ref": "1.8.0-0-g0d9da00"
+  "pdk-version": "1.17.0",
+  "template-url": "pdk-default#1.17.0",
+  "template-ref": "tags/1.17.0-0-gd3a4319"
 }
