@@ -1,25 +1,26 @@
-# == Class vault::ldap 
+# == Class vault::ldap
 #
 #  This class is called from vault to enable vault LDAP authentication.
 #
 define vault::config::ldap (
-  String             $bin_dir          = $vault::bin_dir,
-  String             $bind_dn          = undef,
-  String             $bind_passwd      = undef,
-  String             $group_attr       = undef,
-  String             $group_dn         = undef,
-  String             $group_filter     =
+  String           $bin_dir          = $vault::bin_dir,
+  String           $bind_dn          = undef,
+  String           $bind_passwd      = undef,
+  String           $group_attr       = undef,
+  String           $group_dn         = undef,
+  String           $group_filter     =
     '(&(objectClass=group)(member:1.2.840.113556.1.4.1941:={{.UserDN}}))',
-  String             $group            = $vault::group,
-  Boolean            $insecure_tls     = undef,
-  Optional[Hash]     $ldap_groups      = $vault::ldap_groups,
-  Array[String]      $ldap_servers     = undef,
-  Boolean            $starttls         = undef,
-  String             $user_attr        = undef,
-  String             $user_dn          = undef,
-  String             $user             = $vault::user,
-  String             $vault_address    = $vault::vault_address,
-  String             $vault_dir        = $vault::install_dir,
+  String           $group            = $vault::group,
+  Boolean          $insecure_tls     = undef,
+  Optional[Hash]   $ldap_groups      = $vault::ldap_groups,
+  Optional[String] $ldap_url         = undef,
+  Array[String]    $ldap_servers     = undef,
+  Boolean          $starttls         = undef,
+  String           $user_attr        = undef,
+  String           $user_dn          = undef,
+  String           $user             = $vault::user,
+  String           $vault_address    = $vault::vault_address,
+  String           $vault_dir        = $vault::install_dir,
 ) {
 
   $_ldap_cert = "${vault_dir}/certs/${ldap_servers[0]}.crt"
@@ -36,8 +37,9 @@ define vault::config::ldap (
     | EOC
 
   if $ldap_url == undef {
-    $_ldap_url = join($ldap_servers.map |$server| { "ldap://${server}" }, ",")
-  } else {
+    $_ldap_url = $ldap_servers.map |$server| { "ldap://${server}" }.join(',')
+  }
+  else {
     $_ldap_url = $ldap_url
   }
 
@@ -51,11 +53,11 @@ define vault::config::ldap (
   }
 
   exec { 'vault_ldap_enable':
-    path        => [ $bin_dir, '/bin', '/usr/bin' ],
-    command     => 'vault auth enable ldap',
+    path    => [ $bin_dir, '/bin', '/usr/bin' ],
+    command => 'vault auth enable ldap',
     #environment => [ "VAULT_TOKEN=${vault_token}" ],
-    unless      => $_ldap_auth_check_cmd,
-    require     => Exec["${vault_dir}/scripts/unseal.sh"],
+    unless  => $_ldap_auth_check_cmd,
+    require => Exec["${vault_dir}/scripts/unseal.sh"],
   }
 
   $_ldap_config_cmd = @("EOC")
@@ -78,7 +80,7 @@ define vault::config::ldap (
   #notify { 'DEBUG_safe_ldap_cmd': message => $_safe_ldap_cmd }
 
   file { "${vault_dir}/scripts/.ldap_config_${name}.cmd":
-    ensure  => present,
+    ensure  => file,
     content => $_safe_ldap_cmd,
     mode    => '0640',
     notify  => Exec["ldap_config_${name}"],
@@ -96,4 +98,3 @@ define vault::config::ldap (
   }
 
 }
-

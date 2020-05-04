@@ -11,7 +11,7 @@ Facter.add(:vault_initialized) do
       # the second part is the value (a string)
       init_value = init_parts[1]
       # convert the string to a boolean, so if it's "true" it will return true otherwise false
-      init_value.downcase == 'true'
+      init_value.casecmp('true').zero?
     end
   end
 end

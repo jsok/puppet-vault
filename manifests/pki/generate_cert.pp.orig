@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # @api private == define class to generate pki certificates 
+=======
+# == Class to generate pki certificates
+>>>>>>> master
 define vault::pki::generate_cert (
   String                             $bin_dir          = $vault::bin_dir,
   Optional[Hash]                     $cert_options     = undef,

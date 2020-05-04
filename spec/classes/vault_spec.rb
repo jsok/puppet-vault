@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'rspec/json_expectations'
 
 describe 'vault' do
   let :node do
@@ -72,7 +73,7 @@ describe 'vault' do
         }
 
         context 'vault JSON config' do
-          _subject { param_value(catalogue, 'File', '/etc/vault/config.json', 'content') }
+          subject(:json_config) { param_value(catalogue, 'File', '/etc/vault/config.json', 'content') }
 
           it {
             is_expected.to include_json(
@@ -94,7 +95,7 @@ describe 'vault' do
             )
           }
           it 'excludes unconfigured config options' do
-            expect(_subject).not_to include_json(
+            expect(json_config).not_to include_json(
               ha_storage: exist,
               seal: exist,
               disable_cache: exist,
