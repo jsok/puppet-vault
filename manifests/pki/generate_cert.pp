@@ -1,11 +1,11 @@
-# == Class to generate pki certificates 
+# @api private == define class to generate pki certificates 
 define vault::pki::generate_cert (
   String                             $bin_dir          = $vault::bin_dir,
+  Optional[Hash]                     $cert_options     = undef,
   Optional[String]                   $cert_sn          = undef,
   String[1]                          $common_name      = undef,
   Boolean                            $is_int_ca        = false,
   Boolean                            $is_root_ca       = false,
-  Optional[Hash]                     $cert_options     = undef,
   String[1]                          $path             = $name,
   Optional[Enum[internal,exported]]  $pkey_mode        = 'exported',
   String[1]                          $ttl              = '8760h',
@@ -15,6 +15,7 @@ define vault::pki::generate_cert (
   $cert_bundle = "${vault_dir}/certs/${path}.pem"
   $cert_key    = "${vault_dir}/certs/${path}.key"
   $cert_csr    = "${vault_dir}/certs/${path}.csr"
+  $certificate = "${vault_dir}/certs/${path}.crt"
 
   ## Unseal vault if needed
   contain vault::config::unseal
@@ -32,7 +33,6 @@ define vault::pki::generate_cert (
       # Revoke existing certificate
       $_clear_cert_cmd = "vault write ${path}/revoke serial_number=${cert_sn}"
     } else {
-      # NOOP
       $_clear_cert_cmd = 'vault status'
     }
   }
@@ -40,9 +40,10 @@ define vault::pki::generate_cert (
   ## Check if root or intermediate CA cert
   if $is_root_ca {
     $_gen_cert_cmd = @("EOC")
-      vault write -format=json ${path}/root/generate/${pkey_mode} \
+      bash -c "vault write -format=json ${path}/root/generate/${pkey_mode} \
         common_name='${common_name}' ttl='${ttl}' ${_cert_options} |\
-        jq -r '.data.private_key, .data.certificate' > ${cert_bundle}
+        tee >(jq -r '.data.private_key' > ${cert_key}) |\
+        jq -r '.data.certificate' > ${certificate}"
       | EOC
   } elsif $is_int_ca {
     $_gen_cert_cmd = @("EOC")
@@ -51,9 +52,6 @@ define vault::pki::generate_cert (
         tee >(jq -r '.data.private_key' > ${cert_key}) |\
         jq -r '.data.csr' > ${cert_csr}"
       | EOC
-  } else {
-    # Issue client certificate
-    notify { 'DEBUG': message => 'Generate client certificate' }
   }
 
   $_safe_name = regsubst($common_name, ' ', '_', 'G')
@@ -73,8 +71,6 @@ define vault::pki::generate_cert (
   }
 
   ## Export root CA certifcate
-  # NOTE: File /${vault_dir}/certs/${common_name}.pem must be absent to prevent
-  #       overwriting existing certificate file.
   exec { $common_name:
     command     => $_gen_cert_cmd,
     path        => [ $bin_dir, '/bin', '/usr/bin' ],

@@ -1,4 +1,23 @@
-# == Class to manage secrets engine @ path
+# == define class to manage secrets engine @ path
+
+# Class vault::secrets::engine
+#
+# Parameters
+# ----------
+#
+# * `action`
+#   Optional list of actions [enable (default), disable, or tune]
+#
+# * `engine`
+#   Supported list of configurable vault engines [kv or pki]
+#
+# * `options`
+#   A Hash of configuration parameters for the specified engine to manage.
+#
+# * `path`
+#   The path in vault to create/manage the specified engine.
+
+
 define vault::secrets::engine (
   Optional[Enum[enable,disable,tune]]   $action         = enable,
   Enum[kv,pki]                          $engine         = undef,

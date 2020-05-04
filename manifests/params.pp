@@ -74,18 +74,6 @@ class vault::params {
 
   $final_root_ca_options = merge($_root_ca_options, $vault::root_ca_options)
 
-  ## LDAP Groups
-    #    ldap_groups      => {
-    #      'Linux_Admins' => {
-    #        group        => 'Linux_Admins',
-    #        policy       => 'admin',
-    #      },
-    #      'Linux_Users'  => {
-    #        group  => 'Linux_Users',
-    #        policy => 'users',
-    #      },
-    #    },
-
   ## These are default vault policies to limit users within vault.
   $default_policies = {
     'admin' => {

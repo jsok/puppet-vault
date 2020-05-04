@@ -1,4 +1,4 @@
-# == (Private) Class to create and configure root certificate of authority
+# @api private == define class to create and configure root certificate of authority
 define vault::pki::int_ca (
   Optional[Hash]      $cert_options          = undef,
   String              $common_name           = undef,
@@ -15,17 +15,18 @@ define vault::pki::int_ca (
 ) {
 
   $cert_csr    = "${vault_dir}/certs/${path}.csr"
-  $cert        = "${vault_dir}/certs/${path}.cert"
+  $cert        = "${vault_dir}/certs/${path}.crt"
+  $root_cert   = "${vault_dir}/certs/${root_path}.crt"
   $_safe_name  = regsubst($common_name, ' ', '_', 'G')
 
   ## Initialize pki secrets engine
-  vault::secrets::engine { $path: 
+  vault::secrets::engine { $path:
     engine  => 'pki',
     options => {
       'max-lease-ttl' => $ttl,
     },
   }
-  
+
   ## Generate intermediate csr and private key
   vault::pki::generate_cert { $path:
     common_name  => $common_name,
@@ -43,27 +44,24 @@ define vault::pki::int_ca (
         jq -r '.data.certificate' > ${cert}
       | EOC
 
-      #    ## Idempontent check.
-      #    file { "${vault_dir}/scripts/.sign_cert_${_safe_name}.cmd":
-      #      ensure  => present,
-      #      content => $_sign_int_ca_cmd,
-      #      mode    => '0640',
-      #      notify  => Exec['sign_cert'],
-      #      require => [
-      #        "Vault::Pki::Generate_cert[$root_path]",
-      #        "Vault::Pki::Config[$root_path]",
-      #        "Vault::Pki::Config[${root_path}_role]",
-      #      ],
-      #    }
- 
     ## Sign the intermediate CA CSR
     exec { 'sign_cert':
       command => $_sign_int_ca_cmd,
       path    => [ $vault::bin_dir, '/bin', '/usr/bin' ],
       #refreshonly => true,
       creates => $cert,
-      notify  => Exec['import_cert'],
+      notify  => [
+        Exec['import_cert'],
+        Exec['append_root_ca'],
+      ],
       require => Vault::Pki::Generate_cert[$path],
+    }
+
+    ## Append Root CA to intermediate CA.
+    exec { 'append_root_ca':
+      command     => "cat ${root_cert} >> ${cert}",
+      path        => [ '/bin', '/usr/bin' ],
+      refreshonly => true,
     }
 
     ## Import signed intermediate CA certificate
@@ -95,6 +93,16 @@ define vault::pki::int_ca (
       path    => "${path}/roles/${role_name}",
       options => $role_options,
     }
+  }
+
+  ## Deploy client template
+  file { 'cert_template':
+    ensure => present,
+    path   => "${vault_dir}/certs/cert_template.json",
+    source => "puppet:///modules/${module_name}/cert_template.json",
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
   }
 
 }
