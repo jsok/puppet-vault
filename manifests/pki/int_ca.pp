@@ -95,14 +95,4 @@ define vault::pki::int_ca (
     }
   }
 
-  ## Deploy client template
-  file { 'cert_template':
-    ensure => present,
-    path   => "${vault_dir}/certs/cert_template.json",
-    source => "puppet:///modules/${module_name}/cert_template.json",
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0644',
-  }
-
 }
