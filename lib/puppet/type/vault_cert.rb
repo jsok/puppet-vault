@@ -127,6 +127,16 @@ Puppet::Type.newtype(:vault_cert) do
     defaultto('720h')
   end
 
+  newparam(:owner) do
+    desc 'Owner to assign for the new cert and key'
+    defaultto('root')
+  end
+
+  newparam(:group) do
+    desc 'Group to assign for the new cert and key'
+    defaultto('root')
+  end
+
   newparam(:ip_sans) do
     desc 'Specifies requested IP Subject Alternative Names, in a comma-delimited list'
   end

@@ -225,6 +225,9 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     File.open(key_path, 'w') do |f|
       f.write(cert['data']['private_key'])
     end
+
+    # Change the owner and group of the newly created cert and key
+    FileUtils.chown resource[:owner], resource[:group], [cert_path, key_path]
   end
 
   def exists?
