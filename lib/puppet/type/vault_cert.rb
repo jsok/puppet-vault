@@ -18,26 +18,38 @@ Puppet::Type.newtype(:vault_cert) do
 
   ensurable
 
-  newparam(:cert_path, namevar: true) do
-    desc 'The path to the certificate'
+  newparam(:cert_name, namevar: true) do
+    desc 'The name of the certificate'
+  end
+
+  newparam(:cert_dir) do
+    desc 'The directory that the certificate lives in'
     validate do |value|
       path = Pathname.new(value)
       # Verify that an absolute path was given
       unless path.absolute?
         raise ArgumentError, "Path must be absolute: #{value}"
       end
-      # Verify that the given cert exists
-      unless File.exist?(value)
-        raise ArgumentError, "File not found for: #{value}"
+      # Verify that the given directory exists
+      unless File.directory?(value)
+        raise ArgumentError, "Directory not found for: #{value}"
       end
     end
   end
 
-  newparam(:priv_key_path) do
-    desc 'The path to the private key'
+  newparam(:priv_key_name) do
+    desc 'The name of the private key'
     defaultto do
-      path = Pathname.new(@resource[:cert_path])
-      "#{path.dirname}/#{path.basename(path.extname)}.key"
+      cert_name = @resource[:cert_name]
+      extension = File.extname(cert_name)
+      File.basename(cert_name, extension) + '.key'
+    end
+  end
+
+  newparam(:priv_key_dir) do
+    desc 'The directory that the private key lives in'
+    defaultto do
+      Pathname.new(@resource[:cert_dir])
     end
     validate do |value|
       path = Pathname.new(value)
@@ -45,18 +57,18 @@ Puppet::Type.newtype(:vault_cert) do
       unless path.absolute?
         raise ArgumentError, "Path must be absolute: #{path}"
       end
-      # Verify that the given cert exists
-      unless File.exist?(value)
-        raise ArgumentError, "File not found for: #{value}"
+      # Verify that the given directory exists
+      unless File.directory?(value)
+        raise ArgumentError, "Directory not found for: #{value}"
       end
     end
   end
 
-  newparam(:new_cert_path) do
+  newparam(:new_cert_dir) do
     desc 'The path to save the new certificate in'
     # Default to the directory of the given cert
     defaultto do
-      File.dirname(@resource[:cert_path])
+      @resource[:cert_dir]
     end
     validate do |value|
       path = Pathname.new(value)
@@ -71,11 +83,11 @@ Puppet::Type.newtype(:vault_cert) do
     end
   end
 
-  newparam(:new_priv_key_path) do
+  newparam(:new_priv_key_dir) do
     desc 'The path to save the new certificate in'
     # Default to the directory of the given private key
     defaultto do
-      File.dirname(@resource[:priv_key_path])
+      @resource[:priv_key_dir]
     end
     validate do |value|
       path = Pathname.new(value)
@@ -115,8 +127,8 @@ Puppet::Type.newtype(:vault_cert) do
     defaultto('720h')
   end
 
-  newparam(:sans) do
-    desc 'IP Subject Alternative Names'
+  newparam(:ip_sans) do
+    desc 'Specifies requested IP Subject Alternative Names, in a comma-delimited list'
   end
 
   newparam(:api_server) do

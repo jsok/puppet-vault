@@ -100,7 +100,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
 
   def create_cert
     common_name = client_fqdn_get
-    api_path = '/v1/' + resource[:secret_engine] + '/issue/' + resource[:secret_role]
+    api_path = '/v1' + resource[:secret_engine] + '/issue/' + resource[:secret_role]
 
     headers = {
       'X-Vault-Token' => resource[:api_token],
@@ -112,6 +112,10 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
       ttl: resource[:cert_ttl],
     }
 
+    if resource[:ip_sans]
+      payload['ip_sans'] = resource[:ip_sans]
+    end
+
     response = send_request('POST', api_path, payload, headers)
     return JSON.parse(response.body) if response.body
     response
@@ -120,7 +124,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   def revoke_cert
     serial_number = cert_serial_get
 
-    api_path = '/v1/' + resource[:secret_engine] + '/revoke'
+    api_path = '/v1' + resource[:secret_engine] + '/revoke'
 
     headers = {
       'X-Vault-Token' => resource[:api_token],
@@ -144,7 +148,6 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     now = Time.now
     # Calculate the difference in time (seconds) and convert to hours
     hours_until_expired = (expire_date - now) / 60 / 60
-    # Puppet.info("Time until expired: #{hours_until_expired.to_s}")
 
     if hours_until_expired < resource[:regenerate_ttl]
       true
@@ -157,7 +160,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   # Return true if the cert is revoked
   def check_cert_revoked
     cert_serial = cert_serial_get
-    api_path = '/v1/' + resource[:secret_engine] + '/cert/' + cert_serial
+    api_path = '/v1' + resource[:secret_engine] + '/cert/' + cert_serial
 
     headers = {
       'X-Vault-Token' => resource[:api_token],
@@ -179,8 +182,9 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   # Save an openssl cert object into the global cert var
   def certificate_get
     return @cert unless @cert.nil?
-    @cert = if Pathname.new(resource[:cert_path]).exist?
-              file = File.read(resource[:cert_path])
+    cert_path = File.join(resource[:cert_dir], resource[:cert_name])
+    @cert = if Pathname.new(cert_path).exist?
+              file = File.read(cert_path)
               OpenSSL::X509::Certificate.new(file)
             else
               false
@@ -190,8 +194,9 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   # Save an openssl PKey object into the global priv_key var
   def private_key_get
     return @priv_key unless @priv_key.nil?
-    @priv_key = if Pathname.new(resource[:priv_key_path]).exist?
-                  file = File.read(resource[:priv_key_path])
+    priv_key_path = File.join(resource[:priv_key_dir], resource[:priv_key_name])
+    @priv_key = if Pathname.new(priv_key_path).exist?
+                  file = File.read(priv_key_path)
                   auth_type = resource[:auth_type].downcase
                   if auth_type == 'dsa'
                     OpenSSL::PKey::DSA.new(file, resource[:key_password])
@@ -205,7 +210,6 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
                   else
                     raise Puppet::Error, "Unknown authentication type '#{auth_type}'"
                   end
-                  # OpenSSL::PKey::RSA.new(file)
                 else
                   false
                 end
@@ -223,8 +227,8 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   # Save the certificate and private key on the client server
   def client_cert_save(cert)
     # Name the certificate after the client FQDN
-    cert_name = client_fqdn_get + '.crt'
-    cert_dir = resource[:new_cert_path]
+    cert_name = resource[:cert_name]
+    cert_dir = resource[:new_cert_dir]
     # Save the new cert in the certs directory on the client server
     cert_path = File.join(cert_dir, cert_name)
     File.open(cert_path, 'w') do |f|
@@ -232,8 +236,8 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     end
 
     # Name the private key after the client FQDN
-    key_name = client_fqdn_get + '.key'
-    key_dir = resource[:new_priv_key_path]
+    key_name = resource[:priv_key_name]
+    key_dir = resource[:new_priv_key_dir]
     # Save the new private key in the tls directory on the client
     key_path = File.join(key_dir, key_name)
     File.open(key_path, 'w') do |f|
@@ -248,30 +252,24 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     if cert && priv_key
       # Check if the given private key matches the given cert
       unless cert.check_private_key(priv_key)
-        Puppet.info('PRIVATE KEY FAILED')
         return false
       end
       # Check if the certificate is expired or not
       if check_cert_expiring
-        Puppet.info('CERT EXPIRING')
         return false
       end
       # Check if the cert is revoked or not
       if check_cert_revoked
-        Puppet.info('CERT REVOKED')
         return false
       end
-      Puppet.info('CERT GOOD')
       true
     else
-      Puppet.info("CERT OR KEY DOES NOT EXIST: #{resource[:cert_path]}")
       false
     end
   end
 
   # Create a new certificate with the vault API and save it on the filesystem
   def create
-    Puppet.info('CREATE')
     # Revoke the old cert before creating a new one
     cert = certificate_get
     priv_key = private_key_get
@@ -283,11 +281,12 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   end
 
   def destroy
-    Puppet.info('DESTROY')
     #  Revoke the cert in Vault
     revoke_cert
     #  Delete the cert and key off the filesystem
-    Pathname.new(resource[:cert_path]).delete
-    Pathname.new(resource[:priv_key_path]).delete
+    cert_path = File.join(resource[:cert_dir], resource[:cert_name])
+    Pathname.new(cert_path).delete
+    priv_key_path = File.join(resource[:priv_key_dir], resource[:priv_key_name])
+    Pathname.new(priv_key_path).delete
   end
 end
