@@ -2,33 +2,15 @@ require 'pathname'
 require 'time'
 require 'net/https'
 require 'json'
-# prepreqs
-# - assume a certificate on the filesystem
-#   - rick, help with an openssl to generate this for John
-#   - potentially with a short expiration time, or one that is already
-#     expired
-#
+
 # Steps
-# - use Ruby OpenSSL if we can, otherwsie default to the `openssl` command
-# - Convert this resource over to detect when a cert is going to expire
-#   - put this in the exists? function
-# - When the cert is going to expire, reach out to Vault and request a
-#   new one.
-#   - download the cert and put it on the filesystem
-#   - probably need to write down the cert ID
-# - Check the CRL or the cert itself
-#
-# References:
-# - https://github.com/camptocamp/puppet-openssl/blob/master/lib/puppet/provider/x509_cert/openssl.rb
-# - https://github.com/voxpupuli/puppet-grafana/blob/master/lib/puppet/provider/grafana_datasource/grafana.rb
-# - https://github.com/voxpupuli/puppet-grafana/blob/master/lib/puppet/provider/grafana.rb
-# - https://github.com/StackStorm/puppet-st2/blob/master/lib/puppet/provider/st2_pack/default.rb
-#
-# Blog:
-# - http://garylarizza.com/blog/2013/11/25/fun-with-providers/
-# - http://garylarizza.com/blog/2013/11/26/fun-with-providers-part-2/
-# - http://garylarizza.com/blog/2013/12/15/seriously-what-is-this-provider-doing/
-#
+# - Verify that the given cert and private key exist and match
+# - Check if the cert is revoked or expiring
+# - When the cert is going to expire:
+#   - Revoke the old cert with the Vault API
+#   - Request a new cert with the Vault API
+#   - Save the new cert in the given path on the filesystem
+
 Puppet::Type.type(:vault_cert).provide(:openssl) do
   desc 'Manages a certificates from HashiCorp Vault OpenSSL'
 
@@ -226,7 +208,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
 
   # Save the certificate and private key on the client server
   def client_cert_save(cert)
-    # Name the certificate after the client FQDN
+    # Get the cert path from the directory and name
     cert_name = resource[:cert_name]
     cert_dir = resource[:new_cert_dir]
     # Save the new cert in the certs directory on the client server
@@ -235,7 +217,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
       f.write(cert['data']['certificate'])
     end
 
-    # Name the private key after the client FQDN
+    # Get the private key path from the directory and name
     key_name = resource[:priv_key_name]
     key_dir = resource[:new_priv_key_dir]
     # Save the new private key in the tls directory on the client
