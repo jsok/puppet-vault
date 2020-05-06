@@ -94,6 +94,12 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
       ttl: resource[:cert_ttl],
     }
 
+    # Check if any Subject Alternative Names were given
+    if resource[:alt_names]
+      payload['alt_names'] = resource[:alt_names]
+    end
+
+    # Check if any IP Subject Alternative Names were given
     if resource[:ip_sans]
       payload['ip_sans'] = resource[:ip_sans]
     end

@@ -137,6 +137,10 @@ Puppet::Type.newtype(:vault_cert) do
     defaultto('root')
   end
 
+  newparam(:alt_names) do
+    desc 'Specifies requested Subject Alternative Names, in a comma-delimited list'
+  end
+
   newparam(:ip_sans) do
     desc 'Specifies requested IP Subject Alternative Names, in a comma-delimited list'
   end
