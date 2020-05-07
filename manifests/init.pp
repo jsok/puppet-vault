@@ -118,53 +118,44 @@ class vault (
   Optional[String]           $default_lease_ttl         = $vault::params::default_lease_ttl,
   Optional[Boolean]          $disable_cache             = $vault::params::disable_cache,
   Optional[Boolean]          $disable_mlock             = $vault::params::disable_mlock,
+  String                     $domain                    = $facts['networking']['domain'],
   String                     $download_dir              = '/tmp',
   String                     $download_extension        = 'zip',
   Optional[String]           $download_filename         = 'vault.zip',
   String                     $download_url_base         = 'https://releases.hashicorp.com/vault/',
-  String                     $domain                    = $facts['networking']['domain'],
   Optional[String]           $download_url              = undef,
-  Boolean                    $enable_pki                = true,
-  Boolean                    $enable_intermediate_ca    = false,
+  Boolean                    $enable_int_ca             = false,
+  Boolean                    $enable_ldap               = false,
+  Boolean                    $enable_root_ca            = false,
   Optional[Boolean]          $enable_ui                 = true,
   Optional[Hash]             $extra_config              = {},
   String                     $group                     = 'vault',
   Optional[Hash]             $ha_storage                = $vault::params::ha_storage,
-  String                     $install_method            = $vault::params::install_method,
-  String                     $install_dir               = '/opt/vault',
-  Integer                    $total_keys                = 5,
-  Integer                    $min_keys                  = 2,
   Optional[Boolean]          $initialize_vault          = false,
+  String                     $install_dir               = '/opt/vault',
+  String                     $install_method            = $vault::params::install_method,
+  Optional[Hash]             $int_ca_config             = undef,
   String                     $ip_address                = $facts['networking']['ip'],
+  Optional[Hash]             $ldap_config               = undef,
+  Optional[Hash]             $ldap_groups               = undef,
   Variant[Hash,Array[Hash]]  $listener                  = $vault::params::listener,
   Boolean                    $manage_download_dir       = false,
   Optional[Boolean]          $manage_file_capabilities  = $vault::params::manage_file_capabilities,
   Boolean                    $manage_group              = true,
-  Boolean                    $manage_pki                = true,
   Optional[Boolean]          $manage_service_file       = $vault::params::manage_service_file,
   Boolean                    $manage_service            = true,
   Boolean                    $manage_storage_dir        = true,
   Boolean                    $manage_user               = true,
   Optional[String]           $max_lease_ttl             = $vault::params::max_lease_ttl,
+  Integer                    $min_keys                  = 2,
   Integer                    $num_procs                 = $vault::params::num_procs,
   String                     $os                        = $vault::params::os,
   Enum['present','installed','absent','purged','latest']
     $package_ensure                                     = 'installed',
   Optional[String]           $package_name              = 'vault',
+  String                     $port                      = $vault::params::vault_port,
   Boolean                    $purge_config_dir          = true,
-  Optional[String]           $pki_path                  = undef,
-
-  # Certificate of Authority Options (PKI)
-  Boolean                    $enable_root_ca            = false,
   Optional[Hash]             $root_ca_config            = undef,
-  Boolean                    $enable_int_ca             = false,
-  Optional[Hash]             $int_ca_config             = undef,
-
-  # LDAP Auth
-  Boolean                    $enable_ldap               = false,
-  Optional[Hash]             $ldap_config               = undef,
-  Optional[Hash]             $ldap_groups               = undef,
-
   Optional[Hash]             $seal                      = $vault::params::seal,
   Boolean                    $service_enable            = true,
   Enum['stopped','running']  $service_ensure            = 'running',
@@ -174,8 +165,8 @@ class vault (
   Optional[Hash]             $storage                   = undef,
   Optional[Hash]             $telemetry                 = $vault::params::telemetry,
   Optional[String]           $token                     = undef,
+  Integer                    $total_keys                = 5,
   String                     $user                      = 'vault',
-  String                     $port                      = $vault::params::vault_port,
   Optional[Array[String]]    $vault_keys                = undef,
   Optional[Hash]             $vault_policies            = $vault::params::default_policies,
   String                     $version                   = '1.3.2',
@@ -200,12 +191,6 @@ class vault (
   -> Class['vault::config']
   -> Class['vault::service']
   -> Class['vault::config::initialize']
-  #  -> Class['vault::config::ldap']
-
-  ## Configure vault user policies
-  if $facts['vault_initialized'] {
-    create_resources ('vault::config::policy', $vault_policies)
-  }
 
   ## Setup ldap authentication for vault
   if $enable_ldap {
@@ -221,5 +206,8 @@ class vault (
   if $enable_int_ca {
     create_resources ('vault::pki::int_ca', $int_ca_config)
   }
+
+  ## Configure vault user policies
+  create_resources ('vault::config::policy', $vault_policies)
 
 }

@@ -15,9 +15,7 @@ define vault::pki::config (
 
   $_config_cmd = "vault ${action} ${path} ${_options}"
 
-  #notify { "DEBUG: pki_config:\n\n> ${_config_cmd}" : }
-
-  ## Used for idempotencey
+  ## Used for idempotencey 
   $_file_name = regsubst($path, '/', '_', 'G')
   file { "${vault::install_dir}/scripts/.pki_config_${_file_name}.cmd":
     ensure  => file,
