@@ -64,6 +64,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     # check response for success, redirect or error
     case resp
     when Net::HTTPSuccess then
+      return JSON.parse(resp.body) if resp.body
       resp
     when Net::HTTPRedirection then
       send_request(operation, resp['location'], data, headers)
@@ -104,9 +105,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
       payload['ip_sans'] = resource[:ip_sans]
     end
 
-    response = send_request('POST', api_path, payload, headers)
-    return JSON.parse(response.body) if response.body
-    response
+    send_request('POST', api_path, payload, headers)
   end
 
   def revoke_cert
@@ -122,9 +121,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
       serial_number: serial_number,
     }
 
-    response = send_request('POST', api_path, payload, headers)
-    return JSON.parse(response.body) if response.body
-    response
+    send_request('POST', api_path, payload, headers)
   end
 
   # Check whether the time left on the cert is less than the ttl
@@ -156,11 +153,8 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
 
     response = send_request('GET', api_path, nil, headers)
 
-    # Verify that a response was returned
-    return true unless response.body
-    response_body = JSON.parse(response.body)
-    # Check the revocation time on the cert object
-    if response_body['data']['revocation_time'] > 0
+    # Check the revocation time on the returned cert object
+    if response['data']['revocation_time'] > 0
       true
     else
       false
@@ -185,18 +179,15 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     priv_key_path = File.join(resource[:priv_key_dir], resource[:priv_key_name])
     @priv_key = if Pathname.new(priv_key_path).exist?
                   file = File.read(priv_key_path)
-                  auth_type = resource[:auth_type].downcase
-                  if auth_type == 'dsa'
+                  case resource[:auth_type].downcase
+                  when 'dsa'
                     OpenSSL::PKey::DSA.new(file, resource[:key_password])
-                    # OpenSSL::PKey::DSA.new(file)
-                  elsif auth_type == 'rsa'
+                  when 'rsa'
                     OpenSSL::PKey::RSA.new(file, resource[:key_password])
-                    # OpenSSL::PKey::RSA.new(file)
-                  elsif auth_type == 'ec'
+                  when 'ec'
                     OpenSSL::PKey::EC.new(file, resource[:key_password])
-                    # OpenSSL::PKey::EC.new(file)
                   else
-                    raise Puppet::Error, "Unknown authentication type '#{auth_type}'"
+                    raise Puppet::Error, "Unknown authentication type '#{resource[:auth_type]}'"
                   end
                 else
                   false
@@ -206,7 +197,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   # Read the serial number from the certificate, convert it to base 16, and add colons
   def cert_serial_get
     cert = certificate_get
-    # Get the serial number from the cert object
+    # Convert the base 10 serial number from the openssl cert to hexadecimal
     serial_number = cert.serial.to_s(16)
     # Add a colon every 2 characters to the returned serial number
     serial_number.scan(%r{\w{2}}).join(':')
