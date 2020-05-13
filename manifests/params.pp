@@ -23,6 +23,7 @@ class vault::params {
   $manage_download_dir = false
   $download_filename   = 'vault.zip'
 
+  $manage_config_file  = true
   # storage and listener are mandatory, we provide some sensible
   # defaults here
   $storage             = { 'file' => { 'path' => '/var/lib/vault' }}
