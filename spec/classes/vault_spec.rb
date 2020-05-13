@@ -317,6 +317,18 @@ describe 'vault' do
         }
       end
 
+      context 'when specifying manage_config_file = false' do
+        let(:params) do
+          {
+            manage_config_file: false,
+          }
+        end
+
+        it {
+          is_expected.not_to contain_file ('/etc/vault/config.json')
+        }
+      end
+
       context 'when ensuring the service is disabled' do
         let(:params) do
           {
