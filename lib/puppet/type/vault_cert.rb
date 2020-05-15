@@ -137,6 +137,13 @@ Puppet::Type.newtype(:vault_cert) do
     defaultto('root')
   end
 
+  newparam(:common_name, namevar: true) do
+    desc 'The common name to put in the certificate'
+    defaultto do
+      @resource[:cert_name]
+    end
+  end
+
   newparam(:alt_names) do
     desc 'Specifies requested Subject Alternative Names, in a comma-delimited list'
   end
