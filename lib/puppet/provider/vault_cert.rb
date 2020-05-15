@@ -12,9 +12,8 @@ class Puppet::Provider::VaultCert < Puppet::Provider
     request = nil
     encoded_search = ''
 
-    vault_scheme = resource[:api_scheme]
-    vault_server = resource[:api_server]
-    vault_port = resource[:api_port]
+    # add our auth token into the header
+    headers['X-Vault-Token'] = resource[:api_token]
 
     if URI.respond_to?(:encode_www_form)
       encoded_search = URI.encode_www_form(search_path)
@@ -26,6 +25,10 @@ class Puppet::Provider::VaultCert < Puppet::Provider
       end
       encoded_search = encoded_search.join('&')
     end
+
+    vault_scheme = resource[:api_scheme]
+    vault_server = resource[:api_server]
+    vault_port = resource[:api_port]
     uri = URI.parse '%s://%s:%d%s?%s' % [vault_scheme, vault_server, vault_port, path, encoded_search]
 
     case operation.upcase
@@ -69,63 +72,35 @@ class Puppet::Provider::VaultCert < Puppet::Provider
 
   def create_cert
     api_path = '/v1' + resource[:secret_engine] + '/issue/' + resource[:secret_role]
-
-    headers = {
-      'X-Vault-Token' => resource[:api_token],
-    }
-
     payload = {
       name: resource[:secret_role],
       common_name: resource[:common_name],
       ttl: resource[:cert_ttl],
     }
-
     # Check if any Subject Alternative Names were given
-    if resource[:alt_names]
-      payload['alt_names'] = resource[:alt_names]
-    end
-
     # Check if any IP Subject Alternative Names were given
-    if resource[:ip_sans]
-      payload['ip_sans'] = resource[:ip_sans]
-    end
+    payload[:alt_names] = resource[:alt_names] if resource[:alt_names]
+    payload[:ip_sans] = resource[:ip_sans] if resource[:ip_sans]
 
-    send_request('POST', api_path, payload, headers)
+    send_request('POST', api_path, payload)
   end
 
   def revoke_cert
-    serial_number = cert_serial_get
-
     api_path = '/v1' + resource[:secret_engine] + '/revoke'
-
-    headers = {
-      'X-Vault-Token' => resource[:api_token],
-    }
-
     payload = {
-      serial_number: serial_number,
+      serial_number: cert_serial_get,
     }
 
-    send_request('POST', api_path, payload, headers)
+    send_request('POST', api_path, payload)
   end
 
   # Check whether the cert has been revoked
   # Return true if the cert is revoked
   def check_cert_revoked
-    cert_serial = cert_serial_get
-    api_path = '/v1' + resource[:secret_engine] + '/cert/' + cert_serial
-
-    headers = {
-      'X-Vault-Token' => resource[:api_token],
-    }
-
-    response = send_request('GET', api_path, nil, headers)
+    api_path = '/v1' + resource[:secret_engine] + '/cert/' + cert_serial_get
+    response = send_request('GET', api_path)
 
     # Check the revocation time on the returned cert object
-    if response['data']['revocation_time'] > 0
-      true
-    else
-      false
-    end
+    response['data']['revocation_time'] > 0
   end
 end

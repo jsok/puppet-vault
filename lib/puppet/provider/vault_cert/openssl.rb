@@ -81,16 +81,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     priv_key_path = File.join(resource[:priv_key_dir], resource[:priv_key_name])
     @priv_key = if Pathname.new(priv_key_path).exist?
                   file = File.read(priv_key_path)
-                  case resource[:auth_type].downcase
-                  when 'dsa'
-                    OpenSSL::PKey::DSA.new(file, resource[:key_password])
-                  when 'rsa'
-                    OpenSSL::PKey::RSA.new(file, resource[:key_password])
-                  when 'ec'
-                    OpenSSL::PKey::EC.new(file, resource[:key_password])
-                  else
-                    raise Puppet::Error, "Unknown authentication type '#{resource[:auth_type]}'"
-                  end
+                  OpenSSL::PKey.read(file, resource[:key_password])
                 else
                   false
                 end
@@ -109,16 +100,16 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   def client_cert_save(cert)
     # Get the cert path from the directory and name
     # Save the new cert in the certs directory on the client server
-    cert_path = write_file(resource[:new_cert_dir], resource[:cert_name],
-                           cert['data']['certificate'])
+    write_file(resource[:cert_dir], resource[:cert_name],
+               cert['data']['certificate'])
 
     # Get the private key path from the directory and name
     # Save the new private key in the tls directory on the client
-    key_path = write_file(resource[:new_priv_key_dir], resource[:priv_key_name],
-                          cert['data']['private_key'])
+    write_file(resource[:priv_key_dir], resource[:priv_key_name],
+               cert['data']['private_key'])
 
-    # Change the owner and group of the newly created cert and key
-    FileUtils.chown(resource[:owner], resource[:group], [cert_path, key_path])
+    # NOTE: we specifically do NOT handle file owners + modes in here
+    # if you need that functionality, please use the vault::cert resource
   end
 
   # Write data to a file

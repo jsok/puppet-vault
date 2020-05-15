@@ -19,102 +19,117 @@ Puppet::Type.newtype(:vault_cert) do
   ensurable
 
   newparam(:cert_name, namevar: true) do
-    desc 'The name of the certificate'
+    desc "The filename of the certificate without the directory. If this value doesn't contain an extension, then .crt will be appended automatically."
+    munge do |value|
+      value += '.crt' unless File.extname(value)
+      value
+    end
   end
 
   newparam(:cert_dir) do
     desc 'The directory that the certificate lives in'
-    validate do |value|
-      path = Pathname.new(value)
-      # Verify that an absolute path was given
-      unless path.absolute?
-        raise ArgumentError, "Path must be absolute: #{value}"
+
+    defaultto do
+      case Facter.value(:os)['family']
+      when 'RedHat'
+        '/etc/pki/tls/certs'
+      when 'Debian'
+        '/etc/ssl/certs'
+      when 'windows'
+        'Cert:\LocalMachine\My'
+      else
+        :absent
       end
-      # Verify that the given directory exists
-      unless File.directory?(value)
-        raise ArgumentError, "Directory not found for: #{value}"
+    end
+
+    validate do |value|
+      kernel = Facter.value('kernel')
+      if kernel == 'linux'
+        path = Pathname.new(value)
+        # Verify that an absolute path was given
+        unless path.absolute?
+          raise ArgumentError, "Path must be absolute: #{value}"
+        end
+        # Verify that the given directory exists
+        unless File.directory?(value)
+          raise ArgumentError, "Directory not found for: #{value}"
+        end
+      else
+        unless value.start_with?('Cert:\\')
+          raise ArgumentError, "Windows paths must start with Cert:\\ : #{value}"
+        end
       end
     end
   end
 
+  newparam(:cert_path) do
+    desc 'A read-only state to return the full path to the certificate.'
+    def retrieve
+      File.join(@resource[:cert_dir], @resource[:cert_name])
+    end
+
+    validate do |_value|
+      raise ArgumentError, 'cert_path is read-only'
+    end
+  end
+
   newparam(:priv_key_name) do
-    desc 'The name of the private key'
+    desc 'The filename of the private key without the directory. Default: "${basename(cert_name)}.key"'
     defaultto do
-      cert_name = @resource[:cert_name]
-      extension = File.extname(cert_name)
+      extension = File.extname(@resource[:cert_name])
       File.basename(cert_name, extension) + '.key'
     end
   end
 
   newparam(:priv_key_dir) do
     desc 'The directory that the private key lives in'
+
     defaultto do
-      Pathname.new(@resource[:cert_dir])
-    end
-    validate do |value|
-      path = Pathname.new(value)
-      # Verify that an absolute path was given
-      unless path.absolute?
-        raise ArgumentError, "Path must be absolute: #{path}"
+      case Facter.value(:os)['family']
+      when 'RedHat'
+        '/etc/pki/tls/private'
+      when 'Debian'
+        '/etc/ssl/private'
+      when 'windows'
+        'Cert:\LocalMachine\My'
+      else
+        :absent
       end
-      # Verify that the given directory exists
-      unless File.directory?(value)
-        raise ArgumentError, "Directory not found for: #{value}"
+    end
+
+    validate do |value|
+      kernel = Facter.value('kernel')
+      if kernel == 'linux'
+        path = Pathname.new(value)
+        # Verify that an absolute path was given
+        unless path.absolute?
+          raise ArgumentError, "Path must be absolute: #{path}"
+        end
+        # Verify that the given directory exists
+        unless File.directory?(value)
+          raise ArgumentError, "Directory not found for: #{value}"
+        end
+      else
+        unless value.start_with?('Cert:\\')
+          raise ArgumentError, "Windows paths must start with Cert:\\ : #{value}"
+        end
       end
     end
   end
 
-  newparam(:new_cert_dir) do
-    desc 'The path to save the new certificate in'
-    # Default to the directory of the given cert
-    defaultto do
-      @resource[:cert_dir]
+  newparam(:priv_key_path) do
+    desc 'A read-only state to return the full path to the private key.'
+    def retrieve
+      File.join(@resource[:priv_key_dir], @resource[:priv_key_name])
     end
-    validate do |value|
-      path = Pathname.new(value)
-      # Verify that an absolute path was given
-      unless path.absolute?
-        raise ArgumentError, "Path must be absolute: #{path}"
-      end
-      # Verify that the given directory exist
-      unless File.directory?(value)
-        raise ArgumentError, "Directory not found for: #{value}"
-      end
-    end
-  end
 
-  newparam(:new_priv_key_dir) do
-    desc 'The path to save the new certificate in'
-    # Default to the directory of the given private key
-    defaultto do
-      @resource[:priv_key_dir]
-    end
-    validate do |value|
-      path = Pathname.new(value)
-      # Verify that an absolute path was given
-      unless path.absolute?
-        raise ArgumentError, "Path must be absolute: #{path}"
-      end
-      # Verify that the given directory exist
-      unless File.directory?(value)
-        raise ArgumentError, "Directory not found for: #{value}"
-      end
+    validate do |_value|
+      raise ArgumentError, 'cert_path is read-only'
     end
   end
 
   newparam(:key_password) do
     desc 'The optional password for the private key'
-  end
-
-  newparam(:auth_type) do
-    desc 'authentication type of the private key'
-    defaultto('ec')
-    validate do |value|
-      acceptable_values = ['dsa', 'rsa', 'ec']
-      unless acceptable_values.include? value.downcase
-        raise ArgumentError, "auth_type must be one of: #{acceptable_values.join(', ')}"
-      end
-    end
   end
 
   newparam(:regenerate_ttl) do
@@ -127,20 +142,11 @@ Puppet::Type.newtype(:vault_cert) do
     defaultto('720h')
   end
 
-  newparam(:owner) do
-    desc 'Owner to assign for the new cert and key'
-    defaultto('root')
-  end
-
-  newparam(:group) do
-    desc 'Group to assign for the new cert and key'
-    defaultto('root')
-  end
-
   newparam(:common_name, namevar: true) do
-    desc 'The common name to put in the certificate'
+    desc 'The common name to put in the certificate, defaults to basename(cert_name)'
     defaultto do
-      @resource[:cert_name]
+      extension = File.extname(@resource[:cert_name])
+      File.basename(cert_name, extension)
     end
   end
 
