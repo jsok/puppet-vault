@@ -142,7 +142,7 @@ Puppet::Type.newtype(:vault_cert) do
     defaultto('720h')
   end
 
-  newparam(:common_name, namevar: true) do
+  newparam(:common_name) do
     desc 'The common name to put in the certificate, defaults to basename(cert_name)'
     defaultto do
       extension = File.extname(@resource[:cert_name])

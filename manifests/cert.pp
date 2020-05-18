@@ -1,6 +1,7 @@
 # @summary a vault certificate that also amanges the ownership and mode of the generated
 #          certificate files (for use on Linux)
 define vault::cert (
+  String  $ensure,
   String  $api_server,
   String  $api_token,
   String  $secret_role,
@@ -16,7 +17,7 @@ define vault::cert (
   String $cert_owner                = 'root',
   Stdlib::Filemode $cert_mode       = '0644',
   Optional[String] $cert_name       = undef,
-  Optioanl[String] $cert_ttl        = undef,
+  Optional[String] $cert_ttl        = undef,
   # Private Key options
   Optional[String] $priv_key_dir    = undef,
   Optional[String] $priv_key_group  = undef,
@@ -28,7 +29,7 @@ define vault::cert (
   Optional[String]  $secret_engine  = undef,
 ) {
   vault_cert { $title:
-    ensure         => present,
+    ensure         => $ensure,
     cert_name      => $cert_name,
     cert_dir       => $cert_dir,
     priv_key_name  => $priv_key_name,
@@ -47,7 +48,7 @@ define vault::cert (
 
   if $facts['os']['family'] != 'windows' {
     file { Vault_cert[$title]['cert_path']:
-      ensure    => file,
+      ensure    => $ensure,
       owner     => $cert_owner,
       group     => $cert_group,
       mode      => $cert_mode,
@@ -56,7 +57,7 @@ define vault::cert (
     $_priv_key_owner = pick($priv_key_owner, $cert_owner)
     $_priv_key_group = pick($priv_key_group, $cert_owner)
     file { Vault_cert[$title]['priv_key_path']:
-      ensure    => file,
+      ensure    => $ensure,
       owner     => $_priv_key_owner,
       group     => $_priv_key_group,
       mode      => $priv_key_mode,
