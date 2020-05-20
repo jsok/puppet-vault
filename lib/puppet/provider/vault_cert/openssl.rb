@@ -48,6 +48,17 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     Pathname.new(priv_key_path).delete
   end
 
+  ###############################
+  # public getter/setting methods
+  def thumbprint
+    return @thumbprint unless @thumbprint.nil?
+    cert = certificate
+    if cert
+      @thumbprint = OpenSSL::Digest::SHA1.new(cert.to_der).to_s.upcase
+    end
+    @thumbprint
+  end
+
   #########################
   # private methods
 
@@ -102,6 +113,10 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
     # Save the new cert in the certs directory on the client server
     write_file(resource[:cert_dir], resource[:cert_name],
                cert['data']['certificate'])
+
+    # compute thumbprint of the cert
+    x509_cert = OpenSSL::X509::Certificate.new(file)
+    @thumbprint = OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase
 
     # Get the private key path from the directory and name
     # Save the new private key in the tls directory on the client

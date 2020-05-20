@@ -28,6 +28,8 @@ define vault::cert (
   Optional[Integer] $regenerate_ttl = undef,
   Optional[String]  $secret_engine  = undef,
 ) {
+  # TODO: cert_dir per OS
+
   vault_cert { $title:
     ensure         => $ensure,
     cert_name      => $cert_name,

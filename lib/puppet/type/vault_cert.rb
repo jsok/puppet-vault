@@ -21,7 +21,10 @@ Puppet::Type.newtype(:vault_cert) do
   newparam(:cert_name, namevar: true) do
     desc "The filename of the certificate without the directory. If this value doesn't contain an extension, then .crt will be appended automatically."
     munge do |value|
-      value += '.crt' unless File.extname(value)
+      return value if File.extname(value)
+      value += if Facter.value('kernel') == 'linux'
+                 '.crt'
+               end
       value
     end
   end
@@ -183,5 +186,12 @@ Puppet::Type.newtype(:vault_cert) do
 
   newparam(:secret_role) do
     desc 'Name of the role that the new cert belongs to'
+  end
+
+  newparam(:thumbprint) do
+    desc 'Returns the SHA1 thumbprint/fingerprint/hash of the certificate. This is used for those on Windows where the thumbprint is actually the file name (last part of the path) of the certificate in the cert store. Example: Cert:\LocalMachine\My\123456890ABCDEF. This thumbprint is needed for using the cert in a "binding" for IIS or other Windows specific usecases. This property is read-only and any attempt to set it will result in an error.'
+    validate do |val|
+      fail "thumbprint is read-only"
+    end
   end
 end

@@ -27,6 +27,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
 
   # Create a new certificate with the vault API and save it on the filesystem
   def create
+    Puppet.info('creating')
     # Revoke the old cert before creating a new one
     revoke_cert if certificate
     new_cert = create_cert
@@ -48,10 +49,23 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     Puppet.info("Deleted cert stderr: #{res[:stderr]} ")
   end
 
+  ###############################
+  # public getter/setting methods
+  def thumbprint
+    return @thumbprint unless @thumbprint.nil?
+    cert = certificate
+    if cert && cert['thumbprint']
+      @thumbprint = cert['thumbprint']
+    end
+    @thumbprint
+  end
+
+
   #########################
   # private methods
   def ps(cmd)
     @ps ||= Pwsh::Manager.instance(Pwsh::Manager.powershell_path, Pwsh::Manager.powershell_args)
+    Puppet.debug("Running command: #{cmd}")
     # need to use [:stdout] from result
     @ps.execute(cmd)
   end
@@ -60,20 +74,32 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   def certificate
     return @cert unless @cert.nil?
     cmd = <<-EOF
-    $cert = Get-Item '#{resource[:cert_dir]}\*' | Where-object { $_.Subject -eq '#{resource[:common_name]}' }
-    $data = @{
-      'not_after' = $cert.NotAfter.ToString("o");  # Convert to ISO format
-      'not_before' = $cert.NotBefore.ToString("o");
-      'serial' = $cert.SerialNumber;
+    $cert = Get-Item '#{resource[:cert_dir]}\*' | Where-object { $_.Subject -eq 'CN=#{resource[:common_name]}' }
+    if ($cert) {
+      # don't put this in one big expression, this way powershell throws an error on the specific
+      # line that is having a problem, not the beginning of the expression
+      $data = @{}
+      $data['not_after'] = $cert.NotAfter.ToString("o")  # Convert to ISO format
+      $data['not_before'] = $cert.NotBefore.ToString("o")
+      $data['serial'] = $cert.SerialNumber
+      $data['thumbprint'] = $cert.Thumbprint
+    } else {
+      $data = $null
     }
     $data | ConvertTo-Json
     EOF
     res = ps(cmd)
-    @cert = if res[:exitcode].zero?
+    Puppet.info('parsing cert json')
+    Puppet.info("got output: #{res[:stdout]}")
+    # add to check for truthy stdout because, if the cert doesn't exist the output
+    # could be nil / empty string
+    @cert = if res[:exitcode].zero? && res[:stdout]
               JSON.parse(res[:stdout])
             else
               false
             end
+    Puppet.info('finished getting cert')
+    @cert
   end
 
   ##########################
@@ -82,6 +108,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   # Check whether the time left on the cert is less than the ttl
   # Return true if the cert is about to expire
   def check_cert_expiring
+    Puppet.info('checking cert expiring')
     expire_date = Time.parse(certificate['not_after'])
     # Calculate the difference in time (seconds) and convert to hours
     hours_until_expired = (expire_date - Time.now) / 60 / 60
@@ -90,6 +117,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
 
   # Read the serial number from the certificate, convert it to base 16, and add colons
   def cert_serial_get
+    Puppet.info('getting cert serial')
     # Convert the base 10 serial number from the openssl cert to hexadecimal
     serial_number = certificate['serial'].to_s(16)
     # Add a colon every 2 characters to the returned serial number
@@ -98,16 +126,37 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
 
   # Save the certificate and private key on the client server
   def client_cert_save(cert)
-    key    = OpenSSL::PKey.read(cert['data']['private_key'])
-    cert   = OpenSSL::X509::Certificate.new(cert['data']['certificate'])
-    name   = nil # not sure whether this is allowed
-    pkcs12 = OpenSSL::PKCS12.create(resource[:key_password], name, key, cert)
+    Puppet.info('saving cert')
+    key       = OpenSSL::PKey.read(cert['data']['private_key'])
+    x509_cert = OpenSSL::X509::Certificate.new(cert['data']['certificate'])
+    name      = resource[:cert_name]
+    # compute thumbprint of the cert
+    @thumbprint = OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase
+
+    if resource[:key_password] && resource[:key_password].size >= 4
+      password = resource[:key_password]
+    else
+      require 'securerandom'
+      password = SecureRandom.alphanumeric(16)
+    end
+    pkcs12 = OpenSSL::PKCS12.create(password, name, key, x509_cert)
     pkcs12_der = pkcs12.to_der
+
+    Puppet.info("cert data: #{cert['data']['certificate']}")
+    Puppet.info("key data: #{cert['data']['private_key']}")
+    Puppet.info("Der data: #{pkcs12_der} ")
 
     file = Tempfile.new(resource[:cert_name])
     begin
+      file.binmode
       file.write(pkcs12_der)
-      cmd = "Import-Certificate -FilePath '#{file.path}' '#{resource[:cert_dir]}'"
+      # have to close file before Import-PfxCertificate can open it
+      file.close
+
+      cmd = <<-EOF
+      $password = ConvertTo-SecureString -String '#{password}' -Force -AsPlainText
+      Import-PfxCertificate -FilePath '#{file.path}' -CertStoreLocation '#{resource[:cert_dir]}' -Password $password
+      EOF
       res = ps(cmd)
       Puppet.info("Imported cert exitcode: #{res[:exitcode]} ")
       Puppet.info("Imported cert stdout: #{res[:stdout]} ")
@@ -116,5 +165,17 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
       file.close
       file.unlink
     end
+    # File.open(File.join('c:\\', resource[:cert_name]), 'wb') do |file|
+    #   file.write(pkcs12_der)
+    #   cmd = <<-EOF
+    #   $password = ConvertTo-SecureString -String '#{password}' -Force -AsPlainText
+    #   Import-PfxCertificate -FilePath '#{file.path}' -CertStoreLocation '#{resource[:cert_dir]}' -Password $password
+    #   EOF
+    #   res = ps(cmd)
+    #   Puppet.info("Imported cert exitcode: #{res[:exitcode]} ")
+    #   Puppet.info("Imported cert stdout: #{res[:stdout]} ")
+    #   Puppet.info("Imported cert stderr: #{res[:stderr]} ")
+    #   raise "Error importing cert: #{res[:stderr]}" unless res[:exitcode].zero?
+    # end
   end
 end
