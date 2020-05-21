@@ -22,7 +22,7 @@ Puppet::Type.newtype(:vault_cert) do
     desc "The filename of the certificate without the directory. If this value doesn't contain an extension, then .crt will be appended automatically."
     munge do |value|
       return value if File.extname(value)
-      value += if Facter.value('kernel') == 'linux'
+      value += if Facter.value('kernel').casecmp?('linux')
                  '.crt'
                end
       value
@@ -47,7 +47,7 @@ Puppet::Type.newtype(:vault_cert) do
 
     validate do |value|
       kernel = Facter.value('kernel')
-      if kernel == 'linux'
+      if kernel.casecmp?('linux')
         path = Pathname.new(value)
         # Verify that an absolute path was given
         unless path.absolute?
@@ -102,7 +102,7 @@ Puppet::Type.newtype(:vault_cert) do
 
     validate do |value|
       kernel = Facter.value('kernel')
-      if kernel == 'linux'
+      if kernel.casecmp?('linux')
         path = Pathname.new(value)
         # Verify that an absolute path was given
         unless path.absolute?
