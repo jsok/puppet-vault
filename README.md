@@ -62,6 +62,8 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `manage_service_file`: Manages the service file regardless of the defaults. Default: See [Installation parameters](#installation-parameters).
 
+* `manage_config_file`: Manages the configuration file. When set to false, `config.json` will not be generated. `manag_storage_dir` is ignored. Default: `true`
+
 ### Installation parameters
 
 #### When `install_method` is `repo`
