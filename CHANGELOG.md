@@ -1,3 +1,8 @@
+## 2020-05-27 2.3.0
+- Add `manage_config_file` option
+- Update stm/file_capability dependency
+- Update to vault 1.4.2
+
 ## 2020-02-01 2.2.0
 - Add support for `api_addr` stanza
 - Update to vault 1.3.2
