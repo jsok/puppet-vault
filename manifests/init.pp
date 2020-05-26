@@ -78,7 +78,6 @@ class vault (
   $manage_group                        = $::vault::params::manage_group,
   $bin_dir                             = $::vault::params::bin_dir,
   $config_dir                          = $::vault::params::config_dir,
-
   $manage_config_file                  = $::vault::params::manage_config_file,
   $config_mode                         = $::vault::params::config_mode,
   $purge_config_dir                    = true,
