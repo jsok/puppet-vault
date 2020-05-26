@@ -148,9 +148,6 @@ Style/AsciiComments:
 Style/Attr:
   Enabled: True
 
-Style/BracesAroundHashParameters:
-  Enabled: True
-
 Style/CaseEquality:
   Enabled: True
 
@@ -191,7 +188,7 @@ Style/WordArray:
 Style/RedundantPercentQ:
   Enabled: True
 
-Layout/Tab:
+Layout/IndentationStyle:
   Enabled: True
 
 Layout/SpaceBeforeSemicolon:
