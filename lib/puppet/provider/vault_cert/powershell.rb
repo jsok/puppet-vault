@@ -69,7 +69,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
       $data = @{}
       $data['not_after'] = $cert.NotAfter.ToString("o")  # Convert to ISO format
       $data['not_before'] = $cert.NotBefore.ToString("o")
-      $data['serial'] = $cert.SerialNumber
+      $data['serial_number'] = $cert.SerialNumber
       $data['thumbprint'] = $cert.Thumbprint
     } else {
       $data = $null
@@ -107,7 +107,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   def cert_serial_get
     Puppet.info('getting cert serial')
     # Convert the base 10 serial number from the openssl cert to hexadecimal
-    serial_number = certificate['serial'].to_s(16)
+    serial_number = certificate['serial_number'].to_s(16)
     # Add a colon every 2 characters to the returned serial number
     serial_number.scan(%r{\w{2}}).join(':')
   end

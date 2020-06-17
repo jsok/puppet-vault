@@ -122,18 +122,18 @@ Puppet::Functions.create_function(:'vault::cert') do
     end
 
     thumbprint = nil
-    serial = nil
+    cert_serial_number = nil
     if cert
       x509_cert = OpenSSL::X509::Certificate.new(cert)
       thumbprint = OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase
-      serial = x509_cert.serial.to_s(16)
+      cert_serial_number = x509_cert.serial.to_s(16)
     end
 
     {
       cert: cert,
       priv_key: priv_key,
       thumbprint: thumbprint,
-      serial: serial,
+      serial_number: cert_serial_number,
     }
   end
 end

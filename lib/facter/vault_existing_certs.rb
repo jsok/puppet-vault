@@ -29,7 +29,7 @@ Facter.add(:vault_existing_certs) do
             'not_after' => cert.not_after.iso8601,
             'not_before' => cert.not_before.iso8601,
             'path' => cert_path,
-            'serial' => cert.serial.to_s(16),
+            'serial_number' => cert.serial.to_s(16),
             'subject' => cert.subject,
             # do not compute thumbprint on Linux because it's expensive
             # only needed on Windows anyways
@@ -63,7 +63,7 @@ Facter.add(:vault_existing_certs) do
         $cert_data['not_after'] = $cert.NotAfter.ToString("o")  # Convert to ISO format
         $cert_data['not_before'] = $cert.NotBefore.ToString("o")
         $cert_data['path'] = $path
-        $cert_data['serial'] = $cert.SerialNumber
+        $cert_data['serial_number'] = $cert.SerialNumber
         $cert_data['subject'] = $cert.Subject
         $cert_data['thumbprint'] = $cert.Thumbprint
         $data[$path] = $cert_data
