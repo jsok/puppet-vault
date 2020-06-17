@@ -49,18 +49,6 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     Puppet.info("Deleted cert stderr: #{res[:stderr]} ")
   end
 
-  ###############################
-  # public getter/setting methods
-  def thumbprint
-    return @thumbprint unless @thumbprint.nil?
-    cert = certificate
-    if cert && cert['thumbprint']
-      @thumbprint = cert['thumbprint']
-    end
-    @thumbprint
-  end
-
-
   #########################
   # private methods
   def ps(cmd)
@@ -131,10 +119,10 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     x509_cert = OpenSSL::X509::Certificate.new(cert['data']['certificate'])
     name      = resource[:cert_name]
     # compute thumbprint of the cert
-    @thumbprint = OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase
+    # thumbprint = OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase
 
-    if resource[:key_password] && resource[:key_password].size >= 4
-      password = resource[:key_password]
+    if resource[:priv_key_password] && resource[:priv_key_password].size >= 4
+      password = resource[:priv_key_password]
     else
       require 'securerandom'
       password = SecureRandom.alphanumeric(16)

@@ -12,6 +12,7 @@ define vault::cert (
   Optional[Integer] $api_port       = undef,
   Optional[String] $api_scheme      = undef,
   # Cert options
+  Optional[String] $cert            = undef,
   Optional[String] $cert_dir        = undef,
   String $cert_group                = 'root',
   String $cert_owner                = 'root',
@@ -19,23 +20,25 @@ define vault::cert (
   Optional[String] $cert_name       = undef,
   Optional[String] $cert_ttl        = undef,
   # Private Key options
+  Optional[String] $priv_key        = undef,
   Optional[String] $priv_key_dir    = undef,
   Optional[String] $priv_key_group  = undef,
   Optional[String] $priv_key_owner  = undef,
   Stdlib::Filemode $priv_key_mode   = '0600',
   Optional[String] $priv_key_name   = undef,
   # File options
+  Boolean $manage_files             = true,
   Optional[Integer] $regenerate_ttl = undef,
   Optional[String]  $secret_engine  = undef,
 ) {
-  # TODO: cert_dir per OS
-
   vault_cert { $title:
     ensure         => $ensure,
     cert_name      => $cert_name,
     cert_dir       => $cert_dir,
+    cert           => $cert,
     priv_key_name  => $priv_key_name,
     priv_key_dir   => $priv_key_dir,
+    priv_key       => $priv_key,
     api_server     => $api_server,
     api_port       => $api_port,
     api_scheme     => $api_scheme,
@@ -48,7 +51,7 @@ define vault::cert (
     secret_role    => $secret_role,
   }
 
-  if $facts['os']['family'] != 'windows' {
+  if $manage_files and $facts['os']['family'] != 'windows' {
     file { Vault_cert[$title]['cert_path']:
       ensure    => $ensure,
       owner     => $cert_owner,

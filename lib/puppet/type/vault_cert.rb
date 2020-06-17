@@ -76,11 +76,22 @@ Puppet::Type.newtype(:vault_cert) do
     end
   end
 
+  newparam(:cert) do
+    desc 'Optional certificate data. If this is specified then it will be written to the file and Vault will not be contacted. This is only designed to be used on Windows systems. Usage of this parameter assumes that youre using the vault::cert() function to generate and refresh your certificates.'
+  end
+
   newparam(:priv_key_name) do
-    desc 'The filename of the private key without the directory. Default: "${basename(cert_name)}.key"'
+    desc "The filename of the private key without the directory. If this value doesn't contain an extension, then .crt will be appended automatically. Default: '${basename(cert_name)}.key'"
     defaultto do
       extension = File.extname(@resource[:cert_name])
       File.basename(cert_name, extension) + '.key'
+    end
+    munge do |value|
+      return value if File.extname(value)
+      value += if Facter.value('kernel').casecmp?('linux')
+                 '.key'
+               end
+      value
     end
   end
 
@@ -131,8 +142,12 @@ Puppet::Type.newtype(:vault_cert) do
     end
   end
 
-  newparam(:key_password) do
+  newparam(:priv_key_password) do
     desc 'The optional password for the private key'
+  end
+
+  newparam(:priv_key) do
+    desc 'Optional private key data. If this is specified then it will be written to the file and Vault will not be contacted. This is only designed to be used on Windows systems. Usage of this parameter assumes that youre using the vault::cert() function to generate and refresh your certificates.'
   end
 
   newparam(:regenerate_ttl) do
@@ -186,12 +201,5 @@ Puppet::Type.newtype(:vault_cert) do
 
   newparam(:secret_role) do
     desc 'Name of the role that the new cert belongs to'
-  end
-
-  newparam(:thumbprint) do
-    desc 'Returns the SHA1 thumbprint/fingerprint/hash of the certificate. This is used for those on Windows where the thumbprint is actually the file name (last part of the path) of the certificate in the cert store. Example: Cert:\LocalMachine\My\123456890ABCDEF. This thumbprint is needed for using the cert in a "binding" for IIS or other Windows specific usecases. This property is read-only and any attempt to set it will result in an error.'
-    validate do |val|
-      fail "thumbprint is read-only"
-    end
   end
 end
