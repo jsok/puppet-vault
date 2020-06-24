@@ -40,7 +40,9 @@ require 'puppet_x/encore/vault/client'
 #
 Puppet::Functions.create_function(:'vault::cert') do
   # @param TODO
-  # @param serial_number Certificate serial number. Format: should be a string of hexadecimal numbers with a colon ':' every 2 characters (to separate the hex digits). You can get this by doing: openssl -text -noout -in mycert.crt
+  # @param serial_number Certificate serial number. Format: should be a string of hexadecimal
+  #                      numbers with a colon ':' every 2 characters (to separate the hex digits).
+  #                      You can get this by doing: openssl -text -noout -in mycert.crt
   #
   # @return The cert TODO
   dispatch :cert do

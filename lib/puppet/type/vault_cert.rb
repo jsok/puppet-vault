@@ -77,7 +77,12 @@ Puppet::Type.newtype(:vault_cert) do
   end
 
   newparam(:cert) do
-    desc 'Optional certificate data. If this is specified then it will be written to the file and Vault will not be contacted. This is only designed to be used on Windows systems. Usage of this parameter assumes that youre using the vault::cert() function to generate and refresh your certificates.'
+    desc <<-EOF
+      Optional certificate data. If this is specified then it will be written to the file
+      and Vault will not be contacted. This is only designed to be used on Windows systems.
+      Usage of this parameter assumes that youre using the vault::cert() function to generate
+      and refresh your certificates.
+    EOF
   end
 
   newparam(:priv_key_name) do
@@ -147,7 +152,12 @@ Puppet::Type.newtype(:vault_cert) do
   end
 
   newparam(:priv_key) do
-    desc 'Optional private key data. If this is specified then it will be written to the file and Vault will not be contacted. This is only designed to be used on Windows systems. Usage of this parameter assumes that youre using the vault::cert() function to generate and refresh your certificates.'
+    desc <<-EOF
+      Optional private key data. If this is specified then it will be written to the file and
+      Vault will not be contacted. This is only designed to be used on Windows systems. Usage
+      of this parameter assumes that youre using the vault::cert() function to generate and
+      refresh your certificates.
+    EOF
   end
 
   newparam(:regenerate_ttl) do
