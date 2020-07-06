@@ -5,8 +5,8 @@ require 'puppet_x'
 module PuppetX::Vault
   # Abstraction of the HashiCorp Vault API
   class Client
-    def initialize(api_server,
-                   api_token,
+    def initialize(api_server:,
+                   api_token:,
                    api_port: 8200,
                    api_scheme: 'https',
                    secret_engine: '/pki',
@@ -27,13 +27,12 @@ module PuppetX::Vault
       @headers = { 'X-Vault-Token' => @api_token }.merge(headers)
     end
 
-    def create_cert(secret_role,
-                    common_name,
-                    ttl,
+    def create_cert(secret_role:,
+                    common_name:,
+                    ttl:,
                     alt_names: nil,
-                    ip_sans: nil,
-                    secret_engine: @secret_engine)
-      api_path = '/v1' + secret_engine + '/issue/' + secret_role
+                    ip_sans: nil)
+      api_path = '/v1' + @secret_engine + '/issue/' + secret_role
       payload = {
         name: secret_role,
         common_name: common_name,
@@ -44,24 +43,24 @@ module PuppetX::Vault
       payload[:alt_names] = alt_names if alt_names
       payload[:ip_sans] = ip_sans if ip_sans
 
-      post(api_path, payload)
+      post(api_path, body: payload)
     end
 
-    def revoke_cert(serial_number, secret_engine: @secret_engine)
-      api_path = '/v1' + secret_engine + '/revoke'
+    def revoke_cert(serial_number)
+      api_path = '/v1' + @secret_engine + '/revoke'
       payload = { serial_number: serial_number }
-      post(api_path, payload)
+      post(api_path, body: payload)
     end
 
-    def read_cert(serial_number, secret_engine: @secret_engine)
-      api_path = '/v1' + secret_engine + '/cert/' + serial_number
+    def read_cert(serial_number)
+      api_path = '/v1' + @secret_engine + '/cert/' + serial_number
       get(api_path)
     end
 
     # Check whether the cert has been revoked
     # Return true if the cert is revoked
-    def check_cert_revoked(serial_number, secret_engine: @secret_engine)
-      response = read_cert(serial_number, secret_engine: secret_engine)
+    def check_cert_revoked(serial_number)
+      response = read_cert(serial_number)
       # Check the revocation time on the returned cert object
       response['data']['revocation_time'] > 0
     end
@@ -86,7 +85,7 @@ module PuppetX::Vault
       # create our request
       request = net_http_request_class(method).new(uri)
       # copy headers into the request
-      headers.each { |k, v| req[k] = v }
+      headers.each { |k, v| request[k] = v }
       # set body on the request
       if body
         request.content_type = 'application/json'
@@ -94,13 +93,16 @@ module PuppetX::Vault
       end
 
       # execute
-      resp = http.request(req)
+      resp = http.request(request)
 
       # check response for success, redirect or error
       case resp
       when Net::HTTPSuccess then
-        return JSON.parse(resp.body) if resp.body
-        resp
+        if resp.body
+          JSON.parse(resp.body)
+        else
+          resp
+        end
       when Net::HTTPRedirection then
         execute(method, resp['location'],
                 body: body, headers: headers,

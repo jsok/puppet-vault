@@ -24,10 +24,10 @@ class Puppet::Provider::VaultCert < Puppet::Provider
   end
 
   def revoke_cert
-    client.revoke_cert(serial_number: cert_serial_get)
+    client.revoke_cert(cert_serial_get)
   end
 
   def check_cert_revoked
-    client.check_cert_revoked(serial_number: cert_serial_get)
+    client.check_cert_revoked(cert_serial_get)
   end
 end
