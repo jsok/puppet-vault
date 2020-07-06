@@ -1,4 +1,8 @@
-require 'puppet_x/encore/vault/client'
+# for some reason, in functions you can't do normal requires because the module isn't in
+# the load path, so you have to load it via absolute path :shrug:
+# require 'puppet_x/encore/vault/client'
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'puppet_x', 'encore', 'vault', 'client.rb'))
+
 
 # Creates/renews a PKI certificate from Vault
 #
@@ -40,17 +44,15 @@ require 'puppet_x/encore/vault/client'
 #
 Puppet::Functions.create_function(:'vault::cert') do
   # @param TODO
-  # @param serial_number Certificate serial number. Format: should be a string of hexadecimal
-  #                      numbers with a colon ':' every 2 characters (to separate the hex digits).
-  #                      You can get this by doing: openssl -text -noout -in mycert.crt
+  # @param serial_number Certificate serial number. Format: should be a string of hexadecimal numbers with a colon ':' every 2 characters (to separate the hex digits). You can get this by doing: openssl -text -noout -in mycert.crt
   #
   # @return The cert TODO
   dispatch :cert do
-    required_param 'String',  :cert_name
-    required_param 'String',  :api_server
-    required_param 'Integer', :api_token
-    required_param 'String',  :secret_role
-    required_param 'String',  :serial_number
+    required_param 'String', :cert_name
+    required_param 'String', :api_server
+    required_param 'String', :api_token
+    required_param 'String', :secret_role
+    optional_param 'String', :serial_number
     optional_param 'Integer', :regenerate_ttl
     optional_param 'String',  :cert_ttl
     optional_param 'String',  :common_name
@@ -60,6 +62,15 @@ Puppet::Functions.create_function(:'vault::cert') do
     optional_param 'Integer', :api_port
     optional_param 'String',  :secret_engine
     return_type 'Hash'
+  end
+
+  dispatch :cert_with_hash do
+    required_param 'Vault::CertParams', :params
+    return_type 'Hash'
+  end
+
+  def cert_with_hash(params)
+    cert(**params)
   end
 
   def cert(cert_name,

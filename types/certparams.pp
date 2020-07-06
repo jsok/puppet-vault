@@ -1,0 +1,15 @@
+type Vault::CertParams = Struct[{
+  cert_name      => String,
+  api_server     => String,
+  api_token      => String,
+  secret_role    => String,
+  serial_number  => Optional[String],
+  regenerate_ttl => Optional[Integer],
+  cert_ttl       => Optional[String],
+  common_name    => Optional[String],
+  alt_names      => Optional[String],
+  ip_sans        => Optional[String],
+  api_scheme     => Optional[String],
+  api_port       => Optional[Integer],
+  secret_engine  => Optional[String],
+}]
