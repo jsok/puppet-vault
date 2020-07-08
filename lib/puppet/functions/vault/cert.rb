@@ -51,31 +51,29 @@ Puppet::Functions.create_function(:'vault::cert') do
     return_type 'Hash'
   end
 
-  def cert(params)
+  def find_cert_serial_number(params)
     # if serial_number parameter doesn't exist, try to find cert from facts based on
     # common_name, this should give us the serial number if we can find one
     # FYI serial number is used to query vault API for existing certificate information.
     # We can get everything except the private key if we just have the cert's serial number
     # Vault's API doesn't allow us to lookup via common name, so Serial Number is our unique
     # ID we use for querying.
-    vault_existing_certs = Facter.value(:vault_existing_certs)
-    if !params['serial_number'] && vault_existing_certs
-      common_name = params['common_name']
-      matching_certs = vault_existing_certs.select do |_path, cert_info|
-        cert_info['common_name'] == common_name
-      end
-
-      params['serial_number'] = matching_certs.first['serial_number'] unless matching_certs.empty
+    serial_number = params['serial_number']
+    unless serial_number
+      cn = params['common_name']
+      vault_existing_certs = Facter.value(:vault_existing_certs) || {}
+      matching_certs = vault_existing_certs.select { |_path, cert| cert['common_name'] == cn }
+      serial_number = matching_certs.first['serial_number'] unless matching_certs.empty
     end
-    get_or_create_cert(params)
+    serial_number
   end
 
-  def get_or_create_cert(params)
+  def cert(params)
     cert_name      = params['cert_name']
     api_server     = params['api_server']
     api_token      = params['api_token']
     secret_role    = params['secret_role']
-    serial_number  = params.fetch('serial_number',  nil)
+    serial_number  = find_cert_serial_number(params)
     common_name    = params.fetch('common_name',    nil)
     alt_names      = params.fetch('alt_name',       nil)
     ip_sans        = params.fetch('ip_sans',        nil)
@@ -89,11 +87,6 @@ Puppet::Functions.create_function(:'vault::cert') do
                                                 api_port: api_port,
                                                 api_scheme: api_scheme,
                                                 secret_engine: secret_engine)
-    # if a serial number wasn't passed in, try to read it from facts about existing certs
-    # on the system
-    unless serial_number
-      serial_number = find_serial_from_facts(params)
-    end
 
     data = nil
     if serial_number
