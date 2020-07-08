@@ -23,9 +23,12 @@ Facter.add(:vault_existing_certs) do
           cert_path = path.realpath.to_s
           next if certs.key?(cert_path) # avoid reading the same cert over/over
           cert = OpenSSL::X509::Certificate.new(File.new(cert_path).read)
+          cert_extension = File.extname(cert_path)
+          cert_name = File.basename(cert_path, cert_extension)
           common_name = cert.subject.to_a.find { |name, _, _| name == 'CN' }[1]
           certs[cert_path] = {
             'common_name' => common_name,
+            'cert_name' => cert_name,
             'not_after' => cert.not_after.iso8601,
             'not_before' => cert.not_before.iso8601,
             'path' => cert_path,
@@ -58,8 +61,9 @@ Facter.add(:vault_existing_certs) do
       $data = @{}
       foreach ($cert in $cert_list) {
         $cert_data = @{}
-        $path = $cert.PSPath.Replace('Microsoft.PowerShell.Security\\Certificate::', 'Cert:\\')
-        $cert_data['common_name'] = $cert.SubjectName
+        $path = $cert.PSPath.Replace('Microsoft.PowerShe.Security\\Certificate::', 'Cert:\\')
+        $cert_data['common_name'] = $cert.SubjectName.name
+        $cert_data['cert_name'] = $cert.FriendlyName.
         $cert_data['not_after'] = $cert.NotAfter.ToString("o")  # Convert to ISO format
         $cert_data['not_before'] = $cert.NotBefore.ToString("o")
         $cert_data['path'] = $path

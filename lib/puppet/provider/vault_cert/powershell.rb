@@ -34,6 +34,8 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     # Revoke the old cert before creating a new one
     revoke_cert if certificate
 
+    # TODO remove / delete existing cert
+
     if resource[:cert] && resource[:priv_key]
       # user passed in the certificate data for us, use this
       client_cert_save(resource[:cert], resource[:priv_key])

@@ -75,7 +75,7 @@ Puppet::Functions.create_function(:'vault::cert') do
     secret_role    = params['secret_role']
     serial_number  = find_cert_serial_number(params)
     common_name    = params.fetch('common_name',    nil)
-    alt_names      = params.fetch('alt_name',       nil)
+    alt_names      = params.fetch('alt_names',      nil)
     ip_sans        = params.fetch('ip_sans',        nil)
     api_port       = params.fetch('api_port',       8200)
     api_scheme     = params.fetch('api_scheme',     'https')
