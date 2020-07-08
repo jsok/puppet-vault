@@ -63,7 +63,7 @@ Puppet::Functions.create_function(:'vault::cert') do
       cn = params['common_name']
       vault_existing_certs = Facter.value(:vault_existing_certs) || {}
       matching_certs = vault_existing_certs.select { |_path, cert| cert['common_name'] == cn }
-      serial_number = matching_certs.first['serial_number'] unless matching_certs.empty
+      serial_number = matching_certs.first['serial_number'] unless matching_certs.empty?
     end
     serial_number
   end
