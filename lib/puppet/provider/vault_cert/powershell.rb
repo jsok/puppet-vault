@@ -37,10 +37,12 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     # TODO remove / delete existing cert
 
     if resource[:cert] && resource[:priv_key]
+      Puppet.info('creating from exising cert')
       # user passed in the certificate data for us, use this
       client_cert_save(resource[:cert], resource[:priv_key])
     else
       # create a new cert via Vault API
+      Puppet.info('creating from new cert from vault')
       new_cert = create_cert
       client_cert_save(new_cert['data']['certificate'], new_cert['data']['private_key'])
     end
