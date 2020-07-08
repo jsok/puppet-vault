@@ -50,7 +50,5 @@ Gemfile:
         version: '>= 2.2.0'
       - gem: 'yaml-lint'
         version: '>= 0.0.10'
-# Rakefile:
-#   extras:
-#     - "# exclude plans because puppet-syntax doesn't support them yet: https://github.com/voxpupuli/puppet-syntax/issues/95"
-#     - 'PuppetSyntax.exclude_paths = ["plans/**/*", "vendor/**/*"]'
+spec/spec_helper.rb:
+  mock_with: ':rspec'

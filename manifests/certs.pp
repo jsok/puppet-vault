@@ -109,8 +109,6 @@ class vault::certs (
         serial_number => undef,
       }
     }
-
-
     $memo + {$common_name => $details}
   }
 }

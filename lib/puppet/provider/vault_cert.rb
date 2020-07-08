@@ -7,11 +7,11 @@ class Puppet::Provider::VaultCert < Puppet::Provider
   # helper methods
 
   def client
-    @client ||= PuppetX::Vault::Client(api_server: resource[:api_server],
-                                       api_token:  resource[:api_token],
-                                       api_port: resource[:api_port],
-                                       api_scheme: resource[:api_scheme],
-                                       secret_engine: resource[:secret_engine])
+    @client ||= PuppetX::Encore::Vault::Client(api_server: resource[:api_server],
+                                               api_token:  resource[:api_token],
+                                               api_port: resource[:api_port],
+                                               api_scheme: resource[:api_scheme],
+                                               secret_engine: resource[:secret_engine])
     @client
   end
 

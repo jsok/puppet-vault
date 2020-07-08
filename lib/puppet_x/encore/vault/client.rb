@@ -2,7 +2,10 @@ require 'json'
 require 'net/https'
 require 'puppet_x'
 
-module PuppetX::Vault
+# Encore module
+module PuppetX::Encore; end
+
+module PuppetX::Encore::Vault
   # Abstraction of the HashiCorp Vault API
   class Client
     def initialize(api_server:,
@@ -18,7 +21,6 @@ module PuppetX::Vault
       @api_port = api_port
       @api_scheme = api_scheme
       @api_url = "#{@api_scheme}://#{@api_server}:#{@api_port}"
-      @ssl = @api_scheme == 'https'
       @ssl_verify = ssl_verify
       @redirect_limit = redirect_limit
       @secret_engine = secret_engine
@@ -70,16 +72,16 @@ module PuppetX::Vault
 
     # Return a Net::HTTP::Response object
     def execute(method,
-                path,
+                url,
                 body: nil,
                 headers: {},
                 redirect_limit: @redirect_limit)
       raise ArgumentError, 'HTTP redirect too deep' if redirect_limit.zero?
 
       # setup our HTTP class
-      uri = URI.parse("#{@api_url}#{path}")
+      uri = URI.parse(url)
       http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = @ssl
+      http.use_ssl = uri.scheme == 'https'
       http.verify_mode = @ssl_verify
 
       # create our request
@@ -98,8 +100,9 @@ module PuppetX::Vault
       # check response for success, redirect or error
       case resp
       when Net::HTTPSuccess then
-        if resp.body
-          JSON.parse(resp.body)
+        body = resp.body
+        if body
+          JSON.parse(body)
         else
           resp
         end
@@ -120,11 +123,13 @@ module PuppetX::Vault
     end
 
     def get(path, body: nil, headers: @headers)
-      execute('get', path, body: body, headers: headers, redirect_limit: @redirect_limit)
+      url = "#{@api_url}#{path}"
+      execute('get', url, body: body, headers: headers, redirect_limit: @redirect_limit)
     end
 
     def post(path, body: nil, headers: @headers)
-      execute('post', path, body: body, headers: headers, redirect_limit: @redirect_limit)
+      url = "#{@api_url}#{path}"
+      execute('post', url, body: body, headers: headers, redirect_limit: @redirect_limit)
     end
   end
 end

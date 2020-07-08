@@ -3,7 +3,6 @@
 # require 'puppet_x/encore/vault/client'
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'puppet_x', 'encore', 'vault', 'client.rb'))
 
-
 # Creates/renews a PKI certificate from Vault
 #
 # NOTE: Only use this on Windows, on Linux this function is NOT needed. See below for details.
@@ -53,6 +52,25 @@ Puppet::Functions.create_function(:'vault::cert') do
   end
 
   def cert(params)
+    # if serial_number parameter doesn't exist, try to find cert from facts based on
+    # common_name, this should give us the serial number if we can find one
+    # FYI serial number is used to query vault API for existing certificate information.
+    # We can get everything except the private key if we just have the cert's serial number
+    # Vault's API doesn't allow us to lookup via common name, so Serial Number is our unique
+    # ID we use for querying.
+    vault_existing_certs = Facter.value(:vault_existing_certs)
+    if !params['serial_number'] && vault_existing_certs
+      common_name = params['common_name']
+      matching_certs = vault_existing_certs.select do |_path, cert_info|
+        cert_info['common_name'] == common_name
+      end
+
+      params['serial_number'] = matching_certs.first['serial_number'] unless matching_certs.empty
+    end
+    get_or_create_cert(params)
+  end
+
+  def get_or_create_cert(params)
     cert_name      = params['cert_name']
     api_server     = params['api_server']
     api_token      = params['api_token']
@@ -66,12 +84,17 @@ Puppet::Functions.create_function(:'vault::cert') do
     cert_ttl       = params.fetch('cert_ttl',       '720h')
     regenerate_ttl = params.fetch('regenerate_ttl', 3)
     secret_engine  = params.fetch('secret_engine',  '/pki')
+    client = PuppetX::Encore::Vault::Client.new(api_server: api_server,
+                                                api_token: api_token,
+                                                api_port: api_port,
+                                                api_scheme: api_scheme,
+                                                secret_engine: secret_engine)
+    # if a serial number wasn't passed in, try to read it from facts about existing certs
+    # on the system
+    unless serial_number
+      serial_number = find_serial_from_facts(params)
+    end
 
-    client = PuppetX::Vault::Client.new(api_server: api_server,
-                                        api_token: api_token,
-                                        api_port: api_port,
-                                        api_scheme: api_scheme,
-                                        secret_engine: secret_engine)
     data = nil
     if serial_number
       begin

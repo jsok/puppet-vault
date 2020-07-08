@@ -17,7 +17,7 @@ define vault::cert (
   String $cert_group                = 'root',
   String $cert_owner                = 'root',
   Stdlib::Filemode $cert_mode       = '0644',
-  Optional[String] $cert_name       = undef,
+  Optional[String] $cert_name       = $title,
   Optional[String] $cert_ttl        = undef,
   # Private Key options
   Optional[String] $priv_key        = undef,

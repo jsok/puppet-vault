@@ -19,6 +19,9 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   ##########################
   # public methods inherited from Puppet::Provider
   def exists?
+    # false if the user passed in cert and private key data, this will force
+    # a call to create()
+    return false if resource[:cert] && resource[:priv_key]
     # Check for the certificate existing at all
     # Check if the certificate is expired or not
     # Check if the cert is revoked or not
@@ -30,8 +33,15 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     Puppet.info('creating')
     # Revoke the old cert before creating a new one
     revoke_cert if certificate
-    new_cert = create_cert
-    client_cert_save(new_cert)
+
+    if resource[:cert] && resource[:priv_key]
+      # user passed in the certificate data for us, use this
+      client_cert_save(resource[:cert], resource[:priv_key])
+    else
+      # create a new cert via Vault API
+      new_cert = create_cert
+      client_cert_save(new_cert['data']['certificate'], new_cert['data']['private_key'])
+    end
   end
 
   def destroy
@@ -113,10 +123,10 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   end
 
   # Save the certificate and private key on the client server
-  def client_cert_save(cert)
+  def client_cert_save(cert, priv_key)
     Puppet.info('saving cert')
-    key       = OpenSSL::PKey.read(cert['data']['private_key'])
-    x509_cert = OpenSSL::X509::Certificate.new(cert['data']['certificate'])
+    key       = OpenSSL::PKey.read(priv_key)
+    x509_cert = OpenSSL::X509::Certificate.new(cert)
     name      = resource[:cert_name]
     # compute thumbprint of the cert
     # thumbprint = OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase
@@ -130,8 +140,8 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     pkcs12 = OpenSSL::PKCS12.create(password, name, key, x509_cert)
     pkcs12_der = pkcs12.to_der
 
-    Puppet.info("cert data: #{cert['data']['certificate']}")
-    Puppet.info("key data: #{cert['data']['private_key']}")
+    Puppet.info("cert data: #{cert}")
+    Puppet.info("key data: #{priv_key}")
     Puppet.info("Der data: #{pkcs12_der} ")
 
     file = Tempfile.new(resource[:cert_name])
