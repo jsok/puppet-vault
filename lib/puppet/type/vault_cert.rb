@@ -89,7 +89,7 @@ Puppet::Type.newtype(:vault_cert) do
     desc "The filename of the private key without the directory. If this value doesn't contain an extension, then .crt will be appended automatically. Default: '${basename(cert_name)}.key'"
     defaultto do
       extension = File.extname(@resource[:cert_name])
-      File.basename(cert_name, extension) + '.key'
+      File.basename(@resource[:cert_name], extension) + '.key'
     end
     munge do |value|
       return value if File.extname(value)
@@ -174,7 +174,7 @@ Puppet::Type.newtype(:vault_cert) do
     desc 'The common name to put in the certificate, defaults to basename(cert_name)'
     defaultto do
       extension = File.extname(@resource[:cert_name])
-      File.basename(cert_name, extension)
+      File.basename(@resource[:cert_name], extension)
     end
   end
 
