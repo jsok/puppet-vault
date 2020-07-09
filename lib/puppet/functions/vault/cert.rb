@@ -48,7 +48,7 @@ Puppet::Functions.create_function(:'vault::cert') do
   # @return The cert TODO
   dispatch :cert do
     required_param 'Vault::CertParams', :params
-    return_type 'Hash'
+    return_type 'Struct[{cert => String, priv_key => String, thumbprint => String, serial_number => String}]'
   end
 
   def find_cert_serial_number(params)
@@ -63,15 +63,22 @@ Puppet::Functions.create_function(:'vault::cert') do
       Puppet.info('serial number wasnt pass in, looking it up in facts')
       cn = params['common_name']
       Puppet.info("common name: #{cn}")
-      vault_existing_certs = Facter.value(:vault_existing_certs) || {}
+      # note: closure_scope is a special Puppet method for accessing the scope of the function
+      # see: https://puppet.com/docs/puppet/latest/functions_ruby_implementation.html
+      # It is only able to access global variables, like facts
+      vault_existing_certs = closure_scope['facts']['vault_existing_certs']
       Puppet.info("existing cert facts: #{vault_existing_certs.to_json}")
-      matching_certs = vault_existing_certs.select do |_path, cert|
-        Puppet.info("comparing #{cert['common_name']} == #{cn} : #{cert['common_name'] == cn}")
-        cert['common_name'] == cn
+      if vault_existing_certs
+        matching_certs = vault_existing_certs.select do |_path, cert|
+          Puppet.info("comparing #{cert['common_name']} == #{cn} : #{cert['common_name'] == cn}")
+          cert['common_name'] == cn
+        end
+        Puppet.info("matching certs: #{matching_certs.to_json}")
+        serial_number = matching_certs.values.first['serial_number'] unless matching_certs.empty?
+        Puppet.info("found existing serial number = #{serial_number}")
+      else
+        Puppet.info("couldn't find existing cert facts")
       end
-      Puppet.info("matching certs: #{matching_certs.to_json}")
-      serial_number = matching_certs.first['serial_number'] unless matching_certs.empty?
-      Puppet.info("found existing serial number = #{serial_number}")
     end
     serial_number
   end
@@ -100,13 +107,23 @@ Puppet::Functions.create_function(:'vault::cert') do
     if serial_number
       Puppet.info("using serial number = #{serial_number}")
       begin
+        # unless serial number has the format XX:YY:ZZ
+        # then reformat it by adding in colons every 2 characters
+        # unless serial_number =~ %r{(?:\w{2}:)+\w{2}}
+        #   serial_number = serial_number.scan(%r{\w{2}}).join(':')
+        # end
         resp = client.read_cert(serial_number)
         data = resp['data']
         Puppet.info("read in cert from vault = #{data.to_json}")
-      rescue Net::HTTPError
-        # if the cert doesn't exist by that serial number, then a 403 error will be thrown
-        # this means we need to create a new cert
-        Puppet.info("coulnd't find cert in vault ")
+      rescue Net::HTTPNotFound, Net::HTTPServerException => e
+        # HTTP 404 Not Found
+        # if the cert doesn't exist by that serial number, then a 404 (Not Found)
+        # error will be thrown, this means we need to create a new cert
+        Puppet.info("caught generic server exception with code: #{e.response.code}")
+        Puppet.info("caught generic server exception with code class: #{e.response.code.class.name}")
+        unless e.response.code == '404'
+          raise e
+        end
         data = nil
       end
     end
@@ -158,10 +175,10 @@ Puppet::Functions.create_function(:'vault::cert') do
     end
 
     {
-      cert: cert,
-      priv_key: priv_key,
-      thumbprint: thumbprint,
-      serial_number: cert_serial_number,
+      'cert' => cert,
+      'priv_key' => priv_key,
+      'thumbprint' => thumbprint,
+      'serial_number' => cert_serial_number,
     }
   end
 end

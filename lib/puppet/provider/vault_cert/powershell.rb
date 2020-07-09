@@ -19,6 +19,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   ##########################
   # public methods inherited from Puppet::Provider
   def exists?
+    Puppet.info("exists? - resource: #{resource}")
     Puppet.info("exists? - cert: #{resource[:cert]}")
     Puppet.info("exists? - priv_key: #{resource[:priv_key]}")
     # false if the user passed in cert and private key data, this will force
@@ -83,8 +84,10 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   def certificate
     return @cert unless @cert.nil?
     cmd = <<-EOF
-    $cert = Get-Item '#{resource[:cert_dir]}\*' | Where-object { $_.Subject -eq 'CN=#{resource[:common_name]}' }
-    if ($cert) {
+    $certs_list = Get-Item '#{resource[:cert_dir]}\\*' | Where-object { $_.Subject -eq 'CN=#{resource[:common_name]}' }
+    if ($certs_list) {
+      # TODO: how should we handle >1 cert with the same common name?
+      $cert = $certs_list[0]
       # don't put this in one big expression, this way powershell throws an error on the specific
       # line that is having a problem, not the beginning of the expression
       $data = @{}
@@ -99,7 +102,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     EOF
     res = ps(cmd)
     Puppet.info('parsing cert json')
-    Puppet.info("got output: #{res[:stdout]}")
+    Puppet.info("got output: #{res}")
     # add to check for truthy stdout because, if the cert doesn't exist the output
     # could be nil / empty string
     @cert = if res[:exitcode].zero? && res[:stdout]
@@ -127,8 +130,8 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   # Read the serial number from the certificate, convert it to base 16, and add colons
   def cert_serial_get
     Puppet.info('getting cert serial')
-    # Convert the base 10 serial number from the openssl cert to hexadecimal
-    serial_number = certificate['serial_number'].to_s(16)
+    # serial_number is already a hex string (from PowerShell)
+    serial_number = certificate['serial_number']
     # Add a colon every 2 characters to the returned serial number
     serial_number.scan(%r{\w{2}}).join(':')
   end
