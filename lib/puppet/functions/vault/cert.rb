@@ -48,7 +48,7 @@ Puppet::Functions.create_function(:'vault::cert') do
   # @return The cert TODO
   dispatch :cert do
     required_param 'Vault::CertParams', :params
-    return_type 'Struct[{cert => String, priv_key => String, thumbprint => String, serial_number => String}]'
+    return_type 'Vault::CertReturn'
   end
 
   def find_cert_serial_number(params)
