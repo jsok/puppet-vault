@@ -109,9 +109,9 @@ Puppet::Functions.create_function(:'vault::cert') do
       begin
         # unless serial number has the format XX:YY:ZZ
         # then reformat it by adding in colons every 2 characters
-        # unless serial_number =~ %r{(?:\w{2}:)+\w{2}}
-        #   serial_number = serial_number.scan(%r{\w{2}}).join(':')
-        # end
+        unless serial_number =~ %r{(?:\w{2}:)+\w{2}}
+          serial_number = serial_number.scan(%r{\w{2}}).join(':')
+        end
         resp = client.read_cert(serial_number)
         data = resp['data']
         Puppet.info("read in cert from vault = #{data.to_json}")
