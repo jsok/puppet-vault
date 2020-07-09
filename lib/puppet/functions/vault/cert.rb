@@ -60,10 +60,18 @@ Puppet::Functions.create_function(:'vault::cert') do
     # ID we use for querying.
     serial_number = params['serial_number']
     unless serial_number
+      Puppet.info('serial number wasnt pass in, looking it up in facts')
       cn = params['common_name']
+      Puppet.info("common name: #{cn}")
       vault_existing_certs = Facter.value(:vault_existing_certs) || {}
-      matching_certs = vault_existing_certs.select { |_path, cert| cert['common_name'] == cn }
+      Puppet.info("existing cert facts: #{vault_existing_certs.to_json}")
+      matching_certs = vault_existing_certs.select do |_path, cert|
+        Puppet.info("comparing #{cert['common_name']} == #{cn} : #{cert['common_name'] == cn}")
+        cert['common_name'] == cn
+      end
+      Puppet.info("matching certs: #{matching_certs.to_json}")
       serial_number = matching_certs.first['serial_number'] unless matching_certs.empty?
+      Puppet.info("found existing serial number = #{serial_number}")
     end
     serial_number
   end
@@ -90,12 +98,15 @@ Puppet::Functions.create_function(:'vault::cert') do
 
     data = nil
     if serial_number
+      Puppet.info("using serial number = #{serial_number}")
       begin
         resp = client.read_cert(serial_number)
         data = resp['data']
+        Puppet.info("read in cert from vault = #{data.to_json}")
       rescue Net::HTTPError
         # if the cert doesn't exist by that serial number, then a 403 error will be thrown
         # this means we need to create a new cert
+        Puppet.info("coulnd't find cert in vault ")
         data = nil
       end
     end
@@ -104,8 +115,10 @@ Puppet::Functions.create_function(:'vault::cert') do
     priv_key = nil
     new_cert_needed = true
     if data
+      Puppet.info("checking existing cert to see if it needs refreshed")
       if data['revocation_time'] && data['revocation_time'] > 0
         # the cert is revoked, need a new one
+        Puppet.info("the cert is revoked, need a new one: #{data['revocation_time']}")
         new_cert_needed = true
       elsif data['certificate']
         # check if the cert is expired
@@ -116,13 +129,17 @@ Puppet::Functions.create_function(:'vault::cert') do
         now = Time.now
         # Calculate the difference in time (seconds) and convert to hours
         hours_until_expired = (expire_date - now) / 60 / 60
+        Puppet.info("the cert has this many hours until expiration: #{hours_until_expired}")
         new_cert_needed = (hours_until_expired < regenerate_ttl)
+        Puppet.info("new cert is needed based on expiration [#{regenerate_ttl}]: #{new_cert_needed}")
       else
+        Puppet.info("existing cert is good")
         new_cert_needed = false
       end
     end
 
     if new_cert_needed
+      Puppet.info("new cert is needed, creating one")
       # set common name to cert_name if common_name was not passed in
       common_name ||= cert_name
       resp = client.create_cert(secret_role: secret_role, common_name: common_name,
@@ -137,6 +154,7 @@ Puppet::Functions.create_function(:'vault::cert') do
       x509_cert = OpenSSL::X509::Certificate.new(cert)
       thumbprint = OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase
       cert_serial_number = x509_cert.serial.to_s(16)
+      Puppet.info("computed new cert serial: #{cert_serial_number}")
     end
 
     {

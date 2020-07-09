@@ -21,7 +21,12 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   def exists?
     # false if the user passed in cert and private key data, this will force
     # a call to create()
-    return false if resource[:cert] && resource[:priv_key]
+    if resource[:cert] && resource[:priv_key]
+      Puppet.info('exists? - cert and priv_key were specified')
+      return false
+    else
+      Puppet.info('exists? - cert and priv_key were NOT specified')
+    end
     # Check for the certificate existing at all
     # Check if the certificate is expired or not
     # Check if the cert is revoked or not
@@ -100,7 +105,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
             else
               false
             end
-    Puppet.info('finished getting cert')
+    Puppet.info("finished getting cert: #{@cert}")
     @cert
   end
 
