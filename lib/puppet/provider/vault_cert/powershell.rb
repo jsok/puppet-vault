@@ -19,6 +19,8 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   ##########################
   # public methods inherited from Puppet::Provider
   def exists?
+    Puppet.info("exists? - cert: #{resource[:cert]}")
+    Puppet.info("exists? - priv_key: #{resource[:priv_key]}")
     # false if the user passed in cert and private key data, this will force
     # a call to create()
     if resource[:cert] && resource[:priv_key]
