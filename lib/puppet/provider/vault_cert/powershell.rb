@@ -31,15 +31,28 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     else
       Puppet.info('exists? - cert and priv_key were NOT specified')
     end
+
     # Check for the certificate existing at all
     # Check if the certificate is expired or not
     # Check if the cert is revoked or not
     # certificate && !check_cert_expiring && !check_cert_revoked
-    if certificate
+    if certificate_list
+      # if we're trying to delete the cert, we simply need to check if there are certs
+      # at all, so that all of them are deleted, no sense in checking if exisintg certs
+      # are expiring/revoked when deleting certs,
+      return !certificate_list.empty? if resource[:ensure] == :absent
+
+      # if we have > 1 cert, we need to cleanup the old ones... so
+      # if we are trying to create a cert (ensure: present), we need to say the cert
+      # doesn't exist so that create() is called and the old ones are destroyed
+      if certificate_list.size > 1
+        return false
+      end
+
       Puppet.info('exists? - certificate exists')
-      if !check_cert_expiring
+      if !check_cert_expiring_list
         Puppet.info('exists? - certificate IS NOT expiring')
-        if !check_cert_revoked
+        if !check_cert_revoked_list
           Puppet.info('exists? - certificate IS NOT revoked')
           Puppet.info('exists? - yes, this thing really exists')
           return true
@@ -85,9 +98,10 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
 
     # if there is an existing cert with this common name that doesn't match our
     # thumbprint/serial, then destroy the old one, remove from trust store and create a new one
-    if certificate &&
-       (certificate['thumbprint'] != thumbprint ||
-        certificate['serial_number'] != serial_number)
+    if certificate_list && !certificate_list.empty? &&
+       (certificate_list.size > 1 ||
+        (certificate_list.first['thumbprint'] != thumbprint ||
+         certificate_list.first['serial_number'] != serial_number))
       Puppet.info("A certificate with the same common name exists, but doesn't match our thumbprint and serial number, we're going to delete these old one(s)")
       # Revoke the old cert and remove it from the trust store
       destroy
@@ -113,8 +127,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   def destroy
     Puppet.info('Destroying')
     # Revoke the cert in Vault
-    # TODO revoke ALL certs we find
-    revoke_cert
+    revoke_cert_list
 
     # Remove certificate from certificate store
     cmd = <<-EOF
@@ -137,20 +150,22 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   end
 
   # Save an openssl cert object into the global cert var
-  def certificate
-    return @cert unless @cert.nil?
+  def certificate_list
+    return @cert_list unless @cert_list.nil?
     cmd = <<-EOF
     $certs_list = Get-Item '#{resource[:cert_dir]}\\*' | Where-object { $_.Subject -eq 'CN=#{resource[:common_name]}' }
     if ($certs_list) {
-      # TODO: how should we handle >1 cert with the same common name?
-      $cert = $certs_list[0]
-      # don't put this in one big expression, this way powershell throws an error on the specific
-      # line that is having a problem, not the beginning of the expression
-      $data = @{}
-      $data['not_after'] = $cert.NotAfter.ToString("o")  # Convert to ISO format
-      $data['not_before'] = $cert.NotBefore.ToString("o")
-      $data['serial_number'] = $cert.SerialNumber
-      $data['thumbprint'] = $cert.Thumbprint
+      $data = @()
+      foreach ($cert in $certs_list) {
+        # don't put this in one big expression, this way powershell throws an error on the specific
+        # line that is having a problem, not the beginning of the expression
+        $data += @{
+          'not_after'= $cert.NotAfter.ToString("o");  # Convert to ISO format
+          'not_before' = $cert.NotBefore.ToString("o");
+          'serial_number' = $cert.SerialNumber;
+          'thumbprint' = $cert.Thumbprint;
+        }
+      }
     } else {
       $data = $null
     }
@@ -161,23 +176,34 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     Puppet.info("got output: #{res}")
     # add to check for truthy stdout because, if the cert doesn't exist the output
     # could be nil / empty string
-    @cert = if res[:exitcode].zero? && res[:stdout]
-              JSON.parse(res[:stdout])
-            else
-              false
-            end
-    Puppet.info("finished getting cert: #{@cert}")
-    # TODO we probably need to return a list of all of these
-    @cert
+    @cert_list = if res[:exitcode].zero? && res[:stdout]
+                   JSON.parse(res[:stdout])
+                 else
+                   false
+                 end
+    Puppet.info("finished getting cert list: #{@cert_list}")
+    @cert_list
   end
 
-  def cert_not_after
-    Time.parse(certificate['not_after'])
+  def revoke_cert_list
+    certificate_list.each { |cert| revoke_cert(serial_number: cert_serial_number(cert)) }
   end
 
-  def cert_serial_number
+  def check_cert_revoked_list
+    certificate_list.any? { |cert| check_cert_revoked(serial_number: cert_serial_number(cert)) }
+  end
+
+  def check_cert_expiring_list
+    certificate_list.any? { |cert| check_cert_expiring(not_after: cert_not_after(cert)) }
+  end
+
+  def cert_not_after(cert)
+    Time.parse(cert['not_after'])
+  end
+
+  def cert_serial_number(cert)
     # serial_number is already a hex string (from PowerShell)
-    certificate['serial_number']
+    cert['serial_number']
   end
 
   # Save the certificate and private key on the client server

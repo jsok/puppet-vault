@@ -12,7 +12,7 @@ class Puppet::Provider::VaultCert < Puppet::Provider
                                                    api_port: resource[:api_port],
                                                    api_scheme: resource[:api_scheme],
                                                    api_secret_engine: resource[:api_secret_engine],
-                                                   api_secret_role: resource[:api_secret_role],)
+                                                   api_secret_role: resource[:api_secret_role])
     @client
   end
 
@@ -23,18 +23,21 @@ class Puppet::Provider::VaultCert < Puppet::Provider
                        ip_sans: resource[:ip_sans])
   end
 
-  def revoke_cert
-    client.revoke_cert(cert_serial_number)
+  def revoke_cert(serial_number: nil)
+    serial_number = cert_serial_number unless serial_number
+    client.revoke_cert(serial_number)
   end
 
-  def check_cert_revoked
-    client.check_cert_revoked(cert_serial_number)
+  def check_cert_revoked(serial_number: nil)
+    serial_number = cert_serial_number unless serial_number
+    client.check_cert_revoked(serial_number)
   end
 
   # Check whether the time left on the cert is less than the ttl
   # Return true if the cert is about to expire
-  def check_cert_expiring
+  def check_cert_expiring(not_after: nil)
     Puppet.debug('checking cert expiring')
-    PuppetX::Encore::Vault::Util.check_expiring(cert_not_after, resource[:regenerate_ttl])
+    not_after = cert_not_after unless not_after
+    PuppetX::Encore::Vault::Util.check_expiring(not_after, resource[:regenerate_ttl])
   end
 end
