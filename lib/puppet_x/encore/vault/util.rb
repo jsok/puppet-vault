@@ -21,7 +21,7 @@ module PuppetX::Encore::Vault
       # Calculate the difference in time (seconds) and convert to hours
       hours_until_expired = (not_after - Time.now) / 60 / 60
       expiring = hours_until_expired < regenerate_ttl
-      Puppet.debug("check cert is expiring: #{hours_until_expired} < #{resource[:regenerate_ttl]} = #{expiring}")
+      Puppet.debug("check cert is expiring: #{hours_until_expired} < #{regenerate_ttl} = #{expiring}")
       expiring
     end
   end
