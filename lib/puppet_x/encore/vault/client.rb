@@ -42,29 +42,39 @@ module PuppetX::Encore::Vault
       }
       # Check if any Subject Alternative Names were given
       # Check if any IP Subject Alternative Names were given
-      payload[:alt_names] = alt_names if alt_names
-      payload[:ip_sans] = ip_sans if ip_sans
+      payload[:alt_names] = alt_names.join(',') if alt_names
+      payload[:ip_sans] = ip_sans.join(',') if ip_sans
 
       post(api_path, body: payload)
     end
 
     def revoke_cert(serial_number)
       api_path = '/v1' + @secret_engine + '/revoke'
-      payload = { serial_number: serial_number }
+      payload = { serial_number: format_serial_number(serial_number) }
       post(api_path, body: payload)
     end
 
     def read_cert(serial_number)
-      api_path = '/v1' + @secret_engine + '/cert/' + serial_number
+      api_path = '/v1' + @secret_engine + '/cert/' + format_serial_number(serial_number)
       get(api_path)
     end
 
     # Check whether the cert has been revoked
     # Return true if the cert is revoked
     def check_cert_revoked(serial_number)
-      response = read_cert(serial_number)
+      response = read_cert(format_serial_number(serial_number))
       # Check the revocation time on the returned cert object
       response['data']['revocation_time'] > 0
+    end
+
+    def format_serial_number(serial_number)
+      # unless serial number has the format XX:YY:ZZ
+      # then reformat it by adding in colons every 2 characters
+      unless serial_number =~ %r{(?:\w{2}:)+\w{2}}
+        # Add a colon every 2 characters to the returned serial number
+        serial_number = serial_number.scan(%r{\w{2}}).join(':')
+      end
+      serial_number
     end
 
     #################

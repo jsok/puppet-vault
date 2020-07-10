@@ -24,10 +24,17 @@ class Puppet::Provider::VaultCert < Puppet::Provider
   end
 
   def revoke_cert
-    client.revoke_cert(cert_serial_get)
+    client.revoke_cert(cert_serial_number)
   end
 
   def check_cert_revoked
-    client.check_cert_revoked(cert_serial_get)
+    client.check_cert_revoked(cert_serial_number)
+  end
+
+  # Check whether the time left on the cert is less than the ttl
+  # Return true if the cert is about to expire
+  def check_cert_expiring
+    Puppet.debug('checking cert expiring')
+    PuppetX::Encore::Vault::Util.check_expiring(cert_not_after, resource[:regenerate_ttl])
   end
 end

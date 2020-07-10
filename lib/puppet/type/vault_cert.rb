@@ -19,13 +19,56 @@ Puppet::Type.newtype(:vault_cert) do
   ensurable
 
   newparam(:cert_name, namevar: true) do
-    desc "The filename of the certificate without the directory. If this value doesn't contain an extension, then .crt will be appended automatically."
+    desc <<-EOS
+      On Linux: the filename of the certificate without the directory.
+      If this value doesn't contain an extension, then .crt will be appended  automatically.
+      On Windows: the friendly name of the certificate.
+    EOS
     munge do |value|
       return value if File.extname(value)
-      value += if Facter.value('kernel').casecmp?('linux')
-                 '.crt'
-               end
+      value += '.crt' if Facter.value('kernel').casecmp?('linux')
       value
+    end
+  end
+
+  newparam(:common_name) do
+    desc <<-EOS
+      The common name to put in the certificate.
+      On Linux, defaults to basename(cert_name)
+      On Windows, defaults to cert_name
+    EOS
+    defaultto do
+      return @resource[:cert_name] unless Facter.value('kernel').casecmp?('linux')
+      extension = File.extname(@resource[:cert_name])
+      File.basename(@resource[:cert_name], extension)
+    end
+  end
+
+  newparam(:alt_names) do
+    desc 'Specifies requested Subject Alternative Names, in a comma-delimited list'
+    validate do |value|
+      unless value.is_a?(Array)
+        raise ArgumentError, "alt_names is expected to be an Array, given: #{value.class.name}"
+      end
+      value.each do |v|
+        unless v.is_a?(String)
+          raise ArgumentError, "alt_names items are expected to be String, given: #{v.class.name}"
+        end
+      end
+    end
+  end
+
+  newparam(:ip_sans) do
+    desc 'Specifies requested IP Subject Alternative Names, in a comma-delimited list'
+    validate do |value|
+      unless value.is_a?(Array)
+        raise ArgumentError, "ip_sans is expected to be an Array, given: #{value.class.name}"
+      end
+      value.each do |v|
+        unless v.is_a?(String)
+          raise ArgumentError, "ip_sans items are expected to be String, given: #{v.class.name}"
+        end
+      end
     end
   end
 
@@ -77,17 +120,23 @@ Puppet::Type.newtype(:vault_cert) do
   end
 
   newparam(:cert) do
-    desc <<-EOF
+    desc <<-EOS
       Optional certificate data. If this is specified then it will be written to the file
       and Vault will not be contacted. This is only designed to be used on Windows systems.
       Usage of this parameter assumes that youre using the vault::cert() function to generate
       and refresh your certificates.
-    EOF
+    EOS
   end
 
   newparam(:priv_key_name) do
-    desc "The filename of the private key without the directory. If this value doesn't contain an extension, then .crt will be appended automatically. Default: '${basename(cert_name)}.key'"
+    desc <<-EOS
+      On Linux: the filename of the private key without the directory.
+      If this value doesn't contain an extension, then .crt will be appended automatically.
+      Default: '${basename(cert_name)}.key'.
+      On Windows: unused.
+    EOS
     defaultto do
+      return @resource[:cert_name] unless Facter.value('kernel').casecmp?('linux')
       extension = File.extname(@resource[:cert_name])
       File.basename(@resource[:cert_name], extension) + '.key'
     end
@@ -143,7 +192,7 @@ Puppet::Type.newtype(:vault_cert) do
     end
 
     validate do |_value|
-      raise ArgumentError, 'cert_path is read-only'
+      raise ArgumentError, 'priv_key_path is read-only'
     end
   end
 
@@ -152,12 +201,12 @@ Puppet::Type.newtype(:vault_cert) do
   end
 
   newparam(:priv_key) do
-    desc <<-EOF
+    desc <<-EOS
       Optional private key data. If this is specified then it will be written to the file and
       Vault will not be contacted. This is only designed to be used on Windows systems. Usage
       of this parameter assumes that youre using the vault::cert() function to generate and
       refresh your certificates.
-    EOF
+    EOS
   end
 
   newparam(:regenerate_ttl) do
@@ -168,22 +217,6 @@ Puppet::Type.newtype(:vault_cert) do
   newparam(:cert_ttl) do
     desc 'TTL to give the new cert'
     defaultto('720h')
-  end
-
-  newparam(:common_name) do
-    desc 'The common name to put in the certificate, defaults to basename(cert_name)'
-    defaultto do
-      extension = File.extname(@resource[:cert_name])
-      File.basename(@resource[:cert_name], extension)
-    end
-  end
-
-  newparam(:alt_names) do
-    desc 'Specifies requested Subject Alternative Names, in a comma-delimited list'
-  end
-
-  newparam(:ip_sans) do
-    desc 'Specifies requested IP Subject Alternative Names, in a comma-delimited list'
   end
 
   newparam(:api_server) do

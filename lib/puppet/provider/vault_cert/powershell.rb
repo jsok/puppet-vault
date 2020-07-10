@@ -2,6 +2,7 @@ require 'pathname'
 require 'time'
 require 'ruby-pwsh'
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'vault_cert'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'puppet_x', 'encore', 'vault', 'util'))
 
 # Steps
 # - Verify that the given cert and private key exist and match
@@ -33,37 +34,92 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     # Check for the certificate existing at all
     # Check if the certificate is expired or not
     # Check if the cert is revoked or not
-    certificate && !check_cert_expiring && !check_cert_revoked
+    # certificate && !check_cert_expiring && !check_cert_revoked
+    if certificate
+      Puppet.info('exists? - certificate exists')
+      if !check_cert_expiring
+        Puppet.info('exists? - certificate IS NOT expiring')
+        if !check_cert_revoked
+          Puppet.info('exists? - certificate IS NOT revoked')
+          Puppet.info('exists? - yes, this thing really exists')
+          return true
+        else
+          Puppet.info('exists? - certificate IS revoked')
+        end
+      else
+        Puppet.info('exists? - certificate IS expiring')
+      end
+    else
+      Puppet.info('exists? - certificate doesnt exist')
+    end
+    Puppet.info('exists? - no, this thing doesnt exist')
+    false
   end
 
   # Create a new certificate with the vault API and save it on the filesystem
   def create
     Puppet.info('creating')
-    # Revoke the old cert before creating a new one
-    revoke_cert if certificate
 
-    # TODO remove / delete existing cert
-
-    if resource[:cert] && resource[:priv_key]
+    # don't check priv_key here because priv_key isnt looked up via facts
+    if resource[:cert]
       Puppet.info('creating from exising cert')
       # user passed in the certificate data for us, use this
-      client_cert_save(resource[:cert], resource[:priv_key])
+      cert = resource[:cert]
+      priv_key = resource[:priv_key]
     else
       # create a new cert via Vault API
       Puppet.info('creating from new cert from vault')
       new_cert = create_cert
-      client_cert_save(new_cert['data']['certificate'], new_cert['data']['private_key'])
+      cert = new_cert['data']['certificate']
+      priv_key = new_cert['data']['private_key']
+    end
+
+    thumbprint = nil
+    serial_number = nil
+    if cert
+      Puppet.info("computed new cert serial: #{serial_number}")
+      sn_th = PuppetX::Encore::Vault::Util.cert_sn_thumbprint(cert)
+      thumbprint = sn_th[:thumbprint]
+      serial_number = sn_th[:serial_number]
+    end
+
+    # if there is an existing cert with this common name that doesn't match our
+    # thumbprint/serial, then destroy the old one, remove from trust store and create a new one
+    if certificate &&
+       (certificate['thumbprint'] != thumbprint ||
+        certificate['serial_number'] != serial_number)
+      Puppet.info("A certificate with the same common name exists, but doesn't match our thumbprint and serial number, we're going to delete these old one(s)")
+      # Revoke the old cert and remove it from the trust store
+      destroy
+    end
+
+    # can only save/import the certificate into the cert store if we have
+    # the cert and priv_key
+    # this is important on a puppet run where we've read the existing certificate from
+    # facts, but not the private key (private key isn't exposed in facts)
+    # this way we can check on exist certs without overwriting them
+    if cert
+      if priv_key
+        Puppet.info('saving client cert to cert store')
+        client_cert_save(cert, priv_key)
+      else
+        Puppet.info('not saving client cert because only have cert and not priv key')
+      end
+    else
+      Puppet.info('not saving client cert because cert and priv_key are both nil')
     end
   end
 
   def destroy
+    Puppet.info('Destroying')
     # Revoke the cert in Vault
+    # TODO revoke ALL certs we find
     revoke_cert
 
     # Remove certificate from certificate store
     cmd = <<-EOF
-    $cert = Get-Item '#{resource[:cert_dir]}\*' | Where-object { $_.Subject -eq '#{resource[:common_name]}' }
-    $cert | Remove-Item
+    $cert_list = Get-Item '#{resource[:cert_dir]}\\*' | Where-object { $_.Subject -eq 'CN=#{resource[:common_name]}' }
+    $cert_list | Remove-Item
     EOF
     res = ps(cmd)
     Puppet.info("Deleted cert exitcode: #{res[:exitcode]} ")
@@ -111,29 +167,17 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
               false
             end
     Puppet.info("finished getting cert: #{@cert}")
+    # TODO we probably need to return a list of all of these
     @cert
   end
 
-  ##########################
-  # not converted
-
-  # Check whether the time left on the cert is less than the ttl
-  # Return true if the cert is about to expire
-  def check_cert_expiring
-    Puppet.info('checking cert expiring')
-    expire_date = Time.parse(certificate['not_after'])
-    # Calculate the difference in time (seconds) and convert to hours
-    hours_until_expired = (expire_date - Time.now) / 60 / 60
-    hours_until_expired < resource[:regenerate_ttl]
+  def cert_not_after
+    Time.parse(certificate['not_after'])
   end
 
-  # Read the serial number from the certificate, convert it to base 16, and add colons
-  def cert_serial_get
-    Puppet.info('getting cert serial')
+  def cert_serial_number
     # serial_number is already a hex string (from PowerShell)
-    serial_number = certificate['serial_number']
-    # Add a colon every 2 characters to the returned serial number
-    serial_number.scan(%r{\w{2}}).join(':')
+    certificate['serial_number']
   end
 
   # Save the certificate and private key on the client server
@@ -142,9 +186,6 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     key       = OpenSSL::PKey.read(priv_key)
     x509_cert = OpenSSL::X509::Certificate.new(cert)
     name      = resource[:cert_name]
-    # compute thumbprint of the cert
-    # thumbprint = OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase
-
     if resource[:priv_key_password] && resource[:priv_key_password].size >= 4
       password = resource[:priv_key_password]
     else
@@ -177,17 +218,5 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
       file.close
       file.unlink
     end
-    # File.open(File.join('c:\\', resource[:cert_name]), 'wb') do |file|
-    #   file.write(pkcs12_der)
-    #   cmd = <<-EOF
-    #   $password = ConvertTo-SecureString -String '#{password}' -Force -AsPlainText
-    #   Import-PfxCertificate -FilePath '#{file.path}' -CertStoreLocation '#{resource[:cert_dir]}' -Password $password
-    #   EOF
-    #   res = ps(cmd)
-    #   Puppet.info("Imported cert exitcode: #{res[:exitcode]} ")
-    #   Puppet.info("Imported cert stdout: #{res[:stdout]} ")
-    #   Puppet.info("Imported cert stderr: #{res[:stderr]} ")
-    #   raise "Error importing cert: #{res[:stderr]}" unless res[:exitcode].zero?
-    # end
   end
 end

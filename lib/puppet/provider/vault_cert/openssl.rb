@@ -18,8 +18,8 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   ##########################
   # public methods inherited from Puppet::Provider
   def exists?
-    cert = certificate_get
-    priv_key = private_key_get
+    cert = certificate
+    priv_key = private_key
     # Check for the certificate existing at all
     # Check if the given private key matches the given cert
     # Check if the certificate is expired or not
@@ -31,9 +31,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   # Create a new certificate with the vault API and save it on the filesystem
   def create
     # Revoke the old cert before creating a new one
-    cert = certificate_get
-    priv_key = private_key_get
-    revoke_cert if cert && priv_key
+    revoke_cert if certificate && private_key
     new_cert = create_cert
     client_cert_save(new_cert)
   end
@@ -51,20 +49,8 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   #########################
   # private methods
 
-  # Check whether the time left on the cert is less than the ttl
-  # Return true if the cert is about to expire
-  def check_cert_expiring
-    cert = certificate_get
-    expire_date = cert.not_after
-
-    now = Time.now
-    # Calculate the difference in time (seconds) and convert to hours
-    hours_until_expired = (expire_date - now) / 60 / 60
-    hours_until_expired < resource[:regenerate_ttl]
-  end
-
   # Save an openssl cert object into the global cert var
-  def certificate_get
+  def certificate
     return @cert unless @cert.nil?
     cert_path = File.join(resource[:cert_dir], resource[:cert_name])
     @cert = if Pathname.new(cert_path).exist?
@@ -76,7 +62,7 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
   end
 
   # Save an openssl PKey object into the global priv_key var
-  def private_key_get
+  def private_key
     return @priv_key unless @priv_key.nil?
     priv_key_path = File.join(resource[:priv_key_dir], resource[:priv_key_name])
     @priv_key = if Pathname.new(priv_key_path).exist?
@@ -87,13 +73,13 @@ Puppet::Type.type(:vault_cert).provide(:openssl) do
                 end
   end
 
-  # Read the serial number from the certificate, convert it to base 16, and add colons
-  def cert_serial_get
-    cert = certificate_get
-    # Convert the base 10 serial number from the openssl cert to hexadecimal
-    serial_number = cert.serial.to_s(16)
-    # Add a colon every 2 characters to the returned serial number
-    serial_number.scan(%r{\w{2}}).join(':')
+  def cert_not_after
+    certificate.not_after
+  end
+
+  def cert_serial_number
+    # Read the serial number from the certificate, convert it to base 16 (hex)
+    certificate.serial.to_s(16)
   end
 
   # Save the certificate and private key on the client server

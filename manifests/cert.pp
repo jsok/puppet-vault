@@ -5,7 +5,7 @@ define vault::cert (
   String  $api_server,
   String  $api_token,
   String  $secret_role,
-  Optional[String] $common_name     = $title,
+  Optional[String] $common_name     = undef,
   Optional[String] $alt_names       = undef,
   Optional[String] $ip_sans         = undef,
   # API options

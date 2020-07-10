@@ -1,7 +1,8 @@
 # for some reason, in functions you can't do normal requires because the module isn't in
 # the load path, so you have to load it via absolute path :shrug:
 # require 'puppet_x/encore/vault/client'
-require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'puppet_x', 'encore', 'vault', 'client.rb'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'puppet_x', 'encore', 'vault', 'client'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'puppet_x', 'encore', 'vault', 'util'))
 
 # Creates/renews a PKI certificate from Vault
 #
@@ -107,11 +108,6 @@ Puppet::Functions.create_function(:'vault::cert') do
     if serial_number
       Puppet.info("using serial number = #{serial_number}")
       begin
-        # unless serial number has the format XX:YY:ZZ
-        # then reformat it by adding in colons every 2 characters
-        unless serial_number =~ %r{(?:\w{2}:)+\w{2}}
-          serial_number = serial_number.scan(%r{\w{2}}).join(':')
-        end
         resp = client.read_cert(serial_number)
         data = resp['data']
         Puppet.info("read in cert from vault = #{data.to_json}")
@@ -132,7 +128,7 @@ Puppet::Functions.create_function(:'vault::cert') do
     priv_key = nil
     new_cert_needed = true
     if data
-      Puppet.info("checking existing cert to see if it needs refreshed")
+      Puppet.info('checking existing cert to see if it needs refreshed')
       if data['revocation_time'] && data['revocation_time'] > 0
         # the cert is revoked, need a new one
         Puppet.info("the cert is revoked, need a new one: #{data['revocation_time']}")
@@ -141,22 +137,14 @@ Puppet::Functions.create_function(:'vault::cert') do
         # check if the cert is expired
         cert = data['certificate']
         x509_cert = OpenSSL::X509::Certificate.new(cert)
-        # TODO: move this common code from openssl and powershell into client
-        expire_date = x509_cert.not_after
-        now = Time.now
-        # Calculate the difference in time (seconds) and convert to hours
-        hours_until_expired = (expire_date - now) / 60 / 60
-        Puppet.info("the cert has this many hours until expiration: #{hours_until_expired}")
-        new_cert_needed = (hours_until_expired < regenerate_ttl)
-        Puppet.info("new cert is needed based on expiration [#{regenerate_ttl}]: #{new_cert_needed}")
-      else
-        Puppet.info("existing cert is good")
-        new_cert_needed = false
+        # if cert is expiring, then we need a new cert
+        new_cert_needed = PuppetX::Encore::Vault::Util.check_expiring(x509_cert.not_after,
+                                                                      regenerate_ttl)
       end
     end
 
     if new_cert_needed
-      Puppet.info("new cert is needed, creating one")
+      Puppet.info('new cert is needed, creating one')
       # set common name to cert_name if common_name was not passed in
       common_name ||= cert_name
       resp = client.create_cert(secret_role: secret_role, common_name: common_name,
@@ -168,9 +156,9 @@ Puppet::Functions.create_function(:'vault::cert') do
     thumbprint = nil
     cert_serial_number = nil
     if cert
-      x509_cert = OpenSSL::X509::Certificate.new(cert)
-      thumbprint = OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase
-      cert_serial_number = x509_cert.serial.to_s(16)
+      sn_th = PuppetX::Encore::Vault::Util.cert_sn_thumbprint(cert)
+      thumbprint = sn_th[:thumbprint]
+      cert_serial_number = sn_th[:serial_number]
       Puppet.info("computed new cert serial: #{cert_serial_number}")
     end
 
