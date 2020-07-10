@@ -11,13 +11,13 @@ class Puppet::Provider::VaultCert < Puppet::Provider
                                                    api_token:  resource[:api_token],
                                                    api_port: resource[:api_port],
                                                    api_scheme: resource[:api_scheme],
-                                                   secret_engine: resource[:secret_engine])
+                                                   api_secret_engine: resource[:api_secret_engine],
+                                                   api_secret_role: resource[:api_secret_role],)
     @client
   end
 
   def create_cert
-    client.create_cert(secret_role: resource[:secret_role],
-                       common_name: resource[:common_name],
+    client.create_cert(common_name: resource[:common_name],
                        ttl: resource[:cert_ttl],
                        alt_names: resource[:alt_names],
                        ip_sans: resource[:ip_sans])

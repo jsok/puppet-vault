@@ -10,9 +10,10 @@ module PuppetX::Encore::Vault
   class Client
     def initialize(api_server:,
                    api_token:,
+                   api_secret_role:,
                    api_port: 8200,
                    api_scheme: 'https',
-                   secret_engine: '/pki',
+                   api_secret_engine: '/pki',
                    ssl_verify: OpenSSL::SSL::VERIFY_NONE,
                    redirect_limit: 10,
                    headers: {})
@@ -20,23 +21,23 @@ module PuppetX::Encore::Vault
       @api_token = api_token
       @api_port = api_port
       @api_scheme = api_scheme
+      @api_secret_role = api_secret_role
+      @api_secret_engine = api_secret_engine
       @api_url = "#{@api_scheme}://#{@api_server}:#{@api_port}"
       @ssl_verify = ssl_verify
       @redirect_limit = redirect_limit
-      @secret_engine = secret_engine
       # add our auth token into the header, unless it was passed in,
       # then use the one from the passed in headers
       @headers = { 'X-Vault-Token' => @api_token }.merge(headers)
     end
 
-    def create_cert(secret_role:,
-                    common_name:,
+    def create_cert(common_name:,
                     ttl:,
                     alt_names: nil,
                     ip_sans: nil)
-      api_path = '/v1' + @secret_engine + '/issue/' + secret_role
+      api_path = '/v1' + @api_secret_engine + '/issue/' + @api_secret_role
       payload = {
-        name: secret_role,
+        name: @api_secret_role,
         common_name: common_name,
         ttl: ttl,
       }
@@ -49,13 +50,13 @@ module PuppetX::Encore::Vault
     end
 
     def revoke_cert(serial_number)
-      api_path = '/v1' + @secret_engine + '/revoke'
+      api_path = '/v1' + @api_secret_engine + '/revoke'
       payload = { serial_number: format_serial_number(serial_number) }
       post(api_path, body: payload)
     end
 
     def read_cert(serial_number)
-      api_path = '/v1' + @secret_engine + '/cert/' + format_serial_number(serial_number)
+      api_path = '/v1' + @api_secret_engine + '/cert/' + format_serial_number(serial_number)
       get(api_path)
     end
 

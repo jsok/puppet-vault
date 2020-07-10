@@ -237,12 +237,12 @@ Puppet::Type.newtype(:vault_cert) do
     desc 'API token used to authenticate with Vault'
   end
 
-  newparam(:secret_engine) do
+  newparam(:api_secret_engine) do
     desc 'Path to the PKI secrets engine'
     defaultto('/pki')
   end
 
-  newparam(:secret_role) do
+  newparam(:api_secret_role) do
     desc 'Name of the role that the new cert belongs to'
   end
 end

@@ -85,24 +85,24 @@ Puppet::Functions.create_function(:'vault::cert') do
   end
 
   def cert(params)
-    cert_name      = params['cert_name']
-    api_server     = params['api_server']
-    api_token      = params['api_token']
-    secret_role    = params['secret_role']
-    serial_number  = find_cert_serial_number(params)
-    common_name    = params.fetch('common_name',    nil)
-    alt_names      = params.fetch('alt_names',      nil)
-    ip_sans        = params.fetch('ip_sans',        nil)
-    api_port       = params.fetch('api_port',       8200)
-    api_scheme     = params.fetch('api_scheme',     'https')
-    cert_ttl       = params.fetch('cert_ttl',       '720h')
-    regenerate_ttl = params.fetch('regenerate_ttl', 3)
-    secret_engine  = params.fetch('secret_engine',  '/pki')
+    common_name       = params['common_name']
+    api_server        = params['api_server']
+    api_token         = params['api_token']
+    api_secret_role   = params['api_secret_role']
+    alt_names         = params.fetch('alt_names',         nil)
+    ip_sans           = params.fetch('ip_sans',           nil)
+    api_port          = params.fetch('api_port',          8200)
+    api_scheme        = params.fetch('api_scheme',        'https')
+    api_secret_engine = params.fetch('api_secret_engine', '/pki')
+    cert_ttl          = params.fetch('cert_ttl',          '720h')
+    regenerate_ttl    = params.fetch('regenerate_ttl',    3)
+    serial_number     = find_cert_serial_number(params)
     client = PuppetX::Encore::Vault::Client.new(api_server: api_server,
                                                 api_token: api_token,
                                                 api_port: api_port,
                                                 api_scheme: api_scheme,
-                                                secret_engine: secret_engine)
+                                                api_secret_engine: api_secret_engine,
+                                                api_secret_role: api_secret_role)
 
     data = nil
     if serial_number
@@ -145,10 +145,8 @@ Puppet::Functions.create_function(:'vault::cert') do
 
     if new_cert_needed
       Puppet.info('new cert is needed, creating one')
-      # set common name to cert_name if common_name was not passed in
-      common_name ||= cert_name
-      resp = client.create_cert(secret_role: secret_role, common_name: common_name,
-                                ttl: cert_ttl, alt_names: alt_names, ip_sans: ip_sans)
+      resp = client.create_cert(common_name: common_name, alt_names: alt_names,
+                                ip_sans: ip_sans, ttl: cert_ttl)
       cert = resp['data']['certificate']
       priv_key = resp['data']['private_key']
     end
