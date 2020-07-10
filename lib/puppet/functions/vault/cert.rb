@@ -54,7 +54,7 @@ Puppet::Functions.create_function(:'vault::cert') do
 
   def find_cert_serial_number(params)
     # if serial_number parameter doesn't exist, try to find cert from facts based on
-    # common_name, this should give us the serial number if we can find one
+    # cert_name, this should give us the serial number if we can find one
     # FYI serial number is used to query vault API for existing certificate information.
     # We can get everything except the private key if we just have the cert's serial number
     # Vault's API doesn't allow us to lookup via common name, so Serial Number is our unique
@@ -62,8 +62,8 @@ Puppet::Functions.create_function(:'vault::cert') do
     serial_number = params['serial_number']
     unless serial_number
       Puppet.info('serial number wasnt pass in, looking it up in facts')
-      cn = params['common_name']
-      Puppet.info("common name: #{cn}")
+      cert_name = params['cert_name']
+      Puppet.info("cert_name: #{cert_name}")
       # note: closure_scope is a special Puppet method for accessing the scope of the function
       # see: https://puppet.com/docs/puppet/latest/functions_ruby_implementation.html
       # It is only able to access global variables, like facts
@@ -71,8 +71,8 @@ Puppet::Functions.create_function(:'vault::cert') do
       Puppet.info("existing cert facts: #{vault_existing_certs.to_json}")
       if vault_existing_certs
         matching_certs = vault_existing_certs.select do |_path, cert|
-          Puppet.info("comparing #{cert['common_name']} == #{cn} : #{cert['common_name'] == cn}")
-          cert['common_name'] == cn
+          Puppet.info("comparing #{cert['cert_name']} == #{cert_name} : #{cert['cert_name'] == cert_name}")
+          cert['cert_name'] == cert_name
         end
         Puppet.info("matching certs: #{matching_certs.to_json}")
         serial_number = matching_certs.values.first['serial_number'] unless matching_certs.empty?
@@ -85,10 +85,11 @@ Puppet::Functions.create_function(:'vault::cert') do
   end
 
   def cert(params)
-    common_name       = params['common_name']
+    cert_name         = params['cert_name']
     api_server        = params['api_server']
     api_token         = params['api_token']
     api_secret_role   = params['api_secret_role']
+    common_name       = params.fetch('common_name',       nil)
     alt_names         = params.fetch('alt_names',         nil)
     ip_sans           = params.fetch('ip_sans',           nil)
     api_port          = params.fetch('api_port',          8200)
@@ -145,6 +146,7 @@ Puppet::Functions.create_function(:'vault::cert') do
 
     if new_cert_needed
       Puppet.info('new cert is needed, creating one')
+      common_name ||= cert_name
       resp = client.create_cert(common_name: common_name, alt_names: alt_names,
                                 ip_sans: ip_sans, ttl: cert_ttl)
       cert = resp['data']['certificate']

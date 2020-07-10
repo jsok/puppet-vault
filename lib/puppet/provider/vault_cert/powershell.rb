@@ -96,13 +96,13 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
       serial_number = sn_th[:serial_number]
     end
 
-    # if there is an existing cert with this common name that doesn't match our
+    # if there is an existing cert with this cert_name(friendly name) that doesn't match our
     # thumbprint/serial, then destroy the old one, remove from trust store and create a new one
     if certificate_list && !certificate_list.empty? &&
        (certificate_list.size > 1 ||
         (certificate_list.first['thumbprint'] != thumbprint ||
          certificate_list.first['serial_number'] != serial_number))
-      Puppet.info("A certificate with the same common name exists, but doesn't match our thumbprint and serial number, we're going to delete these old one(s)")
+      Puppet.info("A certificate with the same cert name (FriendlyName) exists, but doesn't match our thumbprint and serial number, we're going to delete these old one(s)")
       # Revoke the old cert and remove it from the trust store
       destroy
     end
@@ -131,7 +131,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
 
     # Remove certificate from certificate store
     cmd = <<-EOF
-    $cert_list = Get-Item '#{resource[:cert_dir]}\\*' | Where-object { $_.Subject -eq 'CN=#{resource[:common_name]}' }
+    $cert_list = Get-Item '#{resource[:cert_dir]}\\*' | Where-object { $_.FriendlyName -eq '#{resource[:cert_name]}' }
     $cert_list | Remove-Item
     EOF
     res = ps(cmd)
@@ -153,7 +153,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   def certificate_list
     return @cert_list unless @cert_list.nil?
     cmd = <<-EOF
-    $certs_list = Get-Item '#{resource[:cert_dir]}\\*' | Where-object { $_.Subject -eq 'CN=#{resource[:common_name]}' }
+    $certs_list = Get-Item '#{resource[:cert_dir]}\\*' | Where-object { $_.FriendlyName -eq '#{resource[:cert_name]}' }
     if ($certs_list) {
       $data = @()
       foreach ($cert in $certs_list) {

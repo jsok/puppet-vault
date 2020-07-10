@@ -22,7 +22,9 @@ Puppet::Type.newtype(:vault_cert) do
     desc <<-EOS
       On Linux: the filename of the certificate without the directory.
       If this value doesn't contain an extension, then .crt will be appended  automatically.
-      On Windows: the friendly name of the certificate.
+      On Windows: the friendly name of the certificate. Windows uses this as the unique
+      property, so only one certificate should have this friendly name (since it's our title
+      in Puppet)
     EOS
     munge do |value|
       return value if File.extname(value)
