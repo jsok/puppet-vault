@@ -1,4 +1,5 @@
 type Vault::CertParams = Struct[{
+  cert_name         => String,
   common_name       => String,
   api_secret_role   => String,
   api_server        => String,
