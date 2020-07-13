@@ -75,6 +75,7 @@ module PuppetX::Encore::Vault
         # Add a colon every 2 characters to the returned serial number
         serial_number = serial_number.scan(%r{\w{2}}).join(':')
       end
+      Puppet.info("formatting serial number: #{serial_number}")
       serial_number
     end
 

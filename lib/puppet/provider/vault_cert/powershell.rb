@@ -72,7 +72,10 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
         (certificate_list.first['thumbprint'] != thumbprint ||
          certificate_list.first['serial_number'] != serial_number))
       Puppet.info("A certificate with the same cert name (FriendlyName) exists, but doesn't match our thumbprint and serial number, we're going to delete these old one(s)")
-      # Revoke the old cert and remove it from the trust store
+      # Note: we _could_ try to keep some certs here, but this adds a ton of additional
+      # complexity, like... which ones should we keep, what if the ones we're trying to
+      # keep is expired, revoked, etc. Easiest thing is to just revoke and remove all
+      # of the certs and make a new one.
       destroy
 
       # if we just destroyed all of the certs on the system, we need to make a new one
@@ -163,6 +166,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   end
 
   def revoke_cert_list
+    Puppet.info('revoking cert list')
     certificate_list.each { |cert| revoke_cert(serial_number: cert_serial_number(cert)) }
   end
 

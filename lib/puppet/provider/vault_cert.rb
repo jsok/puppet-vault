@@ -25,6 +25,7 @@ class Puppet::Provider::VaultCert < Puppet::Provider
 
   def revoke_cert(serial_number: nil)
     serial_number = cert_serial_number unless serial_number
+    Puppet.info("revoking cert: #{serial_number}")
     client.revoke_cert(serial_number)
   end
 
