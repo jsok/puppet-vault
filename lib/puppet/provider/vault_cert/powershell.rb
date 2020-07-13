@@ -146,10 +146,10 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
           'thumbprint' = $cert.Thumbprint;
         }
       }
-    } else {
-      $data = $null
+      # powershell is dumb and will "unbox" a single-element array and return just the elemtn
+      # we really want an array though... thanks PowerShell... 
+      ConvertTo-Json @($data)
     }
-    $data | ConvertTo-Json
     EOF
     res = ps(cmd)
     Puppet.info('parsing cert json')
