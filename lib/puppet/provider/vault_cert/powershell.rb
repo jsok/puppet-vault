@@ -20,53 +20,22 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
   ##########################
   # public methods inherited from Puppet::Provider
   def exists?
-    Puppet.info("exists? - resource: #{resource}")
-    Puppet.info("exists? - cert: #{resource[:cert]}")
-    Puppet.info("exists? - priv_key: #{resource[:priv_key]}")
     # false if the user passed in cert and private key data, this will force
     # a call to create()
-    if resource[:cert] && resource[:priv_key]
-      Puppet.info('exists? - cert and priv_key were specified')
-      return false
-    else
-      Puppet.info('exists? - cert and priv_key were NOT specified')
-    end
+    return false if resource[:cert] && resource[:priv_key]
+
+    # if we're trying to delete the cert, we simply need to check if there are certs
+    # at all, so that all of them are deleted, no sense in checking if exisintg certs
+    # are expiring/revoked when deleting certs,
+    return !certificate_list.empty? if certificate_list && resource[:ensure] == :absent
 
     # Check for the certificate existing at all
+    # if we have > 1 cert, we need to cleanup "extra" ones by returning (false) so that
+    #   create is called, so only return true if we have exactly one cert
     # Check if the certificate is expired or not
     # Check if the cert is revoked or not
-    # certificate && !check_cert_expiring && !check_cert_revoked
-    if certificate_list
-      # if we're trying to delete the cert, we simply need to check if there are certs
-      # at all, so that all of them are deleted, no sense in checking if exisintg certs
-      # are expiring/revoked when deleting certs,
-      return !certificate_list.empty? if resource[:ensure] == :absent
-
-      # if we have > 1 cert, we need to cleanup the old ones... so
-      # if we are trying to create a cert (ensure: present), we need to say the cert
-      # doesn't exist so that create() is called and the old ones are destroyed
-      if certificate_list.size > 1
-        return false
-      end
-
-      Puppet.info('exists? - certificate exists')
-      if !check_cert_expiring_list
-        Puppet.info('exists? - certificate IS NOT expiring')
-        if !check_cert_revoked_list
-          Puppet.info('exists? - certificate IS NOT revoked')
-          Puppet.info('exists? - yes, this thing really exists')
-          return true
-        else
-          Puppet.info('exists? - certificate IS revoked')
-        end
-      else
-        Puppet.info('exists? - certificate IS expiring')
-      end
-    else
-      Puppet.info('exists? - certificate doesnt exist')
-    end
-    Puppet.info('exists? - no, this thing doesnt exist')
-    false
+    (certificate_list && certificate_list.size == 1 &&
+     !check_cert_expiring_list && !check_cert_revoked_list)
   end
 
   # Create a new certificate with the vault API and save it on the filesystem
@@ -105,6 +74,14 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
       Puppet.info("A certificate with the same cert name (FriendlyName) exists, but doesn't match our thumbprint and serial number, we're going to delete these old one(s)")
       # Revoke the old cert and remove it from the trust store
       destroy
+
+      # if we just destroyed all of the certs on the system, we need to make a new one
+      # unless the cert and priv_key were given above
+      unless cert && priv_key
+        new_cert = create_cert
+        cert = new_cert['data']['certificate']
+        priv_key = new_cert['data']['private_key']
+      end
     end
 
     # can only save/import the certificate into the cert store if we have
@@ -212,9 +189,12 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     key       = OpenSSL::PKey.read(priv_key)
     x509_cert = OpenSSL::X509::Certificate.new(cert)
     name      = resource[:cert_name]
+    # PKCS12 private keys must be at least 4 characaters
     if resource[:priv_key_password] && resource[:priv_key_password].size >= 4
       password = resource[:priv_key_password]
     else
+      # PKCS12 private keys require a password, so generate a random 16 character one
+      Puppet.info("vault_cert[#{resource[:cert_name]}] was either not given a private key password or it was less than 4 characters, automatically generating a private key password for you")
       require 'securerandom'
       password = SecureRandom.alphanumeric(16)
     end
@@ -223,7 +203,6 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
 
     Puppet.info("cert data: #{cert}")
     Puppet.info("key data: #{priv_key}")
-    Puppet.info("Der data: #{pkcs12_der} ")
 
     file = Tempfile.new(resource[:cert_name])
     begin
