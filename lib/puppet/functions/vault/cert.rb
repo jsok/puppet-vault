@@ -156,9 +156,9 @@ Puppet::Functions.create_function(:'vault::cert') do
     thumbprint = nil
     cert_serial_number = nil
     if cert
-      sn_th = PuppetX::Encore::Vault::Util.cert_sn_thumbprint(cert)
-      thumbprint = sn_th[:thumbprint]
-      cert_serial_number = sn_th[:serial_number]
+      details = PuppetX::Encore::Vault::Util.cert_details(cert)
+      thumbprint = details[:thumbprint]
+      cert_serial_number = details[:serial_number]
       Puppet.info("computed new cert serial: #{cert_serial_number}")
     end
 

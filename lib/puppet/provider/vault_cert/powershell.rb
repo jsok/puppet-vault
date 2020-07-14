@@ -60,9 +60,9 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     serial_number = nil
     if cert
       Puppet.info("computed new cert serial: #{serial_number}")
-      sn_th = PuppetX::Encore::Vault::Util.cert_sn_thumbprint(cert)
-      thumbprint = sn_th[:thumbprint]
-      serial_number = sn_th[:serial_number]
+      details = PuppetX::Encore::Vault::Util.cert_details(cert)
+      thumbprint = details[:thumbprint]
+      serial_number = details[:serial_number]
     end
 
     # if there is an existing cert with this cert_name(friendly name) that doesn't match our

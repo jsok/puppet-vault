@@ -6,11 +6,15 @@ module PuppetX::Encore; end
 module PuppetX::Encore::Vault
   # Utilities for vault and certificates
   class Util
-    def self.cert_sn_thumbprint(cert)
+    def self.cert_details(cert)
       x509_cert = OpenSSL::X509::Certificate.new(cert)
       {
         thumbprint: OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase,
         serial_number: x509_cert.serial.to_s(16),
+        common_name: x509_cert.subject.to_a.find { |name, _, _| name == 'CN' }[1],
+        not_after: x509_cert.not_after.iso8601,
+        not_before: x509_cert.not_before.iso8601,
+        subject: x509_cert.subject,
       }
     end
 
