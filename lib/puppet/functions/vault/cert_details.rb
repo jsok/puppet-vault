@@ -13,12 +13,12 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'pu
 Puppet::Functions.create_function(:'vault::cert_details') do
   # @param cert A Base64 encoded certificate string (pem, crt, etc)
   # @return A hash containing details about the certificate
-  dispatch :cert do
+  dispatch :cert_details do
     required_param 'String', :cert
     return_type 'Vault::CertDetails'
   end
 
-  def cert(cert)
+  def cert_details(cert)
     details = PuppetX::Encore::Vault::Util.cert_details(cert)
     # convert keys from symbols to strings
     details.map { |k, v| [k.to_s, v] }.to_h
