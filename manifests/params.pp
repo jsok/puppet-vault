@@ -57,6 +57,17 @@ class vault::params {
       $manage_service_file = undef
     }
   }
+  case $facts['os']['family'] {
+    'RedHat': {
+      $cert_dir            = '/etc/pki/tls/certs'
+      $priv_key_dir        = '/etc/pki/tls/private'
+    }
+    default: {
+      $cert_dir            = '/etc/ssl/certs'
+      $priv_key_dir        = '/etc/ssl/private'
+    }
+  }
+
   $os = downcase($facts['kernel'])
 
   ## Default root CA role options

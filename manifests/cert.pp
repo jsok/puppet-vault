@@ -31,6 +31,8 @@ define vault::cert (
   Boolean $manage_files             = true,
   Optional[Integer] $regenerate_ttl = undef,
 ) {
+  include vault::params
+
   vault_cert { $title:
     ensure            => $ensure,
     common_name       => $common_name,
@@ -44,25 +46,36 @@ define vault::cert (
     api_token         => $api_token,
     cert              => $cert,
     cert_name         => $cert_name,
-    cert_dir          => $cert_dir,
+    cert_dir          => $vault_priv_key_dir,
     cert_ttl          => $cert_ttl,
     priv_key          => $priv_key,
     priv_key_name     => $priv_key_name,
-    priv_key_dir      => $priv_key_dir,
+    priv_key_dir      => $vault_priv_key_dir,
     regenerate_ttl    => $regenerate_ttl,
   }
 
   if $manage_files and $facts['os']['family'] != 'windows' {
-    file { Vault_cert[$title]['cert_path']:
+    $vault_cert_dir = pick($cert_dir, $vault::params::cert_dir)
+    $vault_cert_path = stdlib::extname($cert_name) ? {
+      ''      => "${vault_cert_dir}/${cert_name}.crt",
+      default => "${vault_cert_dir}/${cert_name}",
+    }
+
+    $vault_priv_key_dir = pick($cert_dir, $vault::params::priv_key_dir)
+    $vault_priv_key_file = pick($priv_key_name, "${basename($cert_name)}.key")
+    $vault_priv_key_path = "${vault_priv_key_dir}/${vault_priv_key_file}"
+
+    file { $vault_cert_path:
       ensure    => $ensure,
       owner     => $cert_owner,
       group     => $cert_group,
       mode      => $cert_mode,
       subscribe => Vault_cert[$title],
     }
+
     $_priv_key_owner = pick($priv_key_owner, $cert_owner)
     $_priv_key_group = pick($priv_key_group, $cert_owner)
-    file { Vault_cert[$title]['priv_key_path']:
+    file { $vault_priv_key_path:
       ensure    => $ensure,
       owner     => $_priv_key_owner,
       group     => $_priv_key_group,
