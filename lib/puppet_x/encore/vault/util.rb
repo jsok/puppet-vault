@@ -14,7 +14,7 @@ module PuppetX::Encore::Vault
         common_name: x509_cert.subject.to_a.find { |name, _, _| name == 'CN' }[1],
         not_after: x509_cert.not_after.iso8601,
         not_before: x509_cert.not_before.iso8601,
-        subject: x509_cert.subject,
+        subject: x509_cert.subject.to_s,
       }
     end
 

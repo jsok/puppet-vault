@@ -33,7 +33,7 @@ Facter.add(:vault_existing_certs) do
             'not_before' => cert.not_before.iso8601,
             'path' => cert_path,
             'serial_number' => cert.serial.to_s(16),
-            'subject' => cert.subject,
+            'subject' => cert.subject.to_s,
             # do not compute thumbprint on Linux because it's expensive
             # only needed on Windows anyways
             # 'thumbprint' => OpenSSL::Digest::SHA1.new(x509_cert.to_der).to_s.upcase,
