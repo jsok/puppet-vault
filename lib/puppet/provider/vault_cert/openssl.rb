@@ -10,7 +10,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'vault_cert'))
 #   - Request a new cert with the Vault API
 #   - Save the new cert in the given path on the filesystem
 
-Puppet::Type.type(:vault_cert).provide(:openssl) do
+Puppet::Type.type(:vault_cert).provide(:openssl, parent: Puppet::Provider::VaultCert) do
   desc 'Manages a certificates from HashiCorp Vault OpenSSL'
 
   commands openssl: 'openssl'
