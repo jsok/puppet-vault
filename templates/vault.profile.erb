@@ -2,7 +2,7 @@
 
 ## Set vault URI address
 if [[ -z $VAULT_ADDR ]]; then
-  export VAULT_ADDR="http://127.0.0.1:<%= scope['vault::vault_port'] -%>"
+  export VAULT_ADDR="http://127.0.0.1:<%= scope['vault::port'] -%>"
 fi
 
 ## Add bin directory to PATH environment
