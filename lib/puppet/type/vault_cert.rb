@@ -27,7 +27,8 @@ Puppet::Type.newtype(:vault_cert) do
       in Puppet)
     EOS
     munge do |value|
-      return value if File.extname(value)
+      extname = File.extname(value)
+      return value if extname && !extname.empty?
       value += '.crt' if Facter.value('kernel').casecmp?('linux')
       value
     end
@@ -143,7 +144,8 @@ Puppet::Type.newtype(:vault_cert) do
       File.basename(@resource[:cert_name], extension) + '.key'
     end
     munge do |value|
-      return value if File.extname(value)
+      extname = File.extname(value)
+      return value if extname && !extname.empty?
       value += if Facter.value('kernel').casecmp?('linux')
                  '.key'
                end

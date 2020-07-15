@@ -58,6 +58,7 @@ define vault::cert (
     $vault_cert_dir = pick($cert_dir, $vault::params::cert_dir)
     $vault_cert_path = stdlib::extname($cert_name) ? {
       ''      => "${vault_cert_dir}/${cert_name}.crt",
+      undef   => "${vault_cert_dir}/${cert_name}.crt",
       default => "${vault_cert_dir}/${cert_name}",
     }
 
