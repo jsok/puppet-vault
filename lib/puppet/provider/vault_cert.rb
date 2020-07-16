@@ -8,11 +8,14 @@ class Puppet::Provider::VaultCert < Puppet::Provider
 
   def client
     @client ||= PuppetX::Encore::Vault::Client.new(api_server: resource[:api_server],
-                                                   api_token:  resource[:api_token],
                                                    api_port: resource[:api_port],
                                                    api_scheme: resource[:api_scheme],
                                                    api_secret_engine: resource[:api_secret_engine],
-                                                   api_secret_role: resource[:api_secret_role])
+                                                   api_secret_role: resource[:api_secret_role],
+                                                   api_auth_method: resource[:api_auth_method],
+                                                   api_auth_path: resource[:api_auth_path],
+                                                   api_auth_token: resource[:api_auth_token],
+                                                   api_auth_parameters: resource[:api_auth_parameters])
     @client
   end
 
@@ -25,7 +28,7 @@ class Puppet::Provider::VaultCert < Puppet::Provider
 
   def revoke_cert(serial_number: nil)
     serial_number = cert_serial_number unless serial_number
-    Puppet.info("revoking cert: #{serial_number}")
+    Puppet.debug("revoking cert: #{serial_number}")
     client.revoke_cert(serial_number)
   end
 

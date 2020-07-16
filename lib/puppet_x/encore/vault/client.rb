@@ -9,26 +9,52 @@ module PuppetX::Encore::Vault
   # Abstraction of the HashiCorp Vault API
   class Client
     def initialize(api_server:,
-                   api_token:,
                    api_secret_role:,
                    api_port: 8200,
                    api_scheme: 'https',
                    api_secret_engine: '/pki',
+                   api_auth_method: 'token',
+                   api_auth_path: nil,
+                   api_auth_token: nil,
+                   api_auth_parameters: {},
                    ssl_verify: OpenSSL::SSL::VERIFY_NONE,
                    redirect_limit: 10,
                    headers: {})
       @api_server = api_server
-      @api_token = api_token
       @api_port = api_port
       @api_scheme = api_scheme
       @api_secret_role = api_secret_role
       @api_secret_engine = api_secret_engine
+      @api_auth_token = api_auth_token
+      @api_auth_method = api_auth_method
+      @api_auth_path = api_auth_path || "#{api_auth_method}/"
+      @api_auth_parameters = api_auth_parameters
       @api_url = "#{@api_scheme}://#{@api_server}:#{@api_port}"
       @ssl_verify = ssl_verify
       @redirect_limit = redirect_limit
+
+      # only need to auth if we dont have a token already
+      authenticate unless @api_auth_token
+
       # add our auth token into the header, unless it was passed in,
       # then use the one from the passed in headers
-      @headers = { 'X-Vault-Token' => @api_token }.merge(headers)
+      @headers = { 'X-Vault-Token' => @api_auth_token }.merge(headers)
+    end
+
+    def authenticate
+      # default path + payload/parameters for most auth methods
+      path = '/v1/auth/' + @api_auth_path + 'login'
+      payload = @api_auth_parameters
+
+      # make any modifications to the path or parameters that are unique to the auth method
+      case @api_auth_method
+      when 'ldap', 'okta', 'userpass'
+        path += '/' + @api_auth_parameters['username']
+      when 'oci'
+        path += '/' + @api_auth_parameters['role']
+      end
+      response = post(path, body: payload, headers: {})
+      @api_auth_token = response['auth']['client_token']
     end
 
     def create_cert(common_name:,
@@ -75,7 +101,6 @@ module PuppetX::Encore::Vault
         # Add a colon every 2 characters to the returned serial number
         serial_number = serial_number.scan(%r{\w{2}}).join(':')
       end
-      Puppet.info("formatting serial number: #{serial_number}")
       serial_number
     end
 
@@ -90,6 +115,7 @@ module PuppetX::Encore::Vault
                 redirect_limit: @redirect_limit)
       raise ArgumentError, 'HTTP redirect too deep' if redirect_limit.zero?
 
+      puts headers
       # setup our HTTP class
       uri = URI.parse(url)
       http = Net::HTTP.new(uri.host, uri.port)

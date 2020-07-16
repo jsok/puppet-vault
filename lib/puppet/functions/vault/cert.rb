@@ -61,24 +61,24 @@ Puppet::Functions.create_function(:'vault::cert') do
     # ID we use for querying.
     serial_number = params['serial_number']
     unless serial_number
-      Puppet.info('serial number wasnt pass in, looking it up in facts')
+      Puppet.debug('serial number wasnt pass in, looking it up in facts')
       cert_name = params['cert_name']
-      Puppet.info("cert_name: #{cert_name}")
+      Puppet.debug("cert_name: #{cert_name}")
       # note: closure_scope is a special Puppet method for accessing the scope of the function
       # see: https://puppet.com/docs/puppet/latest/functions_ruby_implementation.html
       # It is only able to access global variables, like facts
       vault_existing_certs = closure_scope['facts']['vault_existing_certs']
-      Puppet.info("existing cert facts: #{vault_existing_certs.to_json}")
+      Puppet.debug("existing cert facts: #{vault_existing_certs.to_json}")
       if vault_existing_certs
         matching_certs = vault_existing_certs.select do |_path, cert|
-          Puppet.info("comparing #{cert['cert_name']} == #{cert_name} : #{cert['cert_name'] == cert_name}")
+          Puppet.debug("comparing #{cert['cert_name']} == #{cert_name} : #{cert['cert_name'] == cert_name}")
           cert['cert_name'] == cert_name
         end
-        Puppet.info("matching certs: #{matching_certs.to_json}")
+        Puppet.debug("matching certs: #{matching_certs.to_json}")
         serial_number = matching_certs.values.first['serial_number'] unless matching_certs.empty?
-        Puppet.info("found existing serial number = #{serial_number}")
+        Puppet.debug("found existing serial number = #{serial_number}")
       else
-        Puppet.info("couldn't find existing cert facts")
+        Puppet.debug("couldn't find existing cert facts")
       end
     end
     serial_number
@@ -87,11 +87,14 @@ Puppet::Functions.create_function(:'vault::cert') do
   def cert(params)
     cert_name         = params['cert_name']
     api_server        = params['api_server']
-    api_token         = params['api_token']
     api_secret_role   = params['api_secret_role']
     common_name       = params.fetch('common_name',       nil)
     alt_names         = params.fetch('alt_names',         nil)
     ip_sans           = params.fetch('ip_sans',           nil)
+    api_auth_method     = params.fetch('api_auth_method', nil)
+    api_auth_parameters = params.fetch('api_auth_parameters', nil)
+    api_auth_path       = params.fetch('api_auth_path', nil)
+    api_auth_token      = params.fetch('api_auth_token', nil)
     api_port          = params.fetch('api_port',          8200)
     api_scheme        = params.fetch('api_scheme',        'https')
     api_secret_engine = params.fetch('api_secret_engine', '/pki')
@@ -99,25 +102,28 @@ Puppet::Functions.create_function(:'vault::cert') do
     regenerate_ttl    = params.fetch('regenerate_ttl',    3)
     serial_number     = find_cert_serial_number(params)
     client = PuppetX::Encore::Vault::Client.new(api_server: api_server,
-                                                api_token: api_token,
                                                 api_port: api_port,
                                                 api_scheme: api_scheme,
                                                 api_secret_engine: api_secret_engine,
-                                                api_secret_role: api_secret_role)
+                                                api_secret_role: api_secret_role,
+                                                api_auth_method: api_auth_method,
+                                                api_auth_path: api_auth_path,
+                                                api_auth_token: api_auth_token,
+                                                api_auth_parameters: api_auth_parameters)
 
     data = nil
     if serial_number
-      Puppet.info("using serial number = #{serial_number}")
+      Puppet.debug("using serial number = #{serial_number}")
       begin
         resp = client.read_cert(serial_number)
         data = resp['data']
-        Puppet.info("read in cert from vault = #{data.to_json}")
+        Puppet.debug("read in cert from vault = #{data.to_json}")
       rescue Net::HTTPNotFound, Net::HTTPServerException => e
         # HTTP 404 Not Found
         # if the cert doesn't exist by that serial number, then a 404 (Not Found)
         # error will be thrown, this means we need to create a new cert
-        Puppet.info("caught generic server exception with code: #{e.response.code}")
-        Puppet.info("caught generic server exception with code class: #{e.response.code.class.name}")
+        Puppet.debug("caught generic server exception with code: #{e.response.code}")
+        Puppet.debug("caught generic server exception with code class: #{e.response.code.class.name}")
         unless e.response.code == '404'
           raise e
         end
@@ -129,10 +135,10 @@ Puppet::Functions.create_function(:'vault::cert') do
     priv_key = nil
     new_cert_needed = true
     if data
-      Puppet.info('checking existing cert to see if it needs refreshed')
+      Puppet.debug('checking existing cert to see if it needs refreshed')
       if data['revocation_time'] && data['revocation_time'] > 0
         # the cert is revoked, need a new one
-        Puppet.info("the cert is revoked, need a new one: #{data['revocation_time']}")
+        Puppet.debug("the cert is revoked, need a new one: #{data['revocation_time']}")
         new_cert_needed = true
       elsif data['certificate']
         # check if the cert is expired
@@ -145,7 +151,7 @@ Puppet::Functions.create_function(:'vault::cert') do
     end
 
     if new_cert_needed
-      Puppet.info('new cert is needed, creating one')
+      Puppet.debug('new cert is needed, creating one')
       common_name ||= cert_name
       resp = client.create_cert(common_name: common_name, alt_names: alt_names,
                                 ip_sans: ip_sans, ttl: cert_ttl)
@@ -159,7 +165,7 @@ Puppet::Functions.create_function(:'vault::cert') do
       details = PuppetX::Encore::Vault::Util.cert_details(cert)
       thumbprint = details[:thumbprint]
       cert_serial_number = details[:serial_number]
-      Puppet.info("computed new cert serial: #{cert_serial_number}")
+      Puppet.debug("computed new cert serial: #{cert_serial_number}")
     end
 
     {

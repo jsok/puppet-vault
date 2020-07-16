@@ -237,10 +237,6 @@ Puppet::Type.newtype(:vault_cert) do
     defaultto(8200)
   end
 
-  newparam(:api_token) do
-    desc 'API token used to authenticate with Vault'
-  end
-
   newparam(:api_secret_engine) do
     desc 'Path to the PKI secrets engine'
     defaultto('/pki')
@@ -248,5 +244,57 @@ Puppet::Type.newtype(:vault_cert) do
 
   newparam(:api_secret_role) do
     desc 'Name of the role that the new cert belongs to'
+  end
+
+  newparam(:api_auth_method) do
+    desc <<-EOS
+      Authentication method to use when communicating with the Vault API, see
+      https://www.vaultproject.io/api-docs/auth
+      Currently all auth methods are supported. The auth method name is the name
+      in the API docs in the /auth/<method> URL.
+      If your auth method is mounted to a different path you can change this with
+      api_auth_path.
+      All auth methods, except 'token', require you to pass in api_auth_parameters.
+      For the 'token' auth method please specify api_auth_token.
+    EOS
+    defaultto('token')
+  end
+
+  newparam(:api_auth_path) do
+    desc <<-EOS
+      If you have mounted your auth backend to a different path, specify this here.
+      Please include a trailing '/' in this path.
+      The URL for the authentication endpoint is: /v1/auth/<path>login
+    EOS
+    defaultto do
+      return @resource[:api_auth_method] + '/'
+    end
+    munge do |value|
+      value += '/' unless value[-1] == '/'
+      value
+    end
+  end
+
+  newparam(:api_auth_token) do
+    desc 'If using the "token" api_auth_method, this should be the Vault API auth token'
+  end
+
+  newparam(:api_auth_parameters) do
+    desc <<-EOS
+      Hash of parameters to use when performing the login operation using the auth method
+      on the Vault API.
+      These can be determined by looking at the Vault API docs for the /v1/auth/<method>/login
+      API call. Parameters in those tables should be specified. These will be included in the
+      body of the API request.
+      Note: some auth methods suck as 'ldap', 'okta', 'oci' and 'userpass' utilize a
+      'username' or 'role' parameter that is actually part of the URL. Don't worry, we handl
+      that correctly, simply pass those parameters in this hash and we'll put them in the URL
+      for you
+    EOS
+    validate do |value|
+      unless value.is_a?(Hash)
+        raise ArgumentError, "api_auth_parameters is expected to be a Hash, given: #{value.class.name}"
+      end
+    end
   end
 end

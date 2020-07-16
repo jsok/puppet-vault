@@ -40,17 +40,17 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
 
   # Create a new certificate with the vault API and save it on the filesystem
   def create
-    Puppet.info('creating')
+    Puppet.debug('creating')
 
     # don't check priv_key here because priv_key isnt looked up via facts
     if resource[:cert]
-      Puppet.info('creating from exising cert')
+      Puppet.debug('creating from exising cert')
       # user passed in the certificate data for us, use this
       cert = resource[:cert]
       priv_key = resource[:priv_key]
     else
       # create a new cert via Vault API
-      Puppet.info('creating from new cert from vault')
+      Puppet.debug('creating from new cert from vault')
       new_cert = create_cert
       cert = new_cert['data']['certificate']
       priv_key = new_cert['data']['private_key']
@@ -59,7 +59,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     thumbprint = nil
     serial_number = nil
     if cert
-      Puppet.info("computed new cert serial: #{serial_number}")
+      Puppet.debug("computed new cert serial: #{serial_number}")
       details = PuppetX::Encore::Vault::Util.cert_details(cert)
       thumbprint = details[:thumbprint]
       serial_number = details[:serial_number]
@@ -71,7 +71,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
        (certificate_list.size > 1 ||
         (certificate_list.first['thumbprint'] != thumbprint ||
          certificate_list.first['serial_number'] != serial_number))
-      Puppet.info("A certificate with the same cert name (FriendlyName) exists, but doesn't match our thumbprint and serial number, we're going to delete these old one(s)")
+      Puppet.debug("A certificate with the same cert name (FriendlyName) exists, but doesn't match our thumbprint and serial number, we're going to delete these old one(s)")
       # Note: we _could_ try to keep some certs here, but this adds a ton of additional
       # complexity, like... which ones should we keep, what if the ones we're trying to
       # keep is expired, revoked, etc. Easiest thing is to just revoke and remove all
@@ -94,18 +94,18 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     # this way we can check on exist certs without overwriting them
     if cert
       if priv_key
-        Puppet.info('saving client cert to cert store')
+        Puppet.debug('saving client cert to cert store')
         client_cert_save(cert, priv_key)
       else
-        Puppet.info('not saving client cert because only have cert and not priv key')
+        Puppet.debug('not saving client cert because only have cert and not priv key')
       end
     else
-      Puppet.info('not saving client cert because cert and priv_key are both nil')
+      Puppet.debug('not saving client cert because cert and priv_key are both nil')
     end
   end
 
   def destroy
-    Puppet.info('Destroying')
+    Puppet.debug('Destroying')
     # Revoke the cert in Vault
     revoke_cert_list
 
@@ -115,9 +115,9 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     $cert_list | Remove-Item
     EOF
     res = ps(cmd)
-    Puppet.info("Deleted cert exitcode: #{res[:exitcode]} ")
-    Puppet.info("Deleted cert stdout: #{res[:stdout]} ")
-    Puppet.info("Deleted cert stderr: #{res[:stderr]} ")
+    Puppet.debug("Deleted cert exitcode: #{res[:exitcode]} ")
+    Puppet.debug("Deleted cert stdout: #{res[:stdout]} ")
+    Puppet.debug("Deleted cert stderr: #{res[:stderr]} ")
   end
 
   #########################
@@ -152,8 +152,8 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     }
     EOF
     res = ps(cmd)
-    Puppet.info('parsing cert json')
-    Puppet.info("got output: #{res}")
+    Puppet.debug('parsing cert json')
+    Puppet.debug("got output: #{res}")
     # add to check for truthy stdout because, if the cert doesn't exist the output
     # could be nil / empty string
     @cert_list = if res[:exitcode].zero? && res[:stdout]
@@ -161,12 +161,12 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
                  else
                    false
                  end
-    Puppet.info("finished getting cert list: #{@cert_list}")
+    Puppet.debug("finished getting cert list: #{@cert_list}")
     @cert_list
   end
 
   def revoke_cert_list
-    Puppet.info('revoking cert list')
+    Puppet.debug('revoking cert list')
     certificate_list.each { |cert| revoke_cert(serial_number: cert_serial_number(cert)) }
   end
 
@@ -189,7 +189,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
 
   # Save the certificate and private key on the client server
   def client_cert_save(cert, priv_key)
-    Puppet.info('saving cert')
+    Puppet.debug('saving cert')
     key       = OpenSSL::PKey.read(priv_key)
     x509_cert = OpenSSL::X509::Certificate.new(cert)
     name      = resource[:cert_name]
@@ -198,15 +198,14 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
       password = resource[:priv_key_password]
     else
       # PKCS12 private keys require a password, so generate a random 16 character one
-      Puppet.info("vault_cert[#{resource[:cert_name]}] was either not given a private key password or it was less than 4 characters, automatically generating a private key password for you")
+      Puppet.debug("vault_cert[#{resource[:cert_name]}] was either not given a private key password or it was less than 4 characters, automatically generating a private key password for you")
       require 'securerandom'
       password = SecureRandom.alphanumeric(16)
     end
     pkcs12 = OpenSSL::PKCS12.create(password, name, key, x509_cert)
     pkcs12_der = pkcs12.to_der
 
-    Puppet.info("cert data: #{cert}")
-    Puppet.info("key data: #{priv_key}")
+    Puppet.debug("cert data: #{cert}")
 
     file = Tempfile.new(resource[:cert_name])
     begin
@@ -220,9 +219,9 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
       Import-PfxCertificate -FilePath '#{file.path}' -CertStoreLocation '#{resource[:cert_dir]}' -Password $password
       EOF
       res = ps(cmd)
-      Puppet.info("Imported cert exitcode: #{res[:exitcode]} ")
-      Puppet.info("Imported cert stdout: #{res[:stdout]} ")
-      Puppet.info("Imported cert stderr: #{res[:stderr]} ")
+      Puppet.debug("Imported cert exitcode: #{res[:exitcode]} ")
+      Puppet.debug("Imported cert stdout: #{res[:stdout]} ")
+      Puppet.debug("Imported cert stderr: #{res[:stderr]} ")
     ensure
       file.close
       file.unlink
