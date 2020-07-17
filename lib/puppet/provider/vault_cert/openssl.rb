@@ -13,6 +13,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'vault_cert'))
 Puppet::Type.type(:vault_cert).provide(:openssl, parent: Puppet::Provider::VaultCert) do
   desc 'Manages a certificates from HashiCorp Vault OpenSSL'
 
+  confine kernel: 'Linux'
   commands openssl: 'openssl'
 
   ##########################

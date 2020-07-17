@@ -15,6 +15,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'pu
 Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::VaultCert) do
   desc 'Manages a certificates from HashiCorp Vault OpenSSL'
 
+  confine kernel: 'windows'
   commands powershell: 'powershell.exe'
 
   ##########################
