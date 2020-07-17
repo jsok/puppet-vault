@@ -39,10 +39,10 @@ class vault::params {
   $service_provider = $facts['service_provider']
 
   case $facts['architecture'] {
-    /(x86_64|amd64)/: { $arch = 'amd64' }
-    'i386':           { $arch = '386'   }
-    /^arm.*/:         { $arch = 'arm'   }
-    default:          { fail("Unsupported kernel architecture: ${facts['architecture']}") }
+    /(x86_64|amd64|x64)/: { $arch = 'amd64' }
+    /(i386|x86)/:         { $arch = '386'   }
+    /^arm.*/:             { $arch = 'arm'   }
+    default: { fail("Unsupported kernel architecture: ${facts['architecture']}") }
   }
 
   case $facts['os']['family'] {
