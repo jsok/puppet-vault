@@ -115,7 +115,6 @@ module PuppetX::Encore::Vault
                 redirect_limit: @redirect_limit)
       raise ArgumentError, 'HTTP redirect too deep' if redirect_limit.zero?
 
-      puts headers
       # setup our HTTP class
       uri = URI.parse(url)
       http = Net::HTTP.new(uri.host, uri.port)
