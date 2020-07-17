@@ -148,7 +148,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
         }
       }
       # powershell is dumb and will "unbox" a single-element array and return just the elemtn
-      # we really want an array though... thanks PowerShell... 
+      # we really want an array though... thanks PowerShell...
       ConvertTo-Json @($data)
     }
     EOF

@@ -44,8 +44,9 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'pu
 #
 Puppet::Functions.create_function(:'vault::cert') do
   # @param TODO
-  # @param serial_number Certificate serial number. Format: should be a string of hexadecimal numbers with a colon ':' every 2 characters (to separate the hex digits). You can get this by doing: openssl -text -noout -in mycert.crt
-  #
+  # @param serial_number Certificate serial number. Format: should be a string
+  #   of hexadecimal numbers with a colon ':' every 2 characters (to separate the hex digits).
+  #   You can get this by doing: openssl -text -noout -in mycert.crt
   # @return The cert TODO
   dispatch :cert do
     required_param 'Vault::CertParams', :params
