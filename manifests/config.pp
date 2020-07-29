@@ -4,30 +4,9 @@
 #
 class vault::config {
 
-  if $vault::consul_url == undef {
-    $_storage_hash = {
-      file => {
-        path => "${vault::install_dir}/data",
-      },
-    }
-    file { "${vault::install_dir}/data":
-      ensure => directory,
-      owner  => $vault::user,
-      group  => $vault::group,
-      mode   => $vault::config_mode,
-    }
-  } else {
-    $_storage_hash = {
-      consul => {
-        address => "${vault::consul_url}:${vault::consul_port}",
-        path    => 'vault',
-      },
-    }
-  }
-
   $_config_hash = delete_undef_values({
     'listener'          => $vault::listener,
-    'storage'           => pick($vault::storage, $_storage_hash),
+    'storage'           => $vault::storage,
     'ha_storage'        => $vault::ha_storage,
     'seal'              => $vault::seal,
     'telemetry'         => $vault::telemetry,
@@ -60,7 +39,7 @@ class vault::config {
   # and writable by the vault user, if we have a file path and the
   # manage_storage_dir attribute is true, then we create it here.
   #
-  if $vault::storage != undef and $vault::manage_storage_dir {
+  if $vault::storage and $vault::storage['file'] and $vault::manage_storage_dir {
     if ! $vault::storage['file']['path'] {
       fail('Must provide a path attribute to storage file')
     }

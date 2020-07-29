@@ -4,9 +4,12 @@
 # It sets variables according to platform.
 #
 class vault::params {
+  $install_dir        = '/opt/vault'
   $num_procs          = $facts['processorcount']
   $ip_address         = $facts['networking']['ip']
   $vault_port         = '8200'
+  $storage            = { 'file' => { 'path' => '/var/lib/vault' }}
+  $manage_storage_dir = false
 
   $listener = [
     {
@@ -71,7 +74,7 @@ class vault::params {
   $os = downcase($facts['kernel'])
 
   ## Default root CA role options
-  $_root_ca_options = {
+  $root_ca_options = {
     'allow_any_name'        => true,
     'allow_bare_domains'    => true,
     'allow_glob_domains'    => true,
@@ -82,8 +85,6 @@ class vault::params {
     'key_type'              => 'ec',
     'max_ttl'               => '8760h',
   }
-
-  $final_root_ca_options = merge($_root_ca_options, $vault::root_ca_options)
 
   ## These are default vault policies to limit users within vault.
   $default_policies = {

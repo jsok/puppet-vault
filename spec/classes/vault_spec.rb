@@ -364,7 +364,7 @@ describe 'vault' do
                   service_options: '-log-level=info',
                   user: 'root',
                   group: 'admin',
-                  num_procs: '5',
+                  num_procs: 5,
                 }
               end
 
@@ -476,7 +476,7 @@ describe 'vault' do
                   service_options: '-log-level=info',
                   user: 'root',
                   group: 'admin',
-                  num_procs: '5',
+                  num_procs: 5,
                 }
               end
 
@@ -741,10 +741,14 @@ describe 'vault' do
               }
             end
 
-            it { is_expected.to contain_file('vault_binary').with_path('/opt/bin/vault') }
+            it { is_expected.to contain_file('vault_binary').with_path('/opt/vault/bin/vault') }
+            it { is_expected.to contain_file('vault_binary_link')
+                                  .with_ensure('link')
+                                  .with_path('/opt/bin/vault')
+                                  .with_target('/opt/vault/bin/vault') }
             it {
               is_expected.to contain_file_capability('vault_binary_capability')
-                .with_file('/opt/bin/vault')
+                .with_file('/opt/vault/bin/vault')
             }
 
             it { is_expected.to contain_file('/opt/etc/vault/config.json') }
@@ -955,7 +959,10 @@ describe 'vault' do
         end
       when 'Archlinux'
         context 'defaults to repo install' do
-          it { is_expected.to contain_file('vault_binary').with_path('/bin/vault') }
+          it { is_expected.to contain_file('vault_binary').with_path('/opt/vault/bin/vault') }
+            it { is_expected.to contain_file('vault_binary_link')
+                                  .with_path('/bin/vault')
+                                  .with_target('/opt/vault/bin/vault') }
           it { is_expected.not_to contain_file_capability('vault_binary_capability') }
         end
       end
