@@ -64,8 +64,9 @@ class vault::install {
     mode  => '0755',
   }
 
-  file { "${vault::bin_dir}/vault":
+  file { 'vault_binary_link':
     ensure => link,
+    path   => "${vault::bin_dir}/vault",
     target => $vault_bin,
   }
 

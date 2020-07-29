@@ -4,9 +4,12 @@
 # It sets variables according to platform.
 #
 class vault::params {
+  $install_dir        = '/opt/vault'
   $num_procs          = $facts['processorcount']
   $ip_address         = $facts['networking']['ip']
   $vault_port         = '8200'
+  $storage            = { 'file' => { 'path' => '/var/lib/vault' }}
+  $manage_storage_dir = false
 
   $listener = [
     {
@@ -39,10 +42,10 @@ class vault::params {
   $service_provider = $facts['service_provider']
 
   case $facts['architecture'] {
-    /(x86_64|amd64)/: { $arch = 'amd64' }
-    'i386':           { $arch = '386'   }
-    /^arm.*/:         { $arch = 'arm'   }
-    default:          { fail("Unsupported kernel architecture: ${facts['architecture']}") }
+    /(x86_64|amd64|x64)/: { $arch = 'amd64' }
+    /(i386|x86)/:         { $arch = '386'   }
+    /^arm.*/:             { $arch = 'arm'   }
+    default: { fail("Unsupported kernel architecture: ${facts['architecture']}") }
   }
 
   case $facts['os']['family'] {
@@ -57,10 +60,21 @@ class vault::params {
       $manage_service_file = undef
     }
   }
+  case $facts['os']['family'] {
+    'RedHat': {
+      $cert_dir            = '/etc/pki/tls/certs'
+      $priv_key_dir        = '/etc/pki/tls/private'
+    }
+    default: {
+      $cert_dir            = '/etc/ssl/certs'
+      $priv_key_dir        = '/etc/ssl/private'
+    }
+  }
+
   $os = downcase($facts['kernel'])
 
   ## Default root CA role options
-  $_root_ca_options = {
+  $root_ca_options = {
     'allow_any_name'        => true,
     'allow_bare_domains'    => true,
     'allow_glob_domains'    => true,
@@ -71,8 +85,6 @@ class vault::params {
     'key_type'              => 'ec',
     'max_ttl'               => '8760h',
   }
-
-  $final_root_ca_options = merge($_root_ca_options, $vault::root_ca_options)
 
   ## These are default vault policies to limit users within vault.
   $default_policies = {

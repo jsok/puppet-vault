@@ -113,8 +113,6 @@ class vault (
   String                     $bin_dir                   = $vault::params::bin_dir,
   String                     $config_dir                = '/etc/vault',
   String                     $config_mode               = '0750',
-  Optional[String]           $consul_port               = '8500',
-  Optional[String]           $consul_url                = undef,
   Optional[String]           $default_lease_ttl         = $vault::params::default_lease_ttl,
   Optional[Boolean]          $disable_cache             = $vault::params::disable_cache,
   Optional[Boolean]          $disable_mlock             = $vault::params::disable_mlock,
@@ -131,7 +129,7 @@ class vault (
   Optional[Hash]             $extra_config              = {},
   String                     $group                     = 'vault',
   Optional[Hash]             $ha_storage                = $vault::params::ha_storage,
-  Optional[Boolean]          $initialize_vault          = false,
+  Optional[Boolean]          $initialize_vault          = undef,
   String                     $install_dir               = '/opt/vault',
   String                     $install_method            = $vault::params::install_method,
   Optional[Hash]             $int_ca_config             = undef,
@@ -144,7 +142,7 @@ class vault (
   Boolean                    $manage_group              = true,
   Optional[Boolean]          $manage_service_file       = $vault::params::manage_service_file,
   Boolean                    $manage_service            = true,
-  Boolean                    $manage_storage_dir        = true,
+  Boolean                    $manage_storage_dir        = $vault::params::manage_storage_dir,
   Boolean                    $manage_user               = true,
   Optional[String]           $max_lease_ttl             = $vault::params::max_lease_ttl,
   Integer                    $min_keys                  = 2,
@@ -162,7 +160,7 @@ class vault (
   String                     $service_name              = 'vault',
   Optional[String]           $service_options           = undef,
   String                     $service_provider          = $vault::params::service_provider,
-  Optional[Hash]             $storage                   = undef,
+  Optional[Hash]             $storage                   = $vault::params::storage,
   Optional[Hash]             $telemetry                 = $vault::params::telemetry,
   Optional[String]           $token                     = undef,
   Integer                    $total_keys                = 5,
@@ -183,14 +181,17 @@ class vault (
   contain vault::install
   contain vault::config
   contain vault::service
-  if $initialize_vault {
-    contain vault::config::initialize
-  }
 
   Class['vault::install']
   -> Class['vault::config']
-  -> Class['vault::service']
-  -> Class['vault::config::initialize']
+  ~> Class['vault::service']
+
+  # initialize vault
+  if $initialize_vault or ($initialize_vault == undef and !$facts['vault_initialized']) {
+    contain vault::config::initialize
+    Class['vault::service']
+    -> Class['vault::config::initialize']
+  }
 
   ## Setup ldap authentication for vault
   if $enable_ldap {
