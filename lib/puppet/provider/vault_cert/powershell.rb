@@ -1,6 +1,9 @@
 require 'pathname'
 require 'time'
-require 'ruby-pwsh'
+begin
+  require 'ruby-pwsh'
+rescue LoadError # # rubocop:disable Lint/HandleExceptions
+end
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'vault_cert'))
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', 'puppet_x', 'encore', 'vault', 'util'))
 

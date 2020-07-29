@@ -35,6 +35,17 @@ define vault::cert (
   Optional[Integer] $regenerate_ttl = undef,
 ) {
   include vault::params
+  $_cert_dir = pick($cert_dir, $vault::params::cert_dir)
+  $_cert_path = stdlib::extname($cert_name) ? {
+    ''      => "${_cert_dir}/${cert_name}.crt",
+    undef   => "${_cert_dir}/${cert_name}.crt",
+    default => "${_cert_dir}/${cert_name}",
+  }
+
+  $_priv_key_dir = pick($priv_key_dir, $vault::params::priv_key_dir)
+  $_cert_no_ext = basename($cert_name, stdlib::extname($cert_name))
+  $_priv_key_file = pick($priv_key_name, "${_cert_no_ext}.key")
+  $_priv_key_path = "${_priv_key_dir}/${_priv_key_file}"
 
   vault_cert { $title:
     ensure              => $ensure,
@@ -52,27 +63,16 @@ define vault::cert (
     api_server          => $api_server,
     cert                => $cert,
     cert_name           => $cert_name,
-    cert_dir            => $vault_priv_key_dir,
+    cert_dir            => $_cert_dir,
     cert_ttl            => $cert_ttl,
     priv_key            => $priv_key,
     priv_key_name       => $priv_key_name,
-    priv_key_dir        => $vault_priv_key_dir,
+    priv_key_dir        => $_priv_key_dir,
     regenerate_ttl      => $regenerate_ttl,
   }
 
   if $manage_files and $facts['os']['family'] != 'windows' {
-    $vault_cert_dir = pick($cert_dir, $vault::params::cert_dir)
-    $vault_cert_path = stdlib::extname($cert_name) ? {
-      ''      => "${vault_cert_dir}/${cert_name}.crt",
-      undef   => "${vault_cert_dir}/${cert_name}.crt",
-      default => "${vault_cert_dir}/${cert_name}",
-    }
-
-    $vault_priv_key_dir = pick($cert_dir, $vault::params::priv_key_dir)
-    $vault_priv_key_file = pick($priv_key_name, "${basename($cert_name)}.key")
-    $vault_priv_key_path = "${vault_priv_key_dir}/${vault_priv_key_file}"
-
-    file { $vault_cert_path:
+    file { $_cert_path:
       ensure    => $ensure,
       owner     => $cert_owner,
       group     => $cert_group,
@@ -82,7 +82,7 @@ define vault::cert (
 
     $_priv_key_owner = pick($priv_key_owner, $cert_owner)
     $_priv_key_group = pick($priv_key_group, $cert_owner)
-    file { $vault_priv_key_path:
+    file { $_priv_key_path:
       ensure    => $ensure,
       owner     => $_priv_key_owner,
       group     => $_priv_key_group,
