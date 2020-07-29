@@ -3,6 +3,6 @@ fixtures:
     vault: "#{source_dir}"
   forge_modules:
     stdlib: "puppetlabs/stdlib"
-    archive: "voxpupuli/archive"
+    archive: "puppet/archive"
     systemd: "camptocamp/systemd"
-    file_capability: "smoeding/file_capability"
+    file_capability: "stm/file_capability"
