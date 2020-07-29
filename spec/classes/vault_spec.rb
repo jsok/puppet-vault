@@ -742,10 +742,12 @@ describe 'vault' do
             end
 
             it { is_expected.to contain_file('vault_binary').with_path('/opt/vault/bin/vault') }
-            it { is_expected.to contain_file('vault_binary_link')
-                                  .with_ensure('link')
-                                  .with_path('/opt/bin/vault')
-                                  .with_target('/opt/vault/bin/vault') }
+            it do
+              is_expected.to contain_file('vault_binary_link')
+                .with_ensure('link')
+                .with_path('/opt/bin/vault')
+                .with_target('/opt/vault/bin/vault')
+            end
             it {
               is_expected.to contain_file_capability('vault_binary_capability')
                 .with_file('/opt/vault/bin/vault')
@@ -960,9 +962,11 @@ describe 'vault' do
       when 'Archlinux'
         context 'defaults to repo install' do
           it { is_expected.to contain_file('vault_binary').with_path('/opt/vault/bin/vault') }
-            it { is_expected.to contain_file('vault_binary_link')
-                                  .with_path('/bin/vault')
-                                  .with_target('/opt/vault/bin/vault') }
+          it do
+            is_expected.to contain_file('vault_binary_link')
+              .with_path('/bin/vault')
+              .with_target('/opt/vault/bin/vault')
+          end
           it { is_expected.not_to contain_file_capability('vault_binary_capability') }
         end
       end
