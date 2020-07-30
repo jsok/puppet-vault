@@ -36,10 +36,11 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
     # Check for the certificate existing at all
     # if we have > 1 cert, we need to cleanup "extra" ones by returning (false) so that
     #   create is called, so only return true if we have exactly one cert
+    # Check if the certificate exists in Vault
     # Check if the certificate is expired or not
     # Check if the cert is revoked or not
     (certificate_list && certificate_list.size == 1 &&
-     !check_cert_expiring_list && !check_cert_revoked_list)
+     check_cert_exists_list && !check_cert_expiring_list && !check_cert_revoked_list)
   end
 
   # Create a new certificate with the vault API and save it on the filesystem
@@ -171,7 +172,15 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
 
   def revoke_cert_list
     Puppet.debug('revoking cert list')
-    certificate_list.each { |cert| revoke_cert(serial_number: cert_serial_number(cert)) }
+    certificate_list.each do |cert|
+      # only revoke the cert if it exists in Vault, otherwise we'll get an HTTP error
+      sn = cert_serial_number(cert)
+      revoke_cert(serial_number: sn) if check_cert_exists(serial_number: sn)
+    end
+  end
+
+  def check_cert_exists_list
+    certificate_list.all? { |cert| check_cert_exists(serial_number: cert_serial_number(cert)) }
   end
 
   def check_cert_revoked_list
