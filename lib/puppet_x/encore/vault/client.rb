@@ -86,6 +86,17 @@ module PuppetX::Encore::Vault
       get(api_path)
     end
 
+    def check_cert_exists(serial_number)
+      read_cert(serial_number)
+      true
+    rescue Net::HTTPNotFound, Net::HTTPServerException => e
+      # Net::HTTPNotFound = HTTP 404
+      #  saying that the certificate doesn't exist
+      raise e unless e.response.code == '404'
+      # we got a 404 NOT FOUND, so return false since the cert doesn't exist
+      false
+    end
+
     # Check whether the cert has been revoked
     # Return true if the cert is revoked
     def check_cert_revoked(serial_number)
@@ -148,6 +159,10 @@ module PuppetX::Encore::Vault
                 body: body, headers: headers,
                 redirect_limit: redirect_limit - 1)
       else
+        Puppet.debug("throwing HTTP error: request_method=#{method} request_url=#{url} request_body=#{body} response_http_code=#{resp.code} resp_message=#{resp.message} resp_body=#{resp.body}")
+        stack_trace = caller.join("\n")
+        Puppet.debug("Raising exception: #{resp.error_type.name}")
+        Puppet.debug("stack trace: #{stack_trace}")
         message = 'code=' + resp.code
         message += ' message=' + resp.message
         message += ' body=' + resp.body

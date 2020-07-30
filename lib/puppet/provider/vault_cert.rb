@@ -32,6 +32,11 @@ class Puppet::Provider::VaultCert < Puppet::Provider
     client.revoke_cert(serial_number)
   end
 
+  def check_cert_exists(serial_number: nil)
+    serial_number = cert_serial_number unless serial_number
+    client.check_cert_exists(serial_number)
+  end
+
   def check_cert_revoked(serial_number: nil)
     serial_number = cert_serial_number unless serial_number
     client.check_cert_revoked(serial_number)

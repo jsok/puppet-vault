@@ -89,7 +89,7 @@ Puppet::Functions.create_function(:'vault::cert') do
     cert_name         = params['cert_name']
     api_server        = params['api_server']
     api_secret_role   = params['api_secret_role']
-    common_name       = params.fetch('common_name',       nil)
+    common_name       = params['common_name']
     alt_names         = params.fetch('alt_names',         nil)
     ip_sans           = params.fetch('ip_sans',           nil)
     api_auth_method     = params.fetch('api_auth_method', nil)
