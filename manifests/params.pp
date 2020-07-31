@@ -65,6 +65,10 @@ class vault::params {
       $cert_dir            = '/etc/pki/tls/certs'
       $priv_key_dir        = '/etc/pki/tls/private'
     }
+    'windows': {
+      $cert_dir            = 'Cert:\LocalMachine\My'
+      $priv_key_dir        = 'Cert:\LocalMachine\My'
+    }
     default: {
       $cert_dir            = '/etc/ssl/certs'
       $priv_key_dir        = '/etc/ssl/private'
