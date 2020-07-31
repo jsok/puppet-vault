@@ -89,11 +89,12 @@ module PuppetX::Encore::Vault
     def check_cert_exists(serial_number)
       read_cert(serial_number)
       true
-    rescue Net::HTTPNotFound, Net::HTTPServerException => e
+    rescue Net::HTTPBadRequest, Net::HTTPNotFound, Net::HTTPServerException => e
+      # Net::HTTPBadRequest = HTTP 400
       # Net::HTTPNotFound = HTTP 404
       #  saying that the certificate doesn't exist
-      raise e unless e.response.code == '404'
-      # we got a 404 NOT FOUND, so return false since the cert doesn't exist
+      raise e unless e.response.code == '404' || e.response.code == '400'
+      # we got a 400 bad request or 404 NOT FOUND, so return false since the cert doesn't exist
       false
     end
 
