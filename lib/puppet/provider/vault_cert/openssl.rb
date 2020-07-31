@@ -33,14 +33,14 @@ Puppet::Type.type(:vault_cert).provide(:openssl, parent: Puppet::Provider::Vault
   # Create a new certificate with the vault API and save it on the filesystem
   def create
     # Revoke the old cert before creating a new one
-    revoke_cert if certificate && private_key
+    revoke_cert if certificate && private_key && check_cert_exists
     new_cert = create_cert
     client_cert_save(new_cert)
   end
 
   def destroy
     #  Revoke the cert in Vault
-    revoke_cert if certificate && private_key && check_cert_exists
+    revoke_cert if check_cert_exists
     #  Delete the cert and key off the filesystem
     cert_path = File.join(resource[:cert_dir], resource[:cert_name])
     Pathname.new(cert_path).delete
