@@ -25,7 +25,11 @@ Facter.add(:vault_existing_certs) do
           cert = OpenSSL::X509::Certificate.new(File.new(cert_path).read)
           cert_extension = File.extname(cert_path)
           cert_name = File.basename(cert_path, cert_extension)
-          common_name = cert.subject.to_a.find { |name, _, _| name == 'CN' }[1]
+          cn_attr = cert.subject.to_a.find { |name, _, _| name == 'CN' }
+          # some certificates might not have a Common Name (CN) attribute in their
+          # subject, so check for this and return an empty string in this case
+          # in this case the cn_attr will be nil
+          common_name = (cn_attr && cn_attr.length > 2) ? cn_attr[1] : ''
           certs[cert_path] = {
             'common_name' => common_name,
             'cert_name' => cert_name,
