@@ -29,7 +29,13 @@ Facter.add(:vault_existing_certs) do
           # some certificates might not have a Common Name (CN) attribute in their
           # subject, so check for this and return an empty string in this case
           # in this case the cn_attr will be nil
-          common_name = (cn_attr && cn_attr.length > 2) ? cn_attr[1] : ''
+          common_name_utf8 = (cn_attr && cn_attr.length > 2) ? cn_attr[1] : ''
+          # handle translation of unicode characters because standard JSON
+          # library struggles with unicode (sorry, no my fault!)
+          common_name = common_name_utf8.encode('ASCII',
+                                                invalid: :replace,
+                                                undef: :replace,
+                                                replace: "_")
           certs[cert_path] = {
             'common_name' => common_name,
             'cert_name' => cert_name,
