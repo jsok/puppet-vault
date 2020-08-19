@@ -37,20 +37,29 @@ class vault::config {
       mode    => $::vault::config_mode,
     }
 
-    # If using the file storage then the path must exist and be readable
-    # and writable by the vault user, if we have a file path and the
-    # manage_storage_dir attribute is true, then we create it here.
+    # If manage_storage_dir is true and a file or raft storage backend is configured
+    # we create the directory configured in that backend.
     #
-    if $::vault::storage['file'] and $::vault::manage_storage_dir {
-      if ! $::vault::storage['file']['path'] {
-        fail('Must provide a path attribute to storage file')
+    if $::vault::manage_storage_dir {
+
+      if $::vault::storage['file'] {
+        $_storage_backend = 'file'
+      } elsif $::vault::storage['raft'] {
+        $_storage_backend = 'raft'
+      } else {
+        fail('Must provide a valid storage backend: file or raft')
       }
 
-      file { $::vault::storage['file']['path']:
-        ensure => directory,
-        owner  => $::vault::user,
-        group  => $::vault::group,
+      if $::vault::storage[$_storage_backend]['path'] {
+        file { $::vault::storage[$_storage_backend]['path']:
+          ensure => directory,
+          owner  => $::vault::user,
+          group  => $::vault::group,
+        }
+      } else {
+        fail("Must provide a path attribute to storage ${_storage_backend}")
       }
+
     }
   }
 
