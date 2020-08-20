@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# vault - this script manages the vault server
+# vault - this script manages the vault <%= scope['vault::service_type'] %>
 #
 # chkconfig: 3 85 15
 # processname: vault
@@ -18,7 +18,7 @@
 # Required-Stop:  $local_fs $network
 # Default-Start: 3 4 5
 # Default-Stop:  0 1 2 6
-# Short-Description: Manage the vault server
+# Short-Description: Manage the vault <%= scope['vault::service_type'] %>
 ### END INIT INFO
 
 # Source function library.
@@ -51,7 +51,7 @@ start() {
     touch $logfile $pidfile
     chown <%= scope['vault::user'] %> $logfile $pidfile
     export GOMAXPROCS=${GOMAXPROCS:-<%= scope['vault::num_procs'] %>}
-    daemon --user <%= scope['vault::user'] %> "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"
+    daemon --user <%= scope['vault::user'] %> "{ $exec <%= scope['vault::service_type'] %> -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"
 
     RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
