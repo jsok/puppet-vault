@@ -1,0 +1,10 @@
+---
+Gemfile:
+  optional:
+    ':development':
+      - gem: rspec-json_expectations
+
+spec/spec_helper.rb:
+  mock_with: ':rspec'
+  spec_overrides: |
+    require 'rspec/json_expectations'
