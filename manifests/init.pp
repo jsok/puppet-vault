@@ -47,9 +47,13 @@
 #   Customise the name of the system service provider; this
 #   also controls the init configuration files that are installed.
 #
+# * `service_type`
+#   Choose between `server` or `agent` for which mode you want the
+#   Vault binary to run as.
+#
 # * `service_options`
-#   Extra argument to pass to `vault server`, as per:
-#   `vault server --help`
+#   Extra argument to pass to `vault`, e.g.,
+#   `vault server --help` or `vault agent --help`
 #
 # * `manage_repo`
 #   Configure the upstream HashiCorp repository. Only relevant when $nomad::install_method = 'repo'.
@@ -91,6 +95,7 @@ class vault (
   $service_enable                      = $::vault::params::service_enable,
   $service_ensure                      = $::vault::params::service_ensure,
   $service_provider                    = $::vault::params::service_provider,
+  String $service_type                 = $::vault::params::service_type,
   Boolean $manage_repo                 = $::vault::params::manage_repo,
   $manage_service                      = $::vault::params::manage_service,
   $manage_service_file                 = $::vault::params::manage_service_file,

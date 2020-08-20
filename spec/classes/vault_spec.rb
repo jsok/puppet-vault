@@ -808,6 +808,7 @@ describe 'vault' do
               {
                 bin_dir: '/opt/bin',
                 config_dir: '/opt/etc/vault',
+                service_type: 'agent',
                 service_options: '-log-level=info',
                 user: 'root',
                 group: 'admin'
@@ -830,6 +831,12 @@ describe 'vault' do
             }
             it { is_expected.to contain_user('root') }
             it { is_expected.to contain_group('admin') }
+            context 'contains /etc/init/vault.conf' do
+              it {
+                is_expected.to contain_file('/etc/init.d/vault.conf').
+                  with_content(%r{exec start-stop-daemon -u \$USER -g \$GROUP -p \$PID_FILE -x \$VAULT -S -- agent -config=\$CONFIG $})
+              }
+            end
           end
           context 'install through repo with default service management' do
             let(:params) do
@@ -920,6 +927,7 @@ describe 'vault' do
                 {
                   bin_dir: '/opt/bin',
                   config_dir: '/opt/etc/vault',
+                  service_type: 'agent',
                   service_options: '-log-level=info',
                   user: 'root',
                   group: 'admin',
@@ -937,7 +945,7 @@ describe 'vault' do
                   with_content(%r{^User=root$}).
                   with_content(%r{^Group=admin$}).
                   with_content(%r{Environment=GOMAXPROCS=8}).
-                  with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info$})
+                  with_content(%r{^ExecStart=/opt/bin/vault agent -config=/opt/etc/vault/config.json -log-level=info$})
               }
             end
             context 'with mlock disabled' do

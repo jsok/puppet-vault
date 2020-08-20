@@ -54,7 +54,9 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `service_provider`: Customise the name of the system service provider; this also controls the init configuration files that are installed.
 
-* `service_options`: Extra argument to pass to `vault server`, as per: `vault server --help`
+* `service_type`: Choose between `server` or `agent` for which mode you want the Vault binary to run as.
+
+* `service_options`: Extra argument to pass to `vault`, e.g., `vault server --help` or `vault agent --help`
 
 * `num_procs`: Sets the `GOMAXPROCS` environment variable, to determine how many CPUs Vault can use. The official Vault Terraform install.sh script sets this to the output of ``nprocs``, with the comment, "Make sure to use all our CPUs, because Vault can block a scheduler thread". Default: number of CPUs on the system, retrieved from the ``processorcount`` fact.
 
