@@ -1,0 +1,25 @@
+- repo: https://github.com/chriskuehl/puppet-pre-commit-hooks.git
+  sha: v2.1.0
+  hooks:
+    - id: epp-validate
+    - id: erb-validate
+    - id: puppet-lint
+      args:
+        - --fail-on-warnings
+        - --no-80chars-check
+        - --no-documentation-check
+        - --no-puppet_url_without_modules-check
+        - --no-autoloader_layout-check
+    - id: puppet-validate
+    - id: r10k-validate
+    - id: ruby-validate
+#- repo: https://github.com/jumanjihouse/pre-commit-hooks
+#  rev: 1.11.0
+#  hooks:
+# Enable later
+#    - id: rubocop
+- repo: 'https://github.com/adrienverge/yamllint'
+  rev: v1.15.0
+  hooks:
+    - id: 'yamllint'
+      args: ['-d {rules: {line-length: disable}}', '-s']
