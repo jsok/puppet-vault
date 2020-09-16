@@ -39,22 +39,23 @@ define vault::pki::int_ca (
   ## Sign the intermediate CA with root if true and root CA enabled.
   if $sign_intermediate and $enable_root_ca {
     $_sign_int_ca_cmd = @("EOC")
-      bash -c "vault write -format=json ${root_path}/root/sign-intermediate \
+      bash -lc "${vault::bin_dir}/vault write -format=json ${root_path}/root/sign-intermediate \
         csr=@${cert_csr} format=pem_bundle ttl='${ttl}' |\
         jq -r '.data.certificate' > ${cert}"
       | EOC
 
     ## Sign the intermediate CA CSR
     exec { 'sign_cert':
-      command => $_sign_int_ca_cmd,
-      path    => [ $vault::bin_dir, '/bin', '/usr/bin' ],
+      command  => $_sign_int_ca_cmd,
+      path     => [ $vault::bin_dir, '/bin', '/usr/bin' ],
       #refreshonly => true,
-      creates => $cert,
-      notify  => [
+      creates  => $cert,
+      provider => 'shell',
+      notify   => [
         Exec['import_cert'],
         Exec['append_root_ca'],
       ],
-      require => Vault::Pki::Generate_cert[$path],
+      require  => Vault::Pki::Generate_cert[$path],
     }
 
     ## Append Root CA to intermediate CA.
@@ -62,17 +63,19 @@ define vault::pki::int_ca (
       command     => "cat ${root_cert} >> ${cert}",
       path        => [ '/bin', '/usr/bin' ],
       refreshonly => true,
+      provider    => 'shell',
     }
 
     ## Import signed intermediate CA certificate
     $_import_int_ca_cert = @("EOC")
-      bash -c "vault write ${path}/intermediate/set-signed certificate=@${cert}"
+      bash -lc "${vault::bin_dir}/vault write ${path}/intermediate/set-signed certificate=@${cert}"
     | EOC
 
     exec { 'import_cert':
       command     => $_import_int_ca_cert,
       path        => [ $vault::bin_dir, '/bin', '/usr/bin' ],
       refreshonly => true,
+      provider    => 'shell',
       require     => Vault::Pki::Generate_cert[$path],
     }
   }

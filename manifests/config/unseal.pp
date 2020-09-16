@@ -30,9 +30,10 @@ class vault::config::unseal (
 
   ## Unseal vault
   exec { "${vault_dir}/scripts/unseal.sh":
-    path    => [ $bin_dir, '/bin', '/usr/bin' ],
-    require => File["${vault_dir}/scripts/unseal.sh"],
-    unless  => "${bin_dir}/vault status",
+    path     => [ $bin_dir, '/bin', '/usr/bin' ],
+    require  => File["${vault_dir}/scripts/unseal.sh"],
+    unless   => "${bin_dir}/vault status",
+    provider => 'shell',
   }
 
 }

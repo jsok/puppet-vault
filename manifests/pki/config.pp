@@ -14,7 +14,7 @@ define vault::pki::config (
   }
 
   $_config_cmd = @("EOC")
-    bash -c "vault ${action} ${path} ${_options}"
+    bash -lc "${vault::bin_dir}/vault ${action} ${path} ${_options}"
   | EOC
 
   ## Used for idempotencey
@@ -30,6 +30,7 @@ define vault::pki::config (
     command     => $_config_cmd,
     path        => [ $vault::bin_dir, '/bin', '/usr/bin' ],
     refreshonly => true,
+    provider    => 'shell',
   }
 
 }

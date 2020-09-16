@@ -35,7 +35,7 @@ Facter.add(:vault_existing_certs) do
           common_name = common_name_utf8.encode('ASCII',
                                                 invalid: :replace,
                                                 undef: :replace,
-                                                replace: "_")
+                                                replace: '_')
           certs[cert_path] = {
             'common_name' => common_name,
             'cert_name' => cert_name,

@@ -11,7 +11,7 @@ class vault::config::initialize (
 ) inherits vault {
 
   $_init_cmd = @("EOC")
-    bash -c "vault operator init \
+    bash -lc "${bin_dir}/vault operator init \
       -key-shares=${total_keys} \
       -key-threshold=${minimum_keys} \
       > ${vault_dir}/vault_init.txt"
@@ -19,9 +19,10 @@ class vault::config::initialize (
 
   if $facts['vault_initialized'] != true {
     exec { 'vault_initialize':
-      path    => [$bin_dir, '/bin', '/usr/bin'],
-      command => $_init_cmd,
-      creates => "${vault_dir}/vault_init.txt",
+      path     => [$bin_dir, '/bin', '/usr/bin'],
+      command  => $_init_cmd,
+      creates  => "${vault_dir}/vault_init.txt",
+      provider => 'shell',
     }
 
     file { "${vault_dir}/vault_init.txt":
