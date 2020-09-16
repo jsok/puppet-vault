@@ -35,7 +35,9 @@ define vault::config::policy (
   }
 
   ## Write defined policy to vault if file content changed.
-  $_policy_write_cmd = "vault policy write '${name}' '${_policy_file}'"
+  $_policy_write_cmd = @("EOC")
+    bash -c "vault policy write '${name}' '${_policy_file}'"
+  | EOC
 
   exec { "write_${name}":
     command     => $_policy_write_cmd,

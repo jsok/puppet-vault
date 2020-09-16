@@ -36,11 +36,13 @@ define vault::secrets::engine (
     $_check_secret_cmd = 'false'
   } else {
     $_secret_cmd = @("EOC")
-      vault secrets ${action} \
-        -description="Puppet managed ${engine} engine" \
-        -path=${path} ${_options} ${engine}
+      bash -c "vault secrets ${action} \
+        -description='Puppet managed ${engine} engine' \
+        -path=${path} ${_options} ${engine}"
       | EOC
-    $_check_secret_cmd = "vault secrets list | grep -q '${path}/'"
+    $_check_secret_cmd = @("EOC")
+      bash -c "vault secrets list | grep -q '${path}/'"
+    | EOC
   }
 
   ## Perform selected action

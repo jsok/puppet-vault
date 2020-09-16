@@ -6,11 +6,11 @@ define vault::config::ldap_groups (
 ) {
 
   $_group_add_cmd = @("EOC")
-    vault write auth/ldap/groups/${group} policies=${policy}
+    bash -c "vault write auth/ldap/groups/${group} policies=${policy}"
     | EOC
   $_group_check_cmd = @("EOC")
-    ${bin_dir}/vault read -format=json auth/ldap/groups/${group} |\
-      jq .data.policies | grep -q "${policy}"
+    bash -c "${bin_dir}/vault read -format=json auth/ldap/groups/${group} |\
+      jq .data.policies | grep -q '${policy}'"
     | EOC
 
   exec { "vault_${group}":

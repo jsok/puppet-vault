@@ -32,8 +32,8 @@ define vault::config::ldap (
     | EOC
 
   $_ldap_auth_check_cmd = @("EOC")
-    ${bin_dir}/vault auth list -format=json |\
-      jq '.[] | {message: .type}' | grep -q 'ldap'
+    bash -c "${bin_dir}/vault auth list -format=json |\
+      jq '.[] | {message: .type}' | grep -q 'ldap'"
     | EOC
 
   if $ldap_url == undef {
@@ -54,14 +54,14 @@ define vault::config::ldap (
 
   exec { 'vault_ldap_enable':
     path    => [ $bin_dir, '/bin', '/usr/bin' ],
-    command => 'vault auth enable ldap',
+    command => 'bash -c "vault auth enable ldap"',
     #environment => [ "VAULT_TOKEN=${vault_token}" ],
     unless  => $_ldap_auth_check_cmd,
     require => Exec["${vault_dir}/scripts/unseal.sh"],
   }
 
   $_ldap_config_cmd = @("EOC")
-    vault write auth/ldap/config \
+    bash -c "vault write auth/ldap/config \
       url='${_ldap_url}' \
       starttls='${starttls}' \
       insecure_tls='${insecure_tls}' \
@@ -72,7 +72,7 @@ define vault::config::ldap (
       userattr='${user_attr}' \
       groupdn='${group_dn}' \
       groupattr='${group_attr}' \
-      groupfilter='${group_filter}'
+      groupfilter='${group_filter}'"
     | EOC
 
   $_safe_ldap_cmd = regsubst($_ldap_config_cmd, "bindpass='.* ", "bindpass='********' ",)

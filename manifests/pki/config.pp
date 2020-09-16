@@ -13,9 +13,11 @@ define vault::pki::config (
     $_options = join($options.map |$key, $value| { "${key}='${value}'" }, ' ')
   }
 
-  $_config_cmd = "vault ${action} ${path} ${_options}"
+  $_config_cmd = @("EOC")
+    bash -c "vault ${action} ${path} ${_options}"
+  | EOC
 
-  ## Used for idempotencey 
+  ## Used for idempotencey
   $_file_name = regsubst($path, '/', '_', 'G')
   file { "${vault::install_dir}/scripts/.pki_config_${_file_name}.cmd":
     ensure  => file,

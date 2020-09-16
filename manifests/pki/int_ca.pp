@@ -39,9 +39,9 @@ define vault::pki::int_ca (
   ## Sign the intermediate CA with root if true and root CA enabled.
   if $sign_intermediate and $enable_root_ca {
     $_sign_int_ca_cmd = @("EOC")
-      vault write -format=json ${root_path}/root/sign-intermediate \
+      bash -c "vault write -format=json ${root_path}/root/sign-intermediate \
         csr=@${cert_csr} format=pem_bundle ttl='${ttl}' |\
-        jq -r '.data.certificate' > ${cert}
+        jq -r '.data.certificate' > ${cert}"
       | EOC
 
     ## Sign the intermediate CA CSR
@@ -65,7 +65,9 @@ define vault::pki::int_ca (
     }
 
     ## Import signed intermediate CA certificate
-    $_import_int_ca_cert = "vault write ${path}/intermediate/set-signed certificate=@${cert}"
+    $_import_int_ca_cert = @("EOC")
+      bash -c "vault write ${path}/intermediate/set-signed certificate=@${cert}"
+    | EOC
 
     exec { 'import_cert':
       command     => $_import_int_ca_cert,
