@@ -32,7 +32,9 @@ define vault::secrets::engine (
 
   ## Build vault command
   if $action == 'disable' {
-    $_secret_cmd = "vault secrets ${action} ${path}"
+    $_secret_cmd = @("EOC")
+      bash -c "vault secrets ${action} ${path}"
+    | EOC
     $_check_secret_cmd = 'false'
   } else {
     $_secret_cmd = @("EOC")
