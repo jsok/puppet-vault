@@ -1,4 +1,4 @@
-# @api private == define class to generate pki certificates 
+# @api private == define class to generate pki certificates
 define vault::pki::generate_cert (
   String                             $bin_dir          = $vault::bin_dir,
   Optional[Hash]                     $cert_options     = undef,
@@ -27,27 +27,33 @@ define vault::pki::generate_cert (
 
   if $is_root_ca {
     # Remove existing root certificate
-    $_clear_cert_cmd = "vault delete ${path}/root"
+    $_clear_cert_cmd = @("EOC")
+      bash -lc "${bin_dir}/vault delete ${path}/root"
+    | EOC
   } else {
     if ! empty($cert_sn) {
       # Revoke existing certificate
-      $_clear_cert_cmd = "vault write ${path}/revoke serial_number=${cert_sn}"
+      $_clear_cert_cmd = @("EOC")
+        bash -lc "${bin_dir}/vault write ${path}/revoke serial_number=${cert_sn}"
+      | EOC
     } else {
-      $_clear_cert_cmd = 'vault status'
+      $_clear_cert_cmd = @("EOC")
+        bash -lc "${bin_dir}/vault status"
+      | EOC
     }
   }
 
   ## Check if root or intermediate CA cert
   if $is_root_ca {
     $_gen_cert_cmd = @("EOC")
-      bash -c "vault write -format=json ${path}/root/generate/${pkey_mode} \
+      bash -lc "${bin_dir}/vault write -format=json ${path}/root/generate/${pkey_mode} \
         common_name='${common_name}' ttl='${ttl}' ${_cert_options} |\
         tee >(jq -r '.data.private_key' > ${cert_key}) |\
         jq -r '.data.certificate' > ${certificate}"
       | EOC
   } elsif $is_int_ca {
     $_gen_cert_cmd = @("EOC")
-      bash -c "vault write -format=json ${path}/intermediate/generate/${pkey_mode} \
+      bash -lc "${bin_dir}/vault write -format=json ${path}/intermediate/generate/${pkey_mode} \
         common_name='${common_name}' ttl='${ttl}' ${_cert_options} |\
         tee >(jq -r '.data.private_key' > ${cert_key}) |\
         jq -r '.data.csr' > ${cert_csr}"
@@ -67,6 +73,7 @@ define vault::pki::generate_cert (
     command     => $_clear_cert_cmd,
     path        => [ $bin_dir, '/bin', '/usr/bin' ],
     refreshonly => true,
+    provider    => 'shell',
     notify      => Exec[$common_name],
   }
 
@@ -75,6 +82,7 @@ define vault::pki::generate_cert (
     command     => $_gen_cert_cmd,
     path        => [ $bin_dir, '/bin', '/usr/bin' ],
     refreshonly => true,
+    provider    => 'shell',
   }
 
 }

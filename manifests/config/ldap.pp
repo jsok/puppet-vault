@@ -32,9 +32,13 @@ define vault::config::ldap (
     | EOC
 
   $_ldap_auth_check_cmd = @("EOC")
-    ${bin_dir}/vault auth list -format=json |\
-      jq '.[] | {message: .type}' | grep -q 'ldap'
-    | EOC
+    bash -lc "${bin_dir}/vault auth list -format=json |\
+      jq '.[] | {message: .type}' | grep -q 'ldap'"
+  | EOC
+
+  $_ldap_auth_cmd = @("EOC")
+    bash -lc "${bin_dir}/vault auth enable ldap"
+  | EOC
 
   if $ldap_url == undef {
     $_ldap_url = $ldap_servers.map |$server| { "ldap://${server}" }.join(',')
@@ -47,21 +51,23 @@ define vault::config::ldap (
   contain vault::config::unseal
 
   exec { "${ldap_servers[0]}.crt":
-    path    => [ '/bin', '/usr/bin' ],
-    command => $_ldap_cert_cmd,
-    creates => $_ldap_cert,
+    path     => [ '/bin', '/usr/bin' ],
+    command  => $_ldap_cert_cmd,
+    creates  => $_ldap_cert,
+    provider => 'shell',
   }
 
   exec { 'vault_ldap_enable':
-    path    => [ $bin_dir, '/bin', '/usr/bin' ],
-    command => 'vault auth enable ldap',
+    path     => [ $bin_dir, '/bin', '/usr/bin' ],
+    command  => $_ldap_auth_cmd,
     #environment => [ "VAULT_TOKEN=${vault_token}" ],
-    unless  => $_ldap_auth_check_cmd,
-    require => Exec["${vault_dir}/scripts/unseal.sh"],
+    unless   => $_ldap_auth_check_cmd,
+    provider => 'shell',
+    require  => Exec["${vault_dir}/scripts/unseal.sh"],
   }
 
   $_ldap_config_cmd = @("EOC")
-    vault write auth/ldap/config \
+    bash -lc "${bin_dir}/vault write auth/ldap/config \
       url='${_ldap_url}' \
       starttls='${starttls}' \
       insecure_tls='${insecure_tls}' \
@@ -72,8 +78,8 @@ define vault::config::ldap (
       userattr='${user_attr}' \
       groupdn='${group_dn}' \
       groupattr='${group_attr}' \
-      groupfilter='${group_filter}'
-    | EOC
+      groupfilter='${group_filter}'"
+  | EOC
 
   $_safe_ldap_cmd = regsubst($_ldap_config_cmd, "bindpass='.* ", "bindpass='********' ",)
 
@@ -89,6 +95,7 @@ define vault::config::ldap (
   exec { "ldap_config_${name}":
     path        => [ $bin_dir, '/bin', '/usr/bin' ],
     command     => $_ldap_config_cmd,
+    provider    => 'shell',
     #environment => [ "VAULT_TOKEN=${vault_token}" ],
     refreshonly => true,
   }
