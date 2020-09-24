@@ -1,3 +1,7 @@
+## 2020-02-01 2.3.0
+- Moved directory check out of type definition to provider so that it is checking when at
+  execution not before since directory may be created during the profile run
+
 ## 2020-02-01 2.2.0
 - Add support for `api_addr` stanza
 - Update to vault 1.3.2
