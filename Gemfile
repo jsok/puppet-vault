@@ -15,7 +15,7 @@ group :test do
   gem 'semantic_puppet',                                            :require => false
   gem 'metadata-json-lint',                                         :require => false
   gem 'redcarpet',                                                  :require => false
-  gem 'rubocop', '~> 0.51',                                         :require => false
+  gem 'rubocop', '~> 1.3',                                         :require => false
   gem 'rubocop-rspec', '~> 1.20',                                   :require => false
   gem 'mocha', '>= 1.2.1',                                          :require => false
   gem 'coveralls',                                                  :require => false
