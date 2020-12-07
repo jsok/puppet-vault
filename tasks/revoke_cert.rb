@@ -19,10 +19,10 @@ class VaultRevokeCertTask < TaskHelper
            auth_method: nil,
            auth_token: nil,
            auth_parameters: {},
-           **kwargs)
+           **_kwargs)
     # stringify keys in hash
-    auth_parameters = auth_parameters.collect{|k,v| [k.to_s, v]}.to_h
-    
+    auth_parameters = auth_parameters.map { |k, v| [k.to_s, v] }.to_h
+
     client = PuppetX::Encore::Vault::Client.new(api_server: server,
                                                 api_port: port,
                                                 api_scheme: scheme,

@@ -54,6 +54,12 @@ Puppet::Type.type(:vault_cert).provide(:openssl, parent: Puppet::Provider::Vault
   # Save an openssl cert object into the global cert var
   def certificate
     return @cert unless @cert.nil?
+
+    # Verify that the given directory exists
+    unless File.directory?(resource[:cert_dir])
+      raise ArgumentError, "Directory not found for: #{resource[:cert_dir]}"
+    end
+
     cert_path = File.join(resource[:cert_dir], resource[:cert_name])
     @cert = if Pathname.new(cert_path).exist?
               file = File.read(cert_path)
@@ -66,6 +72,12 @@ Puppet::Type.type(:vault_cert).provide(:openssl, parent: Puppet::Provider::Vault
   # Save an openssl PKey object into the global priv_key var
   def private_key
     return @priv_key unless @priv_key.nil?
+
+    # Verify that the given directory exists
+    unless File.directory?(resource[:priv_key_dir])
+      raise ArgumentError, "Directory not found for: #{resource[:priv_key_dir]}"
+    end
+
     priv_key_path = File.join(resource[:priv_key_dir], resource[:priv_key_name])
     @priv_key = if Pathname.new(priv_key_path).exist?
                   file = File.read(priv_key_path)

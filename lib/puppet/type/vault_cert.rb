@@ -99,10 +99,6 @@ Puppet::Type.newtype(:vault_cert) do
         unless path.absolute?
           raise ArgumentError, "Path must be absolute: #{value}"
         end
-        # Verify that the given directory exists
-        unless File.directory?(value)
-          raise ArgumentError, "Directory not found for: #{value}"
-        end
       else
         unless value.start_with?('Cert:\\')
           raise ArgumentError, "Windows paths must start with Cert:\\ : #{value}"
@@ -176,10 +172,6 @@ Puppet::Type.newtype(:vault_cert) do
         # Verify that an absolute path was given
         unless path.absolute?
           raise ArgumentError, "Path must be absolute: #{path}"
-        end
-        # Verify that the given directory exists
-        unless File.directory?(value)
-          raise ArgumentError, "Directory not found for: #{value}"
         end
       else
         unless value.start_with?('Cert:\\')

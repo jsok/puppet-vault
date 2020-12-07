@@ -8,7 +8,7 @@ plan vault::revoke_certs(
   String $secret_role,
   Hash $auth_parameters = {},
   Integer $port = 443,
-  String $scheme = "https",
+  String $scheme = 'https',
   String $secret_engine = '/pki',
   TargetSpec $targets,
 ) {
@@ -36,12 +36,12 @@ plan vault::revoke_certs(
   }
   out::message("revoke certs = ${revoke_certs}")
   run_task('vault::revoke_cert', 'localhost',
-           serial_numbers => $revoke_certs,
-           server => $server,
-           port => $port,
-           scheme => $scheme,
-           secret_engine => $secret_engine,
-           secret_role => $secret_role,
-           auth_method => $auth_method,
-           auth_parameters => $auth_parameters)
+            serial_numbers => $revoke_certs,
+            server => $server,
+            port => $port,
+            scheme => $scheme,
+            secret_engine => $secret_engine,
+            secret_role => $secret_role,
+            auth_method => $auth_method,
+            auth_parameters => $auth_parameters)
 }
