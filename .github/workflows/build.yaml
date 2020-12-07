@@ -1,0 +1,126 @@
+name: build
+
+on:
+  push:
+    branches: ['*']
+    tags:
+      - v*
+  pull_request:
+    type: [opened, reopened, edited]
+  schedule:
+    # run every night at midnight
+    - cron:  '0 0 * * *'
+
+jobs:
+  unit:
+    name: '${{matrix.name}} - puppet (${{matrix.puppet}})'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # note: actions/setup-ruby only allows using a major.minor release of ruby
+          - ruby: '2.5'
+            puppet: "6.0"
+            check: "check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop syntax lint metadata_lint"
+            name: 'static'
+          - ruby: '2.4'
+            puppet: "5.0"
+            check: "parallel_spec"
+            name: 'spec'
+          - ruby: '2.5'
+            puppet: "6.0"
+            check: "parallel_spec"
+            name: 'spec'
+    env:
+      CHECK: '${{ matrix.check }}'
+      PUPPET_GEM_VERSION: '~> ${{ matrix.puppet }}'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '${{ matrix.ruby }}'
+      - name: Bundle prep
+        run: |
+          gem install bundler
+          bundle -v
+          rm -f Gemfile.lock
+          # Update system gems if requested. This is useful to temporarily workaround troubles in the test runner"
+          # See https://github.com/puppetlabs/pdk-templates/commit/705154d5c437796b821691b707156e1b056d244f for an example of how this was used"
+          # Ignore exit code of SIGPIPE'd yes to not fail with shell's pipefail set"
+          [ -z "$RUBYGEMS_VERSION" ] || (yes || true) | gem update --system $RUBYGEMS_VERSION
+          gem --version
+          bundle -v
+          bundle config path vendor/bundle
+          bundle config without 'system_tests'
+          bundle lock
+        # restore cache AFTER doing 'bundle lock' so that Gemfile.lock exists
+      - uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-${{ matrix.puppet }}-${{ matrix.ruby }}-gems-test-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.puppet }}-${{ matrix.ruby }}-gems-test-
+      - name: Bundle install
+        run: |
+          bundle install --jobs $(nproc) --retry 3
+      - name: Test
+        run: 'bundle exec rake $CHECK'
+
+  deploy:
+    name: 'deploy to forge'
+    needs: unit
+    runs-on: ubuntu-latest
+    # only run deploy on tags that start with 'v'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    # define a "strategy" here so we can use ruby/puppet as variables below
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # note: actions/setup-ruby only allows using a major.minor release of ruby
+          - ruby: '2.5'
+            puppet: "6.0"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '${{ matrix.ruby }}'
+      - name: Bundle prep
+        run: |
+          gem install bundler
+          bundle -v
+          rm -f Gemfile.lock
+          # Update system gems if requested. This is useful to temporarily workaround troubles in the test runner"
+          # See https://github.com/puppetlabs/pdk-templates/commit/705154d5c437796b821691b707156e1b056d244f for an example of how this was used"
+          # Ignore exit code of SIGPIPE'd yes to not fail with shell's pipefail set"
+          [ -z "$RUBYGEMS_VERSION" ] || (yes || true) | gem update --system $RUBYGEMS_VERSION
+          gem --version
+          bundle -v
+          bundle config path vendor/bundle
+          bundle config without 'system_tests'
+          bundle lock
+        # restore cache AFTER doing 'bundle lock' so that Gemfile.lock exists
+      - uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-${{ matrix.puppet }}-${{ matrix.ruby }}-gems-test-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.puppet }}-${{ matrix.ruby }}-gems-test-
+      - name: Bundle install
+        run: |
+          bundle install --jobs $(nproc) --retry 3
+      - name: Build and Deploy
+        env:
+          # TODO configure secrets here:
+          #  https://docs.github.com/en/free-pro-team@latest/actions/reference/encrypted-secrets
+          BLACKSMITH_FORGE_USERNAME: '${{ secrets.PUPPET_FORGE_USERNAME }}'
+          BLACKSMITH_FORGE_PASSWORD: '${{ secrets.PUPPET_FORGE_PASSWORD }}'
+        run: |
+          bundle exec rake module:build
+          bundle exec rake module:push
+

@@ -1,3 +1,9 @@
+## Development
+
+- Switch from Travis to GitHub Actions
+  
+  Contributed by Nick Maludy (@nmaludy)
+
 ## 2020-02-01 2.2.0
 - Add support for `api_addr` stanza
 - Update to vault 1.3.2

@@ -18,6 +18,8 @@ appveyor.yml:
 Gemfile:
   required:
     ':development':
+      - gem: 'puppet-blacksmith'
+        version: '>= 5.0.0'
       - gem: 'puppet-lint-absolute_template_path'
         version: '>= 1.0.1'
       - gem: 'puppet-lint-alias-check'
@@ -50,5 +52,18 @@ Gemfile:
         version: '>= 2.2.0'
       - gem: 'yaml-lint'
         version: '>= 0.0.10'
+# Rakefile:
+#   extras:
+#     - "# exclude plans because puppet-syntax doesn't support them yet: https://github.com/voxpupuli/puppet-syntax/issues/95"
+#     - 'PuppetSyntax.exclude_paths = ["plans/**/*", "vendor/**/*"]'
 spec/spec_helper.rb:
   mock_with: ':rspec'
+.travis.yml:
+  # we've converted over to GitHub actions
+  unmanaged: true
+# .travis.yml:
+#   deploy_to_forge:
+#     enabled: true
+#   user: encore
+#   secure: "ntIpKlxSk9b4T++GJP1MiF2TuZwpeENibVAYRhfw1BsPDMJ0iM1QYjt01LXu2f6AUz3mz3/uIvPWUJgVyoQTOh32jJVZ1pHjr0rj6yC/De+smZM7LyIYFNqYPwzet+vIfgd2pFLmSDIAQwUERx61OTg+zuFO/29fOscZOtKL3gUBG1OTk0bGsCmhITjcoJeFmWksNQgLahooWfYvzP6zaVPdHEw1geES5sHYeXVS8HkqfNooyu5H2rqVpXlkNKKKzZCT0VAUrkwgveTlR8rY4rCMl62e9/lUvon69nEqjvWp/msmNvbhTjdqgWQ6xcL9LBGR9achIdQh19kybBfvMqzewweRS4rYoJwasjTSGebXH4aKsd1QSMZ3vcb2CNnt+z9sotLYRzPISVmGMvntuaa1JTQFY+ccQ7a5WmmL9XRe0EgJWmWUUSRQAJoGRi12UCtSRMhZTxTfylHPFIvUznhmfu3urXAwLpq4/yXI2/IhBQLVN7GzCy7kzPr+amWTgFvEf8b8ggSApAyMp6G24hwCMZiUvsK0klIkN/wsylKyvIed2kdPV6vTn7Uh5TYPOBAOgZBI0Xa0mBUol3MTSkP4yM9hMAK3buGJrxpvyEillO/8njkiCSxH7EYW5WGNR9x0BauxVkAmkegm1oqdfRInVeY4/0PjzcFKJoCWsSk="
+
