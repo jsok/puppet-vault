@@ -1,6 +1,7 @@
 require 'json'
 require 'net/https'
 require 'puppet_x'
+require 'puppet'
 
 # Encore module
 module PuppetX::Encore; end

@@ -1,0 +1,56 @@
+{
+  "description": "Revokes a certificate in Vault",
+  "implementations": [
+    {
+      "name": "revoke_cert.rb",
+      "files": [
+        "vault/lib/puppet_x/encore/vault/client.rb",
+        "ruby_task_helper/files/task_helper.rb"
+      ]
+    }
+  ],
+  "parameters": {
+    "serial_numbers": {
+      "description": "One or more serial numbers to revoke",
+      "type": "Variant[String[1], Array[String[1]]]"
+    },
+    "server": {
+      "description": "Vault server hostname/ip",
+      "type": "String[1]"
+    },
+    "port": {
+      "description": "Vault server port",
+      "type": "Integer",
+      "default": 8200
+    },
+    "scheme": {
+      "description": "Transport scheme to use",
+      "type": "Enum['http', 'https']",
+      "default": "https"
+    },
+    "secret_engine": {
+      "description": "Name of the Vault secret engine to use",
+      "type": "String[1]",
+      "default": "/pki"
+    },
+    "secret_role": {
+      "description": "Name of the Vault secret role to use",
+      "type": "String[1]"
+    },
+    "auth_method": {
+      "description": "Name of the Vault authentication method to use. When specifying 'token' use the 'auth_token' parameter. When specifying any other auth method, use the 'auth_parameters' parameter.",
+      "type": "String[1]"
+    },
+    "auth_token": {
+      "description": "Auth Token to use when auth_method='token'",
+      "type": "Optional[String[1]]",
+      "sensitive": true
+    },
+    "auth_parameters": {
+      "description": "Parameters to pass when making the authentication API call when using something other than auth_method='token'. Example for auth_method='ldap' this would be a hash: {'username' => 'xxxx', 'password' => 'yyy'}.",
+      "type": "Optional[Hash]",
+      "sensitive": true
+    }
+  }
+}
+

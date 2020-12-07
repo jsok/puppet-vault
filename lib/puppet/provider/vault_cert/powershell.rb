@@ -102,7 +102,7 @@ Puppet::Type.type(:vault_cert).provide(:powershell, parent: Puppet::Provider::Va
         Puppet.debug('saving client cert to cert store')
         client_cert_save(cert, priv_key)
       else
-        Puppet.debug('not saving client cert because only have cert and not priv key')
+        Puppet.info('not saving client cert because only have cert and not priv key')
       end
     else
       Puppet.debug('not saving client cert because cert and priv_key are both nil')
