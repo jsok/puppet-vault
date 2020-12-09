@@ -95,7 +95,7 @@ The module will **not** manage any required packages to un-archive, e.g. `unzip`
 
 By default, with no parameters the module will configure vault with some sensible defaults to get you running, the following parameters may be specified to configure Vault.  Please see [The official documentation](https://www.vaultproject.io/docs/configuration/index.html) for further details of acceptable parameter values.
 
-* `storage`: A hash containing the Vault storage configuration, default:
+* `storage`: A hash containing the Vault storage configuration. File and raft storage backends are supported. In the examples section you can find an example for raft. The file backend is the default:
 ```
 { 'file' => { 'path' => '/var/lib/vault' }}
 ```
@@ -172,6 +172,18 @@ vault::listener:
       address: 10.0.0.10:8200
 
 vault::default_lease_ttl: 720h
+```
+
+Configuring raft storage engine using Hiera:
+```yaml
+vault::storage:
+  raft:
+    node_id: '%{facts.networking.hostname}'
+    path: /var/lib/vault
+    retry_join:
+    - leader_api_addr: https://vault1:8200
+    - leader_api_addr: https://vault2:8200
+    - leader_api_addr: https://vault3:8200
 ```
 
 ## mlock
