@@ -57,7 +57,7 @@ class vault::params {
   $service_provider = $facts['service_provider']
 
   case $facts['architecture'] {
-    'aarch64'         { $arch = 'arm64' }
+    'aarch64':        { $arch = 'arm64' }
     /(x86_64|amd64)/: { $arch = 'amd64' }
     'i386':           { $arch = '386'   }
     /^arm.*/:         { $arch = 'arm'   }
