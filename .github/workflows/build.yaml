@@ -35,6 +35,8 @@ jobs:
     env:
       CHECK: '${{ matrix.check }}'
       PUPPET_GEM_VERSION: '~> ${{ matrix.puppet }}'
+      # lock to 2.1.0 because 2.2.0 is causing issues during builds
+      BUNDLER_GEM_VERSION: '~> 2.1.0'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -44,7 +46,7 @@ jobs:
           ruby-version: '${{ matrix.ruby }}'
       - name: Bundle prep
         run: |
-          gem install bundler
+          gem install bundler -v "$BUNDLER_GEM_VERSION"
           bundle -v
           rm -f Gemfile.lock
           # Update system gems if requested. This is useful to temporarily workaround troubles in the test runner"
@@ -83,6 +85,10 @@ jobs:
           # note: actions/setup-ruby only allows using a major.minor release of ruby
           - ruby: '2.5'
             puppet: "6.0"
+    env:
+      PUPPET_GEM_VERSION: '~> ${{ matrix.puppet }}'
+      # lock to 2.1.0 because 2.2.0 is causing issues during builds
+      BUNDLER_GEM_VERSION: '~> 2.1.0'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -92,7 +98,7 @@ jobs:
           ruby-version: '${{ matrix.ruby }}'
       - name: Bundle prep
         run: |
-          gem install bundler
+          gem install bundler -v "$BUNDLER_GEM_VERSION"
           bundle -v
           rm -f Gemfile.lock
           # Update system gems if requested. This is useful to temporarily workaround troubles in the test runner"
