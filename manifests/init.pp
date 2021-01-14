@@ -50,7 +50,10 @@
 # * `service_options`
 #   Extra argument to pass to `vault server`, as per:
 #   `vault server --help`
-
+#
+# * `manage_repo`
+#   Configure the upstream HashiCorp repository. Only relevant when $nomad::install_method = 'repo'.
+#
 # * `manage_service`
 #   Instruct puppet to manage service or not
 #
@@ -88,6 +91,7 @@ class vault (
   $service_enable                      = $::vault::params::service_enable,
   $service_ensure                      = $::vault::params::service_ensure,
   $service_provider                    = $::vault::params::service_provider,
+  Boolean $manage_repo                 = $::vault::params::manage_repo,
   $manage_service                      = $::vault::params::manage_service,
   $manage_service_file                 = $::vault::params::manage_service_file,
   Hash $storage                        = $::vault::params::storage,

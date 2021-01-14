@@ -69,11 +69,13 @@ class vault::params {
       $install_method      = 'repo'
       $bin_dir             = '/bin'
       $manage_service_file = true
+      $manage_repo         = false
     }
     default: {
       $install_method      = 'archive'
       $bin_dir             = '/usr/local/bin'
       $manage_service_file = undef
+      $manage_repo         = true
     }
   }
   $os = downcase($facts['kernel'])
