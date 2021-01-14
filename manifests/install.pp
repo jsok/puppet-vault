@@ -25,6 +25,9 @@ class vault::install {
       }
 
     'repo': {
+      if $vault::manage_repo{
+        include hashi_stack::repo
+      }
       package { $::vault::package_name:
         ensure  => $::vault::package_ensure,
       }
