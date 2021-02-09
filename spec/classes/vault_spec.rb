@@ -147,16 +147,29 @@ describe 'vault' do
           it {
             is_expected.to contain_archive('/tmp/vault.zip').
               that_comes_before('File[vault_binary]')
+            is_expected.to contain_file('/opt/vault-1.4.2').
+              with_ensure('directory').
+              with_owner('root').
+              with_group('root').
+              with_mode('0755')
           }
 
           context 'when installed with default download options' do
             let(:params) do
-              super().merge(version: '0.7.0')
+              super().merge(
+                version: '0.7.0',
+              )
             end
 
             it {
+              is_expected.to contain_file('/opt/vault-0.7.0')
               is_expected.to contain_archive('/tmp/vault.zip').
                 with_source('https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip')
+              # A regex is used to validate the command because vault bin_dir is OS specific
+              is_expected.to contain_exec('install_versioned_vault').
+                with_command(%r{/bin/cp -f /opt/vault-0.7.0/vault /[\w/]+/vault}).
+                with_refreshonly(true).
+                that_notifies(['Class[vault::service]'])
             }
           end
 
@@ -171,6 +184,7 @@ describe 'vault' do
             end
 
             it {
+              is_expected.to contain_file('/opt/vault-0.6.0')
               is_expected.to contain_archive('/tmp/vault.zip').
                 with_source('http://my_site.example.com/vault/0.6.0/vaultbinary_0.6.0_linux_amd64.tar.gz')
             }
