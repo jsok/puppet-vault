@@ -8,7 +8,7 @@ start on (local-filesystems and net-device-up IFACE!=lo)
 stop on runlevel [06]
 
 env VAULT=<%= scope['vault::bin_dir'] %>/vault
-env CONFIG=<%= scope['vault::config_dir'] %>/config.json
+env CONFIG=<%= scope['vault::config_dir'] %>/vault.hcl
 env USER=<%= scope['vault::user'] %>
 env GROUP=<%= scope['vault::group'] %>
 env PID_FILE=/var/run/vault.pid

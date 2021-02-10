@@ -66,13 +66,13 @@ describe 'vault' do
             with_group('vault')
         }
         it {
-          is_expected.to contain_file('/etc/vault/config.json').
+          is_expected.to contain_file('/etc/vault/vault.hcl').
             with_owner('vault').
             with_group('vault')
         }
 
         context 'vault JSON config' do
-          subject { param_value(catalogue, 'File', '/etc/vault/config.json', 'content') }
+          subject { param_value(catalogue, 'File', '/etc/vault/vault.hcl', 'content') }
 
           it {
             is_expected.to include_json(
@@ -120,7 +120,7 @@ describe 'vault' do
           it { is_expected.not_to contain_file_capability('vault_binary_capability') }
 
           it {
-            expect(param_value(catalogue, 'File', '/etc/vault/config.json', 'content')).to include_json(
+            expect(param_value(catalogue, 'File', '/etc/vault/vault.hcl', 'content')).to include_json(
               disable_mlock: true
             )
           }
@@ -135,7 +135,7 @@ describe 'vault' do
 
 
           it {
-            expect(param_value(catalogue, 'File', '/etc/vault/config.json', 'content')).to include_json(
+            expect(param_value(catalogue, 'File', '/etc/vault/vault.hcl', 'content')).to include_json(
               api_addr: 'something'
             )
           }
@@ -275,7 +275,7 @@ describe 'vault' do
         end
 
         it {
-          expect(param_value(catalogue, 'File', '/etc/vault/config.json', 'content')).to include_json(
+          expect(param_value(catalogue, 'File', '/etc/vault/vault.hcl', 'content')).to include_json(
             ui: true
           )
         }
@@ -288,7 +288,7 @@ describe 'vault' do
           }
         end
 
-        it { is_expected.to contain_file('/etc/vault/config.json').with_mode('0700') }
+        it { is_expected.to contain_file('/etc/vault/vault.hcl').with_mode('0700') }
       end
 
       context 'when specifying an array of listeners' do
@@ -302,7 +302,7 @@ describe 'vault' do
         end
 
         it {
-          expect(param_value(catalogue, 'File', '/etc/vault/config.json', 'content')).to include_json(
+          expect(param_value(catalogue, 'File', '/etc/vault/vault.hcl', 'content')).to include_json(
             listener: [
               {
                 tcp: {
@@ -386,7 +386,7 @@ describe 'vault' do
         end
 
         it {
-          is_expected.not_to contain_file ('/etc/vault/config.json')
+          is_expected.not_to contain_file ('/etc/vault/vault.hcl')
         }
       end
 
@@ -425,7 +425,7 @@ describe 'vault' do
                   with_content(%r{export GOMAXPROCS=\${GOMAXPROCS:-3}}).
                   with_content(%r{OPTIONS=\$OPTIONS:-""}).
                   with_content(%r{exec="/usr/local/bin/vault"}).
-                  with_content(%r{conffile="/etc/vault/config.json"}).
+                  with_content(%r{conffile="/etc/vault/vault.hcl"}).
                   with_content(%r{chown vault \$logfile \$pidfile})
               }
             end
@@ -451,7 +451,7 @@ describe 'vault' do
                   with_content(%r{export GOMAXPROCS=\${GOMAXPROCS:-5}}).
                   with_content(%r{OPTIONS=\$OPTIONS:-"-log-level=info"}).
                   with_content(%r{exec="/opt/bin/vault"}).
-                  with_content(%r{conffile="/opt/etc/vault/config.json"}).
+                  with_content(%r{conffile="/opt/etc/vault/vault.hcl"}).
                   with_content(%r{chown root \$logfile \$pidfile})
               }
             end
@@ -537,7 +537,7 @@ describe 'vault' do
                   with_content(%r{export GOMAXPROCS=\${GOMAXPROCS:-3}}).
                   with_content(%r{OPTIONS=\$OPTIONS:-""}).
                   with_content(%r{exec="/usr/local/bin/vault"}).
-                  with_content(%r{conffile="/etc/vault/config.json"}).
+                  with_content(%r{conffile="/etc/vault/vault.hcl"}).
                   with_content(%r{chown vault \$logfile \$pidfile})
               }
             end
@@ -563,7 +563,7 @@ describe 'vault' do
                   with_content(%r{export GOMAXPROCS=\${GOMAXPROCS:-5}}).
                   with_content(%r{OPTIONS=\$OPTIONS:-"-log-level=info"}).
                   with_content(%r{exec="/opt/bin/vault"}).
-                  with_content(%r{conffile="/opt/etc/vault/config.json"}).
+                  with_content(%r{conffile="/opt/etc/vault/vault.hcl"}).
                   with_content(%r{chown root \$logfile \$pidfile})
               }
             end
@@ -649,7 +649,7 @@ describe 'vault' do
                   with_content(%r{^User=vault$}).
                   with_content(%r{^Group=vault$}).
                   with_content(%r{Environment=GOMAXPROCS=3}).
-                  with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $}).
+                  with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.hcl $}).
                   with_content(%r{SecureBits=keep-caps}).
                   with_content(%r{Capabilities=CAP_IPC_LOCK\+ep}).
                   with_content(%r{CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK}).
@@ -678,7 +678,7 @@ describe 'vault' do
                   with_content(%r{^User=root$}).
                   with_content(%r{^Group=admin$}).
                   with_content(%r{Environment=GOMAXPROCS=8}).
-                  with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info$})
+                  with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/vault.hcl -log-level=info$})
               }
             end
             context 'with mlock disabled' do
@@ -695,7 +695,7 @@ describe 'vault' do
                   with_content(%r{^# vault systemd unit file}).
                   with_content(%r{^User=vault$}).
                   with_content(%r{^Group=vault$}).
-                  with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $}).
+                  with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.hcl $}).
                   without_content(%r{SecureBits=keep-caps}).
                   without_content(%r{Capabilities=CAP_IPC_LOCK\+ep}).
                   with_content(%r{CapabilityBoundingSet=CAP_SYSLOG}).
@@ -793,7 +793,7 @@ describe 'vault' do
                   with_content(%r{^# vault Agent \(Upstart unit\)}).
                   with_content(%r{env USER=vault}).
                   with_content(%r{env GROUP=vault}).
-                  with_content(%r{env CONFIG=\/etc\/vault\/config.json}).
+                  with_content(%r{env CONFIG=\/etc\/vault\/vault.hcl}).
                   with_content(%r{env VAULT=\/usr\/local\/bin\/vault}).
                   with_content(%r{exec start-stop-daemon -u \$USER -g \$GROUP -p \$PID_FILE -x \$VAULT -S -- server -config=\$CONFIG $}).
                   with_content(%r{export GOMAXPROCS=\${GOMAXPROCS:-3}})
@@ -820,7 +820,7 @@ describe 'vault' do
                 with_file('/opt/bin/vault')
             }
 
-            it { is_expected.to contain_file('/opt/etc/vault/config.json') }
+            it { is_expected.to contain_file('/opt/etc/vault/vault.hcl') }
 
             it {
               is_expected.to contain_file('/opt/etc/vault').
@@ -908,7 +908,7 @@ describe 'vault' do
                   with_content(%r{^User=vault$}).
                   with_content(%r{^Group=vault$}).
                   with_content(%r{Environment=GOMAXPROCS=3}).
-                  with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $}).
+                  with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.hcl $}).
                   with_content(%r{SecureBits=keep-caps}).
                   with_content(%r{Capabilities=CAP_IPC_LOCK\+ep}).
                   with_content(%r{CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK}).
@@ -937,7 +937,7 @@ describe 'vault' do
                   with_content(%r{^User=root$}).
                   with_content(%r{^Group=admin$}).
                   with_content(%r{Environment=GOMAXPROCS=8}).
-                  with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/config.json -log-level=info$})
+                  with_content(%r{^ExecStart=/opt/bin/vault server -config=/opt/etc/vault/vault.hcl -log-level=info$})
               }
             end
             context 'with mlock disabled' do
@@ -954,7 +954,7 @@ describe 'vault' do
                   with_content(%r{^# vault systemd unit file}).
                   with_content(%r{^User=vault$}).
                   with_content(%r{^Group=vault$}).
-                  with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json $}).
+                  with_content(%r{^ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.hcl $}).
                   without_content(%r{SecureBits=keep-caps}).
                   without_content(%r{Capabilities=CAP_IPC_LOCK\+ep}).
                   with_content(%r{CapabilityBoundingSet=CAP_SYSLOG}).

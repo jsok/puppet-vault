@@ -6,7 +6,7 @@
 # processname: vault
 # description: Init.d script for Vault Project Server
 # pidfile: /var/run/vault.pid
-# config: <%= scope['vault::config_dir'] %>/config.json
+# config: <%= scope['vault::config_dir'] %>/vault.hcl
 ###########################################################################################################
 # this file has been put in place by the jsok/vault Puppet module (https://forge.puppetlabs.com/jsok/vault)
 # any changes will be overwritten if Puppet is run again
@@ -37,7 +37,7 @@ lockfile="/var/lock/subsys/$prog"
 pidfile="/var/run/${prog}.pid"
 logfile="/var/log/${prog}.log"
 sysconfig="/etc/sysconfig/$prog"
-conffile="<%= scope['vault::config_dir'] %>/config.json"
+conffile="<%= scope['vault::config_dir'] %>/vault.hcl"
 
 [ -f $sysconfig ] && . $sysconfig
 

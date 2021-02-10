@@ -1,4 +1,8 @@
 ## 2020-05-27 2.3.0
+- Replace config.json with vault.hcl
+- Update to vault 1.6.2
+
+## 2020-05-27 2.3.0
 - Add `manage_config_file` option
 - Update stm/file_capability dependency
 - Update to vault 1.4.2

@@ -51,7 +51,7 @@ describe 'vault class' do
         it { is_expected.to be_owned_by 'root' }
         it { is_expected.to be_grouped_into 'root' }
         its(:content) { is_expected.to include 'env VAULT=/usr/local/bin/vault' }
-        its(:content) { is_expected.to include 'env CONFIG=/etc/vault/config.json' }
+        its(:content) { is_expected.to include 'env CONFIG=/etc/vault/vault.hcl' }
         its(:content) { is_expected.to include 'env USER=vault' }
         its(:content) { is_expected.to include 'env GROUP=vault' }
         its(:content) { is_expected.to include 'exec start-stop-daemon -u $USER -g $GROUP -p $PID_FILE -x $VAULT -S -- server -config=$CONFIG ' }
@@ -69,7 +69,7 @@ describe 'vault class' do
         it { is_expected.to be_grouped_into 'root' }
         its(:content) { is_expected.to include 'User=vault' }
         its(:content) { is_expected.to include 'Group=vault' }
-        its(:content) { is_expected.to include 'ExecStart=/usr/local/bin/vault server -config=/etc/vault/config.json ' }
+        its(:content) { is_expected.to include 'ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.hcl ' }
         its(:content) { is_expected.to match %r{Environment=GOMAXPROCS=\d+} }
       end
       describe command('systemctl list-units') do
@@ -83,7 +83,7 @@ describe 'vault class' do
           it { is_expected.to be_owned_by 'root' }
           it { is_expected.to be_grouped_into 'root' }
           its(:content) { is_expected.to include 'daemon --user vault "{ $exec server -config=$conffile $OPTIONS &>> $logfile & }; echo \$! >| $pidfile"' }
-          its(:content) { is_expected.to include 'conffile="/etc/vault/config.json"' }
+          its(:content) { is_expected.to include 'conffile="/etc/vault/vault.hcl"' }
           its(:content) { is_expected.to include 'exec="/usr/local/bin/vault"' }
           its(:content) { is_expected.to match %r{export GOMAXPROCS=\${GOMAXPROCS:-\d+}} }
         end
@@ -94,7 +94,7 @@ describe 'vault class' do
       it { is_expected.to be_directory }
     end
 
-    describe file('/etc/vault/config.json') do
+    describe file('/etc/vault/vault.hcl') do
       it { is_expected.to be_file }
       its(:content) { is_expected.to include('"address": "127.0.0.1:8200"') }
     end

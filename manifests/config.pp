@@ -30,7 +30,7 @@ class vault::config {
 
     $config_hash = merge($_config_hash, $::vault::extra_config)
 
-    file { "${::vault::config_dir}/config.json":
+    file { "${::vault::config_dir}/vault.hcl":
       content => to_json_pretty($config_hash),
       owner   => $::vault::user,
       group   => $::vault::group,

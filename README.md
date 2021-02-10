@@ -40,7 +40,7 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `config_dir`: Directory the vault configuration will be kept in.
 
-* `config_mode`: Mode of the configuration file (config.json). Defaults to '0750'
+* `config_mode`: Mode of the configuration file (vault.hcl). Defaults to '0750'
 
 * `purge_config_dir`: Whether the `config_dir` should be purged before installing the generated config.
 
@@ -62,7 +62,7 @@ Please see [The official documentation](https://www.vaultproject.io/docs/configu
 
 * `manage_service_file`: Manages the service file regardless of the defaults. Default: See [Installation parameters](#installation-parameters).
 
-* `manage_config_file`: Manages the configuration file. When set to false, `config.json` will not be generated. `manag_storage_dir` is ignored. Default: `true`
+* `manage_config_file`: Manages the configuration file. When set to false, `vault.hcl` will not be generated. `manag_storage_dir` is ignored. Default: `true`
 
 ### Installation parameters
 
@@ -87,7 +87,7 @@ The module will **not** manage any required packages to un-archive, e.g. `unzip`
 * `download_dir`: Path to download the zip file to, default: `/tmp`
 * `manage_download_dir`: Boolean, whether or not to create the download directory, default: `false`
 * `download_filename`: Filename to (temporarily) save the downloaded zip file, default: `vault.zip`
-* `version`: The Version of vault to download. default: `1.4.2`
+* `version`: The Version of vault to download. default: `1.6.2`
 * `manage_service_file`: Will manage the service file. default: true
 * `manage_file_capabilities`: Will manage file capabilities of the vault binary. default: `true`
 
