@@ -30,7 +30,7 @@ CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 <% end -%>
 NoNewPrivileges=yes
 Environment=GOMAXPROCS=<%= scope['vault::num_procs'] %>
-ExecStart=<%= scope['vault::bin_dir'] %>/vault server -config=<%= scope['vault::config_dir'] %>/config.json <%= scope['vault::service_options'] %>
+ExecStart=<%= scope['vault::bin_dir'] %>/vault <%= scope['vault::service_type'] %>  -config=<%= scope['vault::config_dir'] %>/config.json <%= scope['vault::service_options'] %>
 KillSignal=SIGINT
 TimeoutStopSec=30s
 Restart=on-failure
