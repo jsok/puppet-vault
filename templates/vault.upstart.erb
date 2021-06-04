@@ -3,7 +3,7 @@
 # this file has been put in place by the jsok/vault Puppet module (https://forge.puppetlabs.com/jsok/vault)
 # any changes will be overwritten if Puppet is run again
 ###########################################################################################################
-description "vault server"
+description "vault <%= scope['vault::service_type'] %>"
 start on (local-filesystems and net-device-up IFACE!=lo)
 stop on runlevel [06]
 
@@ -18,7 +18,7 @@ script
     export GOMAXPROCS=${GOMAXPROCS:-<%= scope['vault::num_procs'] %>}
     [ -e /etc/default/$UPSTART_JOB ] && . /etc/default/$UPSTART_JOB
     exec >> $LOG_FILE 2>&1
-    exec start-stop-daemon -u $USER -g $GROUP -p $PID_FILE -x $VAULT -S -- server -config=$CONFIG <%= scope['vault::service_options'] %>
+    exec start-stop-daemon -u $USER -g $GROUP -p $PID_FILE -x $VAULT -S -- <%= scope['vault::service_type'] %> -config=$CONFIG <%= scope['vault::service_options'] %>
 end script
 
 respawn
