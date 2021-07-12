@@ -1,0 +1,21 @@
+HOSTS:
+  debian-9-x64:
+    default_apply_opts:
+      order: random
+      strict_variables:
+    platform: debian-9-amd64
+    hypervisor : docker
+    # Need upstart to tests services
+    image: debian:9
+    docker_cmd: '["/sbin/init"]'
+    # This stops the image from being deleted on completion, speeding up the process.
+    docker_preserve_image: true
+    docker_image_commands:
+      - 'apt-get update && apt-get install -y cron locales-all net-tools wget systemd-sysv'
+      - 'rm -f /usr/sbin/policy-rc.d'
+      - 'systemctl mask getty@tty1.service getty-static.service'
+CONFIG:
+  type: foss
+  log_level: debug
+  docker_options:
+    ssl_verify_peer: false

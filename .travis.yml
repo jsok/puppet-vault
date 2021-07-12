@@ -37,6 +37,12 @@ matrix:
     env: PUPPET_INSTALL_TYPE=agent BEAKER_PUPPET_COLLECTION=puppet5 BEAKER_set="ubuntu-18.04-x86_64-docker"
     script: bundle exec rake acceptance
     bundler_args: --without development
+  - sudo: required
+    services: docker
+    rvm: 2.4.2
+    env: PUPPET_INSTALL_TYPE=agent BEAKER_set="debian-9-x86_64-docker"
+    script: bundle exec rake acceptance
+    bundler_args: --without development
 deploy:
   provider: puppetforge
   user: jsok
