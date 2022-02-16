@@ -73,6 +73,7 @@ When `repo` is set the module will attempt to install a package corresponding wi
 * `package_name`:  Name of the package to install, default: `vault`
 * `package_ensure`: Desired state of the package, default: `installed`
 * `bin_dir`: Set to the path where the package will install the Vault binary, this is necessary to correctly manage the [`disable_mlock`](#mlock) option.
+* `manage_repo`: Will manage the upstream HashiCorp repo, default: `true`
 * `manage_service_file`: Will manage the service file in case it's not included in the package, default: false
 * `manage_file_capabilities`: Will manage file capabilities of the vault binary. default: `false`
 
