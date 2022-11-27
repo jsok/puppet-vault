@@ -56,6 +56,8 @@ class vault::params {
 
   $service_provider = $facts['service_provider']
 
+  $service_type = 'server'
+
   case $facts['architecture'] {
     'aarch64':        { $arch = 'arm64' }
     /(x86_64|amd64)/: { $arch = 'amd64' }
