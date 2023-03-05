@@ -56,7 +56,7 @@ class vault::install {
     }
 
     if $::vault::install_method == 'repo' {
-      Package['vault'] ~> File_capability['vault_binary_capability']
+      Package[$::vault::package_name] ~> File_capability['vault_binary_capability']
     }
   }
 
