@@ -16,7 +16,7 @@ class vault::params {
   $download_extension = 'zip'
   $version            = '1.4.2'
   $service_name       = 'vault'
-  $num_procs          = $facts['processorcount']
+  $num_procs          = $facts['processors']['count']
   $package_name       = 'vault'
   $package_ensure     = 'installed'
 
@@ -26,7 +26,7 @@ class vault::params {
 
   # storage and listener are mandatory, we provide some sensible
   # defaults here
-  $storage             = { 'file' => { 'path' => '/var/lib/vault' }}
+  $storage             = { 'file' => { 'path' => '/var/lib/vault' } }
   $manage_storage_dir  = false
   $listener            = {
     'tcp' => {
@@ -51,17 +51,16 @@ class vault::params {
 
   $manage_service = true
 
-  $service_enable = true
+  $service_enable = 'true'
   $service_ensure = 'running'
 
   $service_provider = $facts['service_provider']
 
-  case $facts['architecture'] {
-    'aarch64':        { $arch = 'arm64' }
+  case $facts['os']['architecture'] {
     /(x86_64|amd64)/: { $arch = 'amd64' }
-    'i386':           { $arch = '386'   }
-    /^arm.*/:         { $arch = 'arm'   }
-    default:          { fail("Unsupported kernel architecture: ${facts['architecture']}") }
+    'i386':           { $arch = '386' }
+    /^arm.*/:         { $arch = 'arm' }
+    default:          { fail("Unsupported kernel architecture: ${facts['os']['architecture']}") }
   }
 
   case $facts['os']['family'] {
@@ -69,13 +68,11 @@ class vault::params {
       $install_method      = 'repo'
       $bin_dir             = '/bin'
       $manage_service_file = true
-      $manage_repo         = false
     }
     default: {
       $install_method      = 'archive'
       $bin_dir             = '/usr/local/bin'
       $manage_service_file = undef
-      $manage_repo         = true
     }
   }
   $os = downcase($facts['kernel'])
